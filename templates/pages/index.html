@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block title %}Hospedaje Sofi | Inicio{% endblock %} 
+
+{% block content %}
+
+<section class="hero">
+        <div class="overlay"></div>
+        <div class="hero-content">
+            <h2>Bienvenidos a</h2>
+            <h1>Hospedaje <span>Sofi</span><br> Loreto</h1>
+            <p>
+                Un servicio diferente en el corazón de la Amazonía. Vive la calidez, comodidad y belleza natural de
+                Loreto en nuestro hospedaje familiar.
+            </p>
+            <div class="buttons">
+                <a href="#contacto" class="btn primary">Reservar ahora</a>
+                <a href="#nosotros" class="btn secondary">Explorar más</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="habitaciones-destacadas" id="habitaciones">
+        <div class="container">
+            <h2>Habitaciones Destacadas</h2>
+
+            <div class="habitaciones-grupo">
+                <div class="grupo">
+                    <h3>Más Populares</h3>
+                    <div class="cards">
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='images/index/hab1.avif') }}" alt="Habitación 1">
+                            <h4>Suite Andina Deluxe</h4>
+                            <p>Espaciosa con vista a la selva, cama king y minibar.</p>
+                            <a href="#" class="btn-card">Ver más detalles</a>
+                        </div>
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='images/index/hab2.avif') }}" alt="Habitación 2">
+                            <h4>Habitación Familiar</h4>
+                            <p>Ideal para 4 personas, cómoda y con aire acondicionado.</p>
+                            <a href="#" class="btn-card">Ver más detalles</a>
+                        </div>
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='images/index/hab3.jpg') }}" alt="Habitación 3">
+                            <h4>Habitación Premium</h4>
+                            <p>Diseño moderno con balcón privado y desayuno incluido.</p>
+                            <a href="#" class="btn-card">Ver más detalles</a>
+                        </div>
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='images/index/hab4.jpg') }}" alt="Habitación 4">
+                            <h4>Deluxe Jungle View</h4>
+                            <p>Vista panorámica a la selva y decoración amazónica.</p>
+                            <a href="#" class="btn-card">Ver más detalles</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grupo">
+                    <h3>Más Accesibles</h3>
+                    <div class="cards">
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='images/index/hab2.avif') }}" alt="Habitación 5">
+                            <h4>Estándar Económica</h4>
+                            <p>Perfecta para viajeros, buena ubicación y precio.</p>
+                            <a href="#" class="btn-card">Ver más detalles</a>
+                        </div>
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='images/index/hab2.avif') }}" alt="Habitación 6">
+                            <h4>Individual Básica</h4>
+                            <p>Ideal para estancias cortas, incluye desayuno.</p>
+                            <a href="#" class="btn-card">Ver más detalles</a>
+                        </div>
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='images/index/hab3.jpg') }}" alt="Habitación 7">
+                            <h4>Doble Compartida</h4>
+                            <p>Opción económica para 2, ventilación natural.</p>
+                            <a href="#" class="btn-card">Ver más detalles</a>
+                        </div>
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='images/index/hab4.jpg') }}" alt="Habitación 8">
+                            <h4>Mini Suite Asequible</h4>
+                            <p>Pequeña pero elegante, con aire acondicionado.</p>
+                            <a href="#" class="btn-card">Ver más detalles</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

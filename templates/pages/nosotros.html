@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block titulo %}Hospedaje Sofi | Nosotros{% endblock %} 
+
+{% block content %}
+<section class="nosotros-hero">
+  <div class="overlay"></div>
+  <div class="contenido-hero">
+    <h1>Sobre Nosotros</h1>
+    <p>Somos una empresa dedicada al alquiler de habitaciones cómodas, modernas y seguras para todo tipo de huéspedes. Nuestra misión es ofrecer calidad, confianza y hospitalidad en cada estadía.</p>
+  </div>
+</section>
+
+<section class="valores">
+  <div class="container">
+    <div class="grid-valores">
+      <div class="card-valor">
+        <h3>Misión</h3>
+        <p>Brindar alojamiento de calidad con atención personalizada, priorizando la comodidad, limpieza y accesibilidad.</p>
+      </div>
+      <div class="card-valor">
+        <h3>Visión</h3>
+        <p>Convertirnos en la opción preferida de hospedaje en nuestra ciudad, combinando modernidad y calidez humana.</p>
+      </div>
+      <div class="card-valor">
+        <h3>Valores</h3>
+        <p>Honestidad, compromiso, hospitalidad y mejora continua en nuestros servicios.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="porque-elegirnos">
+  <div class="container">
+    <h2>¿Por qué elegirnos?</h2>
+    <div class="grid-razones">
+      <div class="razon">
+        <img src="{{ url_for('static', filename='svg/nosotros/seguridad.svg') }}" alt="Seguridad">
+        <h4>Seguridad</h4>
+        <p>Ambientes vigilados y protegidos las 24 horas.</p>
+      </div>
+      <div class="razon">
+        <img src="{{ url_for('static', filename='svg/nosotros/limpieza.svg') }}" alt="Limpieza">
+        <h4>Limpieza Garantizada</h4>
+        <p>Habitaciones impecables gracias a nuestro equipo de limpieza profesional.</p>
+      </div>
+      <div class="razon">
+        <img src="{{ url_for('static', filename='svg/nosotros/wifi.svg') }}" alt="WiFi">
+        <h4>Wi-Fi Rápido</h4>
+        <p>Internet de alta velocidad disponible en todas nuestras instalaciones.</p>
+      </div>
+      <div class="razon">
+        <img src="{{ url_for('static', filename='svg/nosotros/ubicacion.svg') }}" alt="Ubicación">
+        <h4>Ubicación Estratégica</h4>
+        <p>Cerca de transporte, centros comerciales y zonas turísticas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

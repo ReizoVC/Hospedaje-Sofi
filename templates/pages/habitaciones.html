@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+
+{% block titulo %}Hospedaje Sofi | Habitaciones{% endblock %} 
+
+{% block content %}
+<section class="habitaciones">
+  <div class="container">
+    <h1 class="titulo-seccion">Nuestras Habitaciones</h1>
+    
+    <div class="grid-habitaciones">
+      <!-- Habitación 1 -->
+      <div class="card-habitacion">
+        <img src="{{ url_for('static', filename='images/index/hab1.avif') }}" alt="Habitación Deluxe">
+        <div class="info">
+          <h3>Habitación Deluxe</h3>
+          <p>Espaciosa y luminosa, con baño privado y excelente vista.</p>
+          <span class="precio">S/ 120 por noche</span>
+          <a href="/habitacion/hab1.avif" class="btn-detalle">Ver Detalles</a>
+        </div>
+      </div>
+
+      <!-- Habitación 2 -->
+      <div class="card-habitacion">
+        <img src="{{ url_for('static', filename='images/index/hab2.avif') }}" alt="Habitación Económica">
+        <div class="info">
+          <h3>Habitación Económica</h3>
+          <p>Ideal para viajeros, cómoda y accesible.</p>
+          <span class="precio">S/ 70 por noche</span>
+          <a href="/habitacion/hab2.avif" class="btn-detalle">Ver Detalles</a>
+        </div>
+      </div>
+
+      <!-- Habitación 3 -->
+      <div class="card-habitacion">
+        <img src="{{ url_for('static', filename='images/index/hab3.jpg') }}" alt="Suite Familiar">
+        <div class="info">
+          <h3>Suite Familiar</h3>
+          <p>Perfecta para familias, equipada con 2 camas grandes.</p>
+          <span class="precio">S/ 180 por noche</span>
+          <a href="/habitacion/hab3.jpg" class="btn-detalle">Ver Detalles</a>
+        </div>
+      </div>
+
+      <!-- Habitación 4 -->
+      <div class="card-habitacion">
+        <img src="{{ url_for('static', filename='images/index/hab4.jpg') }}" alt="Habitación Estándar">
+        <div class="info">
+          <h3>Habitación Estándar</h3>
+          <p>Comodidad esencial a un precio justo. Cama matrimonial y baño compartido.</p>
+          <span class="precio">S/ 85 por noche</span>
+          <a href="/habitacion/hab4.avif" class="btn-detalle">Ver Detalles</a>
+        </div>
+      </div>
+
+      <!-- Habitación 5 -->
+      <div class="card-habitacion">
+        <img src="{{ url_for('static', filename='images/index/hab1.avif') }}" alt="Mini Suite">
+        <div class="info">
+          <h3>Mini Suite</h3>
+          <p>Confort premium para una o dos personas, escritorio y aire acondicionado.</p>
+          <span class="precio">S/ 140 por noche</span>
+          <a href="/habitacion/hab2.avif" class="btn-detalle">Ver Detalles</a>
+        </div>
+      </div>
+
+      <!-- Habitación 6 -->
+      <div class="card-habitacion">
+        <img src="{{ url_for('static', filename='images/index/hab3.jpg') }}" alt="Habitación Doble">
+        <div class="info">
+          <h3>Habitación Doble</h3>
+          <p>Dos camas individuales, perfecta para compañeros de viaje.</p>
+          <span class="precio">S/ 100 por noche</span>
+          <a href="/habitacion/hab3.jpg" class="btn-detalle">Ver Detalles</a>
+        </div>
+      </div>
+
+      <!-- Habitación 7 -->
+      <div class="card-habitacion">
+        <img src="{{ url_for('static', filename='images/index/hab2.avif') }}" alt="Loft con Vista">
+        <div class="info">
+          <h3>Loft con Vista</h3>
+          <p>Habitación tipo loft con ventanales y vista a la ciudad.</p>
+          <span class="precio">S/ 160 por noche</span>
+          <a href="/habitacion/hab2.avif" class="btn-detalle">Ver Detalles</a>
+        </div>
+      </div>
+
+      <!-- Habitación 8 -->
+      <div class="card-habitacion">
+        <img src="{{ url_for('static', filename='images/index/hab4.jpg') }}" alt="Habitación Compacta">
+        <div class="info">
+          <h3>Habitación Compacta</h3>
+          <p>Espacio reducido, ideal para estancias cortas y viajeros solos.</p>
+          <span class="precio">S/ 60 por noche</span>
+          <a href="/habitacion/hab1.avif" class="btn-detalle">Ver Detalles</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

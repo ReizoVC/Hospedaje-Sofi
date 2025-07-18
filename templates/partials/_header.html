@@ -1,0 +1,43 @@
+    <header>
+        <a href="index.html" class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo Sofi Hospedaje">
+        </a>
+
+
+        <nav id="nav-links">
+            <a href="/">Inicio</a>
+            <a href="/habitaciones">Habitaciones</a>
+            <a href="/nosotros">Nosotros</a>
+        </nav>
+
+        <div class="session" id="session-btn">
+            <a href="/login" class="btn-session">Iniciar Sesión</a>
+        </div>
+
+        <div class="user-account" id="user-account" style="display: none;">
+            <button id="account-toggle" class="account-btn">
+                <img src="{{ url_for('static', filename='svg/index/user.svg') }}" alt="Cuenta">
+                <span id="user-name">Usuario</span>
+            </button>
+            <div id="account-menu" class="account-menu">
+                <a href="#perfil">Mi Perfil</a>
+                <a href="#reservas">Mis Reservas</a>
+                <a href="#configuracion">Configuración</a>
+                <hr>
+                <a href="#" onclick="logout()">Cerrar Sesión</a>
+            </div>
+        </div>
+
+        <button id="menu-toggle" class="menu-icon">
+            <img src="{{ url_for('static', filename='svg/index/bgmenu.svg') }}" alt="Menú">
+        </button>
+
+        <div id="mobile-menu" class="mobile-menu">
+            <a href="#">Inicio</a>
+            <a href="#habitaciones">Habitaciones</a>
+            <a href="#nosotros">Nosotros</a>
+            <a href="/login">Iniciar Sesión</a>
+        </div>
+    </header>
+
+
