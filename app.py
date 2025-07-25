@@ -5,6 +5,7 @@ from utils.db import db
 # Importar modelos para que se registren con SQLAlchemy
 from models.usuario import Usuario
 from models.habitaciones import Habitacion
+from models.imagenes_habitaciones import ImagenHabitacion
 
 from routes.inicio import inicio
 from routes.auth import auth

@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}Error | Hospedaje Sofi{% endblock %}
+
+{% block content %}
+<section class="error-page" style="margin-top: 8rem; padding: 4rem 1rem; text-align: center; min-height: 60vh; display: flex; align-items: center; justify-content: center;">
+    <div class="container">
+        <h1 style="font-size: 3rem; color: #333; margin-bottom: 1rem;">¡Oops!</h1>
+        <h2 style="font-size: 1.5rem; color: #666; margin-bottom: 2rem;">{{ mensaje }}</h2>
+        <a href="/habitaciones" class="btn primary" style="display: inline-block; padding: 1rem 2rem; background-color: #ffc107; color: #000; text-decoration: none; border-radius: 0.5rem; font-weight: bold;">
+            Volver a Habitaciones
+        </a>
+    </div>
+</section>
+{% endblock %}

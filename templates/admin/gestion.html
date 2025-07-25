@@ -124,5 +124,31 @@
     </div>
 </div>
 
+<!-- Modal para gestionar imágenes -->
+<div class="modal" id="modal-imagenes">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-imagenes-titulo">Gestionar Imágenes</h3>
+            <button class="modal-close" id="btn-cerrar-modal-imagenes">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="upload-imagenes">Subir Imágenes</label>
+                <input type="file" id="upload-imagenes" accept="image/*" multiple>
+                <button type="button" class="btn-primary" onclick="subirImagenes()">
+                    <i class="fas fa-upload"></i> Subir
+                </button>
+            </div>
+            
+            <div id="imagenes-list" class="imagenes-container">
+                <!-- Las imágenes se cargarán dinámicamente -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="btn-cerrar-imagenes">Cerrar</button>
+        </div>
+    </div>
+</div>
+
 <script src="{{ url_for('static', filename='js/gestion.js') }}"></script>
 {% endblock %}

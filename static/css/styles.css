@@ -409,10 +409,71 @@ nav a:hover {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-    .cards {
-        flex-direction: column;
-    }
+
+
+/* Estilos para gestión de imágenes */
+.imagenes-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.imagen-item {
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+}
+
+.imagen-item img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.imagen-controls {
+    padding: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+}
+
+.orden-input {
+    width: 50px;
+    padding: 0.25rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.btn-delete-image {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.btn-delete-image:hover {
+    background-color: #c82333;
+}
+
+.upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.upload-area.dragover {
+    border-color: #ffc107;
+    background-color: #fff3cd;
 }
 
 .btn-card {
@@ -650,6 +711,227 @@ nav a:hover {
 
 .btn-detalle:hover {
     background-color: #0056b3;
+}
+
+/* ========================== */
+/* ESTILOS PARA DETALLE DE HABITACIÓN */
+/* ========================== */
+
+.detalle-habitacion {
+    margin-top: 8rem;
+    padding: 2rem 1rem;
+    background-color: #f9f9f9;
+    min-height: 80vh;
+}
+
+.galeria-habitacion {
+    margin-bottom: 3rem;
+}
+
+.imagen-principal {
+    width: 100%;
+    height: 400px;
+    border-radius: 1rem;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.imagen-principal img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.imagen-principal img:hover {
+    transform: scale(1.02);
+}
+
+.imagenes-miniatura {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.miniatura {
+    width: 80px;
+    height: 60px;
+    border-radius: 0.5rem;
+    object-fit: cover;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    flex-shrink: 0;
+}
+
+.miniatura:hover,
+.miniatura.active {
+    border-color: #ffc107;
+    transform: scale(1.05);
+}
+
+.info-habitacion {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.detalle-info h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.descripcion {
+    font-size: 1.1rem;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.caracteristicas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.caracteristica {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.caracteristica i {
+    color: #ffc107;
+    font-size: 1.1rem;
+}
+
+.servicios h3 {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.lista-servicios {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
+.lista-servicios li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+.lista-servicios i {
+    color: #28a745;
+    font-size: 0.9rem;
+}
+
+.precio-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 2rem;
+}
+
+.precio {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.precio-valor {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.precio-texto {
+    display: block;
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.btn-reservar {
+    width: 100%;
+    background-color: #ffc107;
+    color: #000;
+    border: none;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.btn-reservar:hover {
+    background-color: #e0a800;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+.btn-volver {
+    display: block;
+    text-align: center;
+    color: #666;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.btn-volver:hover {
+    color: #333;
+}
+
+/* Responsive para detalle de habitación */
+@media (max-width: 768px) {
+    .detalle-habitacion {
+        margin-top: 6rem;
+        padding: 1rem;
+    }
+
+    .info-habitacion {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .detalle-info h1 {
+        font-size: 2rem;
+    }
+
+    .imagen-principal {
+        height: 300px;
+    }
+
+    .caracteristicas {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .lista-servicios {
+        grid-template-columns: 1fr;
+    }
+
+    .precio-card {
+        position: static;
+    }
 }
 
 
@@ -929,6 +1211,15 @@ nav a:hover {
 
 .btn-edit:hover {
     background-color: #0056b3;
+}
+
+.btn-images {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.btn-images:hover {
+    background-color: #138496;
 }
 
 .btn-delete {

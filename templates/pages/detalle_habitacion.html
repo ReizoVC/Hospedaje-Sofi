@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ habitacion.nombre }} | Hospedaje Sofi{% endblock %}
+
+{% block content %}
+<section class="detalle-habitacion">
+    <div class="container">
+        <!-- Galería de imágenes -->
+        <div class="galeria-habitacion">
+            <div class="imagen-principal">
+                <img id="imagen-main" src="{{ habitacion.imagenes[0] if habitacion.imagenes else '/static/images/index/hab1.avif' }}" alt="{{ habitacion.nombre }}">
+            </div>
+            {% if habitacion.imagenes|length > 1 %}
+            <div class="imagenes-miniatura">
+                {% for imagen in habitacion.imagenes %}
+                <img src="{{ imagen }}" alt="{{ habitacion.nombre }}" onclick="cambiarImagen('{{ imagen }}')" class="miniatura {% if loop.first %}active{% endif %}">
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Información de la habitación -->
+        <div class="info-habitacion">
+            <div class="detalle-info">
+                <h1>{{ habitacion.nombre }}</h1>
+                <p class="descripcion">{{ habitacion.descripcion if habitacion.descripcion else 'Habitación cómoda y equipada para tu estadía perfecta.' }}</p>
+                
+                <div class="caracteristicas">
+                    <div class="caracteristica">
+                        <i class="fas fa-users"></i>
+                        <span>Capacidad: {{ habitacion.capacidad }} persona{% if habitacion.capacidad != 1 %}s{% endif %}</span>
+                    </div>
+                    {% if habitacion.tamano_m2 %}
+                    <div class="caracteristica">
+                        <i class="fas fa-ruler-combined"></i>
+                        <span>Tamaño: {{ habitacion.tamano_m2 }} m²</span>
+                    </div>
+                    {% endif %}
+                    {% if habitacion.camas %}
+                    <div class="caracteristica">
+                        <i class="fas fa-bed"></i>
+                        <span>{{ habitacion.camas }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if habitacion.servicios %}
+                <div class="servicios">
+                    <h3>Servicios incluidos:</h3>
+                    <ul class="lista-servicios">
+                        {% for servicio in habitacion.servicios %}
+                        <li><i class="fas fa-check"></i> {{ servicio }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="precio-reserva">
+                <div class="precio-card">
+                    <div class="precio">
+                        <span class="precio-valor">S/ {{ "%.0f"|format(habitacion.precio_noche) }}</span>
+                        <span class="precio-texto">por noche</span>
+                    </div>
+                    <button class="btn-reservar">Reservar Ahora</button>
+                    <a href="/habitaciones" class="btn-volver">← Volver a Habitaciones</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function cambiarImagen(nuevaImagen) {
+    document.getElementById('imagen-main').src = nuevaImagen;
+    
+    // Actualizar clase active en miniaturas
+    document.querySelectorAll('.miniatura').forEach(img => img.classList.remove('active'));
+    event.target.classList.add('active');
+}
+</script>
+{% endblock %}

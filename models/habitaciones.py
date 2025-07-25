@@ -1,5 +1,6 @@
 from utils.db import db
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.orm import relationship
 
 class Habitacion(db.Model):
     __tablename__ = 'habitaciones'
@@ -14,6 +15,9 @@ class Habitacion(db.Model):
     tamano_m2 = db.Column(db.Integer)
     camas = db.Column(db.String(100))
     servicios = db.Column(ARRAY(db.Text))
+
+    # Relación con imágenes
+    imagenes = relationship("ImagenHabitacion", back_populates="habitacion", cascade="all, delete-orphan", order_by="ImagenHabitacion.orden")
 
     def __repr__(self):
         return f"<Habitacion {self.numero} - {self.nombre}>"
