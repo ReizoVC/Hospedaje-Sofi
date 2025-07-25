@@ -1,8 +1,14 @@
 from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
-from models.usuario import db
+from utils.db import db
+
+# Importar modelos para que se registren con SQLAlchemy
+from models.usuario import Usuario
+from models.habitaciones import Habitacion
+
 from routes.inicio import inicio
 from routes.auth import auth
+from routes.admin import admin
 from dotenv import load_dotenv
 import os
 
@@ -36,6 +42,7 @@ def inject_user():
 # Registrar blueprints
 app.register_blueprint(inicio)
 app.register_blueprint(auth)
+app.register_blueprint(admin)
 
 # Crear las tablas si no existen
 with app.app_context():

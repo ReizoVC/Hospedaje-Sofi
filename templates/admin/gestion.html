@@ -1,0 +1,128 @@
+{% extends "layout.html" %}
+
+{% block title %}Hospedaje Sofi | Gestión{% endblock %}
+
+{% block content %}
+<section class="gestion-container">
+    <div class="container">
+        <h1 class="titulo-seccion">Panel de Gestión</h1>
+        
+        <!-- Navegación de pestañas -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" data-tab="habitaciones">Habitaciones</button>
+            <button class="tab-btn" data-tab="reservas">Reservas</button>
+            <button class="tab-btn" data-tab="usuarios">Usuarios</button>
+        </div>
+
+        <!-- Contenido de pestañas -->
+        <div class="tab-content active" id="habitaciones">
+            <div class="crud-header">
+                <h2>Gestión de Habitaciones</h2>
+                <button class="btn-primary" id="btn-nueva-habitacion">
+                    <i class="fas fa-plus"></i> Nueva Habitación
+                </button>
+            </div>
+
+            <!-- Tabla de habitaciones -->
+            <div class="table-container">
+                <table class="crud-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Número</th>
+                            <th>Nombre</th>
+                            <th>Estado</th>
+                            <th>Capacidad</th>
+                            <th>Precio/Noche</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="habitaciones-tbody">
+                        <!-- Las habitaciones se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="reservas">
+            <h2>Gestión de Reservas</h2>
+            <p>Funcionalidad próximamente...</p>
+        </div>
+
+        <div class="tab-content" id="usuarios">
+            <h2>Gestión de Usuarios</h2>
+            <p>Funcionalidad próximamente...</p>
+        </div>
+    </div>
+</section>
+
+<!-- Modal para crear/editar habitación -->
+<div class="modal" id="modal-habitacion">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-titulo">Nueva Habitación</h3>
+            <button class="modal-close" id="btn-cerrar-modal">&times;</button>
+        </div>
+        <form id="form-habitacion">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="numero">Número de Habitación</label>
+                    <input type="number" id="numero" name="numero" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="estado">Estado</label>
+                    <select id="estado" name="estado" required>
+                        <option value="disponible">Disponible</option>
+                        <option value="ocupada">Ocupada</option>
+                        <option value="mantenimiento">Mantenimiento</option>
+                        <option value="limpieza">Limpieza</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="capacidad">Capacidad</label>
+                    <input type="number" id="capacidad" name="capacidad" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="precio_noche">Precio por Noche (S/)</label>
+                    <input type="number" id="precio_noche" name="precio_noche" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tamano_m2">Tamaño (m²)</label>
+                    <input type="number" id="tamano_m2" name="tamano_m2" min="1">
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="camas">Tipo de Camas</label>
+                    <input type="text" id="camas" name="camas" placeholder="Ej: 1 cama king, 2 camas individuales">
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" name="descripcion" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="servicios">Servicios (separados por coma)</label>
+                    <input type="text" id="servicios" name="servicios" placeholder="WiFi, Aire acondicionado, TV, Minibar">
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="btn-cancelar">Cancelar</button>
+                <button type="submit" class="btn-primary" id="btn-guardar">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/gestion.js') }}"></script>
+{% endblock %}

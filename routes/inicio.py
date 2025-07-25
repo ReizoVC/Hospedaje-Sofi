@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template
+from utils.db import db
 
 inicio = Blueprint('inicio', __name__)
 
@@ -13,3 +14,11 @@ def habitaciones():
 @inicio.route('/nosotros')
 def nosotros():
     return render_template('pages/nosotros.html')
+
+@inicio.route('/login')
+def login():
+    return render_template('auth/login.html')
+
+@inicio.route('/register')
+def register():
+    return render_template('auth/register.html')

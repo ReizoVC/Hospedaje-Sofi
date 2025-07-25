@@ -61,6 +61,7 @@ function checkAuthStatus() {
                 if (data.user.rol >= 3) {
                     accountMenu.innerHTML = `
                         <a href="#perfil">Perfil</a>
+                        <a href="/gestion">Gestión</a>
                         <a href="#gestion-personal">Gestion de Personal</a>
                         <a href="#reportes">Reportes</a>
                         <a href="#ingresos">Ingresos</a>
@@ -73,6 +74,7 @@ function checkAuthStatus() {
                         <a href="/habitaciones">Habitaciones</a>
                         <a href="#nosotros">Nosotros</a>
                         <a href="#perfil">Perfil</a>
+                        <a href="/gestion">Gestión</a>
                         <a href="#gestion-personal">Gestion de Personal</a>
                         <a href="#reportes">Reportes</a>
                         <a href="#ingresos">Ingresos</a>
