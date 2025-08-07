@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <img src="/static/uploads/${imagen.url}" alt="Imagen habitación">
                 <div class="imagen-controls">
                     <input type="number" class="orden-input" value="${imagen.orden}" 
-                           onchange="actualizarOrden(${imagen.idimagen}, this.value)" min="1">
+                            onchange="actualizarOrden(${imagen.idimagen}, this.value)" min="1">
                     <button class="btn-delete-image" onclick="eliminarImagen(${imagen.idimagen})">
                         <i class="fas fa-trash"></i>
                     </button>

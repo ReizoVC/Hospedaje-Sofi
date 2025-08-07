@@ -1,0 +1,135 @@
+{% extends 'layout.html' %} 
+{% block titulo %}Gestion Reservas | Hospedaje Sofi{% endblock %} 
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/recep/gestion_reservas.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <!-- Header del contenido -->
+    <div class="content-header fade-in-up">
+      <h3 class="titulo-seccion">Gestión de Reservas</h3>
+      <button class="btn btn-nueva">
+        <i class="fas fa-plus"></i>
+        Nueva Reserva
+      </button>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="stats-container fade-in-up">
+      <div class="stat-card">
+        <div class="stat-icon pending">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-number">1</div>
+        <div class="stat-label">Pendientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon confirmed">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-number">1</div>
+        <div class="stat-label">Confirmadas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon cancelled">
+          <i class="fas fa-times-circle"></i>
+        </div>
+        <div class="stat-number">1</div>
+        <div class="stat-label">Canceladas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon total">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="stat-number">3</div>
+        <div class="stat-label">Total Reservas</div>
+      </div>
+    </div>
+
+    <!-- Tabla moderna -->
+    <div class="table-container fade-in-up">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th><i class="fas fa-hashtag me-2"></i>ID</th>
+            <th><i class="fas fa-user me-2"></i>Usuario</th>
+            <th><i class="fas fa-door-open me-2"></i>Habitación</th>
+            <th><i class="fas fa-calendar-check me-2"></i>Fecha Inicio</th>
+            <th><i class="fas fa-calendar-times me-2"></i>Fecha Fin</th>
+            <th><i class="fas fa-info-circle me-2"></i>Estado</th>
+            <th><i class="fas fa-cogs me-2"></i>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1</strong></td>
+            <td>
+              <div class="usuario-info">
+                <div class="usuario-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">JP</div>
+                Juan Pérez
+              </div>
+            </td>
+            <td><span style="font-weight: 600; color: var(--primary-color);">101</span></td>
+            <td style="font-weight: 500;">2025-07-15</td>
+            <td style="font-weight: 500;">2025-07-18</td>
+            <td><span class="badge bg-warning"><i class="fas fa-clock me-1"></i>Pendiente</span></td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary" title="Editar">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" title="Eliminar">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>2</strong></td>
+            <td>
+              <div class="usuario-info">
+                <div class="usuario-avatar" style="background: linear-gradient(135deg, #10b981, #34d399);">MG</div>
+                María Gómez
+              </div>
+            </td>
+            <td><span style="font-weight: 600; color: var(--primary-color);">102</span></td>
+            <td style="font-weight: 500;">2025-07-16</td>
+            <td style="font-weight: 500;">2025-07-20</td>
+            <td><span class="badge bg-success"><i class="fas fa-check me-1"></i>Confirmada</span></td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary" title="Editar">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" title="Eliminar">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>3</strong></td>
+            <td>
+              <div class="usuario-info">
+                <div class="usuario-avatar" style="background: linear-gradient(135deg, #ef4444, #f87171);">CR</div>
+                Carlos Ruiz
+              </div>
+            </td>
+            <td><span style="font-weight: 600; color: var(--primary-color);">103</span></td>
+            <td style="font-weight: 500;">2025-07-10</td>
+            <td style="font-weight: 500;">2025-07-12</td>
+            <td><span class="badge bg-danger"><i class="fas fa-times me-1"></i>Cancelada</span></td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary" title="Editar">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" title="Eliminar">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='js/recep/gestion_reservas.js') }}"></script>
+{% endblock %}

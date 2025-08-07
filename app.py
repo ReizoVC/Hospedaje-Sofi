@@ -10,6 +10,9 @@ from models.imagenes_habitaciones import ImagenHabitacion
 from routes.inicio import inicio
 from routes.auth import auth
 from routes.admin import admin
+from routes.recepcionista import recepcionista
+from routes.almacenista import almacenista
+from routes.user import user
 from dotenv import load_dotenv
 import os
 
@@ -44,6 +47,9 @@ def inject_user():
 app.register_blueprint(inicio)
 app.register_blueprint(auth)
 app.register_blueprint(admin)
+app.register_blueprint(recepcionista)
+app.register_blueprint(almacenista)
+app.register_blueprint(user)
 
 # Crear las tablas si no existen
 with app.app_context():

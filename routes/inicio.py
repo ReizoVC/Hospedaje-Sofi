@@ -12,8 +12,8 @@ def index():
 @inicio.route('/habitaciones')
 def habitaciones():
     try:
-        # Obtener todas las habitaciones disponibles
-        habitaciones = Habitacion.query.filter_by(estado='disponible').all()
+        # Obtener todas las habitaciones
+        habitaciones = Habitacion.query.all()
         
         # Preparar datos con imágenes
         habitaciones_data = []

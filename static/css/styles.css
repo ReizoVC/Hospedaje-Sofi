@@ -665,52 +665,146 @@ nav a:hover {
     gap: 2rem;
 }
 
-.card-habitacion {
+.hab-card {
     background: white;
-    border-radius: 1rem;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
 }
 
-.card-habitacion:hover {
+.hab-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.card-habitacion img {
+.hab-image {
+    position: relative;
     width: 100%;
-    height: 200px;
+    height: 240px;
+    overflow: hidden;
+}
+
+.hab-image img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
 }
 
-.card-habitacion .info {
-    padding: 1rem;
+.hab-card:hover .hab-image img {
+    transform: scale(1.02);
 }
 
-.card-habitacion h3 {
-    margin: 0 0 0.5rem;
-    font-size: 1.2rem;
+.hab-image .estado-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.card-habitacion .precio {
-    color: #2c3e50;
-    font-weight: bold;
-    display: block;
-    margin-top: 0.5rem;
+.hab-content {
+    padding: 24px;
+    font-family: 'Poppins', sans-serif;
 }
 
-.btn-detalle {
-    display: inline-block;
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    background-color: #007bff;
+.hab-nombre {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 16px 0;
+    line-height: 1.3;
+    height: 3.9rem; /* Altura fija para 2 líneas (1.5rem * 1.3 * 2) */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.hab-servicios-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.hab-servicio-pill {
+    background: #f9b600;
+    color: #1a1a1a;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.hab-servicio-pill:hover {
+    background: #e6a500;
+    transform: translateY(-1px);
+}
+
+.hab-servicio-pill.more {
+    background: #6c757d;
     color: white;
-    border-radius: 0.5rem;
-    text-decoration: none;
 }
 
-.btn-detalle:hover {
-    background-color: #0056b3;
+.hab-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.hab-precio-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.hab-precio-valor {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1;
+}
+
+.hab-precio-texto {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.hab-btn-action {
+    background-color: #1a1a1a;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: 2px solid #1a1a1a;
+}
+
+.hab-btn-action:hover {
+    background-color: #f9b600;
+    color: #1a1a1a;
+    border-color: #f9b600;
+    transform: translateY(-2px);
 }
 
 /* ========================== */
@@ -931,6 +1025,34 @@ nav a:hover {
 
     .precio-card {
         position: static;
+    }
+    
+    .hab-content {
+        padding: 20px;
+    }
+    
+    .hab-nombre {
+        font-size: 1.2rem;
+        height: 3.12rem; /* Altura fija para 2 líneas en móvil (1.2rem * 1.3 * 2) */
+    }
+    
+    .hab-image {
+        height: 200px;
+    }
+    
+    .hab-footer {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+    }
+    
+    .hab-btn-action {
+        text-align: center;
+        width: 100%;
+    }
+    
+    .hab-precio-info {
+        text-align: center;
     }
 }
 

@@ -1,0 +1,161 @@
+{% extends 'layout.html' %} 
+{% block titulo %}Check in/out | Hospedaje Sofi{% endblock %} 
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/recep/check.css') }}" />
+{% endblock %}
+
+{% block content %}
+  <div class="main-container">
+    <div class="container">
+      
+      <!-- Header del contenido -->
+      <div class="content-header fade-in-up">
+        <h3>Gestión de Check-In y Check-Out</h3>
+        <p class="content-subtitle">Administra las llegadas y salidas de huéspedes de manera eficiente</p>
+      </div>
+
+      <!-- Estadísticas rápidas -->
+      <div class="stats-container fade-in-up">
+        <div class="stat-card">
+          <div class="stat-icon checkin">
+            <i class="fas fa-sign-in-alt"></i>
+          </div>
+          <div class="stat-number">1</div>
+          <div class="stat-label">Pendientes Check-In</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon checkout">
+            <i class="fas fa-sign-out-alt"></i>
+          </div>
+          <div class="stat-number">1</div>
+          <div class="stat-label">Pendientes Check-Out</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon occupied">
+            <i class="fas fa-bed"></i>
+          </div>
+          <div class="stat-number">1</div>
+          <div class="stat-label">Habitaciones Ocupadas</div>
+        </div>
+      </div>
+
+      <!-- Tabla moderna -->
+      <div class="table-container fade-in-up">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-hashtag"></i>#</th>
+              <th><i class="fas fa-bookmark"></i>Reserva</th>
+              <th><i class="fas fa-user"></i>Cliente</th>
+              <th><i class="fas fa-door-open"></i>Habitación</th>
+              <th><i class="fas fa-info-circle"></i>Estado</th>
+              <th><i class="fas fa-calendar-check"></i>Check-In</th>
+              <th><i class="fas fa-calendar-times"></i>Check-Out</th>
+              <th><i class="fas fa-cogs"></i>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1</strong></td>
+              <td><span style="font-weight: 600; color: var(--primary-color);">RZ001</span></td>
+              <td>
+                <div class="cliente-info">
+                  <div class="cliente-avatar" style="background: var(--primary-color);">PG</div>
+                  Pedro García
+                </div>
+              </td>
+              <td><span style="font-weight: 600;">302</span></td>
+              <td><span class="badge warning"><i class="fas fa-clock"></i>Reservado</span></td>
+              <td style="color: var(--secondary-color);">--</td>
+              <td style="color: var(--secondary-color);">--</td>
+              <td>
+                <button class="btn btn-checkin" onclick="openModal('modalCheckIn')">
+                  <i class="fas fa-sign-in-alt"></i>Check-In
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>2</strong></td>
+              <td><span style="font-weight: 600; color: var(--primary-color);">RZ002</span></td>
+              <td>
+                <div class="cliente-info">
+                  <div class="cliente-avatar" style="background: var(--success-color);">AT</div>
+                  Ana Torres
+                </div>
+              </td>
+              <td><span style="font-weight: 600;">204</span></td>
+              <td><span class="badge success"><i class="fas fa-check"></i>Ocupado</span></td>
+              <td style="font-weight: 500;">2025-07-22 14:00</td>
+              <td style="color: var(--secondary-color);">--</td>
+              <td>
+                <button class="btn btn-checkout" onclick="openModal('modalCheckOut')">
+                  <i class="fas fa-sign-out-alt"></i>Check-Out
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CHECK-IN -->
+  <div class="modal" id="modalCheckIn">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header success">
+          <h5 class="modal-title">
+            <i class="fas fa-sign-in-alt"></i>Confirmar Check-In
+          </h5>
+          <button type="button" class="btn-close" onclick="closeModal('modalCheckIn')"></button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center">
+            <i class="fas fa-question-circle modal-icon success-color"></i>
+            <p class="modal-text">¿Estás seguro de realizar el Check-In para esta reserva?</p>
+            <small class="modal-subtext">Esta acción marcará la habitación como ocupada</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalCheckIn')">
+            <i class="fas fa-times"></i>Cancelar
+          </button>
+          <button type="button" class="btn btn-success">
+            <i class="fas fa-check"></i>Confirmar Check-In
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CHECK-OUT -->
+  <div class="modal" id="modalCheckOut">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header warning">
+          <h5 class="modal-title">
+            <i class="fas fa-sign-out-alt"></i>Confirmar Check-Out
+          </h5>
+          <button type="button" class="btn-close" onclick="closeModal('modalCheckOut')"></button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center">
+            <i class="fas fa-question-circle modal-icon warning-color"></i>
+            <p class="modal-text">¿Deseas finalizar el Check-Out de esta reserva?</p>
+            <small class="modal-subtext">Esta acción liberará la habitación</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalCheckOut')">
+            <i class="fas fa-times"></i>Cancelar
+          </button>
+          <button type="button" class="btn btn-warning">
+            <i class="fas fa-check"></i>Confirmar Check-Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='js/recep/check.js') }}"></script>
+{% endblock %}

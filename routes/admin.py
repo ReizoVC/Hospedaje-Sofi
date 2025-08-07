@@ -21,8 +21,24 @@ def verificar_admin():
         print("No hay user_id en session")
         return jsonify({'error': 'No autenticado'}), 401
     if session.get('user_rol', 0) < 3:
-        print(f"Rol insuficiente: {session.get('user_rol')}")
+        print(f"Rol insuficiente: {session.get('user_rol')} - Se requiere rol 3 o superior para administrador")
         return jsonify({'error': 'Acceso no autorizado - rol insuficiente'}), 403
+    return None
+
+# Middleware para verificar permisos de recepcionista o superior
+def verificar_recepcionista():
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autenticado'}), 401
+    if session.get('user_rol', 0) < 1:
+        return jsonify({'error': 'Acceso no autorizado - se requiere rol de recepcionista o superior'}), 403
+    return None
+
+# Middleware para verificar permisos de almacenista o superior
+def verificar_almacenista():
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autenticado'}), 401
+    if session.get('user_rol', 0) < 2:
+        return jsonify({'error': 'Acceso no autorizado - se requiere rol de almacenista o superior'}), 403
     return None
 
 @admin.route('/gestion')

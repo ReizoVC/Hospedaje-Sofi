@@ -1,0 +1,167 @@
+{% extends 'layout.html' %} 
+{% block titulo %}Estado de Habitaciones | Hospedaje Sofi{% endblock %} 
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/recep/estadohab.css') }}" />
+{% endblock %} 
+
+{% block content %}
+  <div class="main-container">
+    <div class="container">
+
+      <!-- Header del contenido -->
+      <div class="content-header fade-in-up">
+        <h3>Estado de Habitaciones</h3>
+        <p class="content-subtitle">Monitorea y gestiona el estado en tiempo real de todas las habitaciones del hotel
+        </p>
+      </div>
+
+      <!-- Estadísticas rápidas -->
+      <div class="stats-container fade-in-up">
+        <div class="stat-card total">
+          <div class="stat-icon total">
+            <i class="fas fa-building"></i>
+          </div>
+          <div class="stat-number">24</div>
+          <div class="stat-label">Total Habitaciones</div>
+        </div>
+        <div class="stat-card disponible">
+          <div class="stat-icon disponible">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="stat-number">12</div>
+          <div class="stat-label">Disponibles</div>
+        </div>
+        <div class="stat-card ocupado">
+          <div class="stat-icon ocupado">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="stat-number">8</div>
+          <div class="stat-label">Ocupadas</div>
+        </div>
+        <div class="stat-card mantenimiento">
+          <div class="stat-icon mantenimiento">
+            <i class="fas fa-tools"></i>
+          </div>
+          <div class="stat-number">4</div>
+          <div class="stat-label">Mantenimiento</div>
+        </div>
+      </div>
+
+      <!-- Leyenda -->
+      <div class="leyenda-container slide-in-left">
+        <div class="leyenda-title">
+          <i class="fas fa-info-circle me-1"></i>
+          Leyenda de Estados
+        </div>
+        <div class="leyenda-items">
+          <div class="leyenda-item">
+            <div class="leyenda-color disponible"></div>
+            <span>Disponible</span>
+          </div>
+          <div class="leyenda-item">
+            <div class="leyenda-color ocupado"></div>
+            <span>Ocupada</span>
+          </div>
+          <div class="leyenda-item">
+            <div class="leyenda-color mantenimiento"></div>
+            <span>Mantenimiento</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de Habitaciones -->
+      <div class="habitaciones-grid fade-in-up">
+        <div class="habitacion disponible" onclick="toggleHabitacion(this)">
+          <div class="habitacion-icono">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="habitacion-numero">
+            <i class="fas fa-door-open me-1"></i>
+            101
+          </div>
+          <div class="habitacion-estado">Disponible</div>
+        </div>
+
+        <div class="habitacion ocupado" onclick="toggleHabitacion(this)">
+          <div class="habitacion-icono">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="habitacion-numero">
+            <i class="fas fa-door-closed me-1"></i>
+            102
+          </div>
+          <div class="habitacion-estado">Ocupada</div>
+        </div>
+
+        <div class="habitacion mantenimiento" onclick="toggleHabitacion(this)">
+          <div class="habitacion-icono">
+            <i class="fas fa-tools"></i>
+          </div>
+          <div class="habitacion-numero">
+            <i class="fas fa-exclamation-triangle me-1"></i>
+            103
+          </div>
+          <div class="habitacion-estado">Mantenimiento</div>
+        </div>
+
+        <div class="habitacion disponible" onclick="toggleHabitacion(this)">
+          <div class="habitacion-icono">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="habitacion-numero">
+            <i class="fas fa-door-open me-1"></i>
+            104
+          </div>
+          <div class="habitacion-estado">Disponible</div>
+        </div>
+
+        <div class="habitacion ocupado" onclick="toggleHabitacion(this)">
+          <div class="habitacion-icono">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="habitacion-numero">
+            <i class="fas fa-door-closed me-1"></i>
+            105
+          </div>
+          <div class="habitacion-estado">Ocupada</div>
+        </div>
+
+        <div class="habitacion mantenimiento" onclick="toggleHabitacion(this)">
+          <div class="habitacion-icono">
+            <i class="fas fa-tools"></i>
+          </div>
+          <div class="habitacion-numero">
+            <i class="fas fa-exclamation-triangle me-1"></i>
+            106
+          </div>
+          <div class="habitacion-estado">Mantenimiento</div>
+        </div>
+
+        <div class="habitacion disponible" onclick="toggleHabitacion(this)">
+          <div class="habitacion-icono">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="habitacion-numero">
+            <i class="fas fa-door-open me-1"></i>
+            107
+          </div>
+          <div class="habitacion-estado">Disponible</div>
+        </div>
+
+        <div class="habitacion disponible" onclick="toggleHabitacion(this)">
+          <div class="habitacion-icono">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="habitacion-numero">
+            <i class="fas fa-door-open me-1"></i>
+            108
+          </div>
+          <div class="habitacion-estado">Disponible</div>
+        </div>
+      </div>
+    </div>
+</div>
+
+    <script src="{{ url_for('static', filename='js/recep/estadohab.js') }}"></script>
+{% endblock %}

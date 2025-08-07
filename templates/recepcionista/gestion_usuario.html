@@ -1,0 +1,259 @@
+{% extends 'layout.html' %} 
+{% block titulo %}Check in/out | Hospedaje Sofi{% endblock %} 
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/recep/gestion_usuario.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="main-container">
+  <div class="container">
+
+    <!-- Header del contenido -->
+    <div class="content-header fade-in-up">
+      <h2>Gestión de Huéspedes</h2>
+      <p class="content-subtitle">Administra y consulta la información de todos los usuarios del sistema</p>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="stats-container fade-in-up">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-number">127</div>
+        <div class="stat-label">Total Usuarios</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-user-check"></i>
+        </div>
+        <div class="stat-number">89</div>
+        <div class="stat-label">Clientes Activos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="stat-number">15</div>
+        <div class="stat-label">Personal</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-user-plus"></i>
+        </div>
+        <div class="stat-number">8</div>
+        <div class="stat-label">Nuevos este mes</div>
+      </div>
+    </div>
+
+    <!-- Botón Registrar -->
+    <div class="button-container slide-in-right">
+      <button class="btn btn-register" onclick="openModal()">
+        <i class="fas fa-plus"></i> Registrar Usuario
+      </button>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="table-container fade-in-up">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>DNI</th>
+            <th>Contacto</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="user-info">
+                <div class="user-avatar" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                  JP
+                </div>
+                <div>
+                  <div class="user-name">Juan Pérez</div>
+                  <div class="user-email">juan@example.com</div>
+                </div>
+              </div>
+            </td>
+            <td><strong>12345678</strong></td>
+            <td>
+              <div>
+                <i class="fas fa-envelope"></i> juan@example.com<br>
+                <i class="fas fa-phone"></i> 987654321
+              </div>
+            </td>
+            <td><span class="badge badge-danger">Administrador</span></td>
+            <td><span class="badge badge-success">Activo</span></td>
+            <td>
+              <button class="btn btn-edit" title="Editar" onclick="openModal()">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-danger" title="Eliminar">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-info">
+                <div class="user-avatar" style="background: linear-gradient(135deg, #10b981, #34d399);">
+                  MR
+                </div>
+                <div>
+                  <div class="user-name">María Rodríguez</div>
+                  <div class="user-email">maria@example.com</div>
+                </div>
+              </div>
+            </td>
+            <td><strong>87654321</strong></td>
+            <td>
+              <div>
+                <i class="fas fa-envelope"></i> maria@example.com<br>
+                <i class="fas fa-phone"></i> 912345678
+              </div>
+            </td>
+            <td><span class="badge badge-primary">Recepcionista</span></td>
+            <td><span class="badge badge-success">Activo</span></td>
+            <td>
+              <button class="btn btn-edit" title="Editar" onclick="openModal()">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-danger" title="Eliminar">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-info">
+                <div class="user-avatar" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
+                  CG
+                </div>
+                <div>
+                  <div class="user-name">Carlos García</div>
+                  <div class="user-email">carlos@example.com</div>
+                </div>
+              </div>
+            </td>
+            <td><strong>45678912</strong></td>
+            <td>
+              <div>
+                <i class="fas fa-envelope"></i> carlos@example.com<br>
+                <i class="fas fa-phone"></i> 965432187
+              </div>
+            </td>
+            <td><span class="badge badge-warning">Cliente</span></td>
+            <td><span class="badge badge-success">Activo</span></td>
+            <td>
+              <button class="btn btn-edit" title="Editar" onclick="openModal()">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-danger" title="Eliminar">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REGISTRO/EDICIÓN -->
+<div class="modal" id="modalUsuario">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-user-plus"></i>
+          Registrar / Editar Usuario
+        </h5>
+        <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nombre" class="form-label">
+                <i class="fas fa-user"></i> Nombre
+              </label>
+              <input type="text" class="form-control" id="nombre" required placeholder="Ingrese el nombre">
+            </div>
+            <div class="form-group">
+              <label for="apellidos" class="form-label">
+                <i class="fas fa-user"></i> Apellidos
+              </label>
+              <input type="text" class="form-control" id="apellidos" placeholder="Ingrese los apellidos">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dni" class="form-label">
+                <i class="fas fa-id-card"></i> DNI
+              </label>
+              <input type="text" class="form-control" id="dni" required placeholder="Ingrese el DNI">
+            </div>
+            <div class="form-group">
+              <label for="email" class="form-label">
+                <i class="fas fa-envelope"></i> Email
+              </label>
+              <input type="email" class="form-control" id="email" required placeholder="Ingrese el email">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="telefono" class="form-label">
+                <i class="fas fa-phone"></i> Teléfono
+              </label>
+              <input type="tel" class="form-control" id="telefono" placeholder="Ingrese el teléfono">
+            </div>
+            <div class="form-group">
+              <label for="rol" class="form-label">
+                <i class="fas fa-shield-alt"></i> Rol
+              </label>
+              <select class="form-control" id="rol" required>
+                <option value="">Seleccione un rol</option>
+                <option value="administrador">Administrador</option>
+                <option value="recepcionista">Recepcionista</option>
+                <option value="cliente">Cliente</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="estado" class="form-label">
+                <i class="fas fa-toggle-on"></i> Estado
+              </label>
+              <select class="form-control" id="estado" required>
+                <option value="">Seleccione un estado</option>
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="password" class="form-label">
+                <i class="fas fa-lock"></i> Contraseña
+              </label>
+              <input type="password" class="form-control" id="password" placeholder="Ingrese la contraseña">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="button" class="btn btn-success">
+          <i class="fas fa-check"></i> Guardar Usuario
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+  <script src="{{ url_for('static', filename='js/recep/gestion_usuario.js') }}"></script>
+{% endblock %}

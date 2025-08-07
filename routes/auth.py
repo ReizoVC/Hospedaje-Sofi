@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session, render_template
+from flask import Blueprint, request, jsonify, session, render_template, flash, redirect, url_for
 from werkzeug.security import check_password_hash
 from models.usuario import Usuario, db
 import uuid
@@ -108,6 +108,13 @@ def logout():
         return jsonify({'message': 'Sesión cerrada exitosamente'}), 200
     except Exception as e:
         return jsonify({'error': f'Error interno del servidor: {str(e)}'}), 500
+
+@auth.route('/logout', methods=['GET', 'POST'])
+def logout_user():
+    """Cerrar sesión del usuario"""
+    session.clear()
+    flash('Has cerrado sesión exitosamente', 'success')
+    return redirect(url_for('inicio.index'))
 
 @auth.route('/api/check-auth', methods=['GET'])
 def check_auth():

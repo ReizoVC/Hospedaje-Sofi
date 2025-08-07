@@ -9,13 +9,32 @@
     
     <div class="grid-habitaciones">
       {% for habitacion in habitaciones %}
-      <div class="card-habitacion">
-        <img src="{{ habitacion.imagen_url }}" alt="{{ habitacion.nombre }}">
-        <div class="info">
-          <h3>{{ habitacion.nombre }}</h3>
-          <p>{{ habitacion.descripcion if habitacion.descripcion else 'Habitación cómoda y equipada para tu estadía.' }}</p>
-          <span class="precio">S/ {{ "%.0f"|format(habitacion.precio_noche) }} por noche</span>
-          <a href="/habitacion/{{ habitacion.idhabitacion }}" class="btn-detalle">Ver Detalles</a>
+      <div class="hab-card">
+        <div class="hab-image">
+          <img src="{{ habitacion.imagen_url }}" alt="{{ habitacion.nombre }}">
+          <span class="estado-badge estado-{{ habitacion.estado.lower() }}">{{ habitacion.estado }}</span>
+        </div>
+        <div class="hab-content">
+          <h3 class="hab-nombre">{{ habitacion.nombre }}</h3>
+          
+          {% if habitacion.servicios %}
+          <div class="hab-servicios-pills">
+            {% for servicio in habitacion.servicios[:4] %}
+            <span class="hab-servicio-pill">{{ servicio }}</span>
+            {% endfor %}
+            {% if habitacion.servicios|length > 4 %}
+            <span class="hab-servicio-pill more">+{{ habitacion.servicios|length - 4 }}</span>
+            {% endif %}
+          </div>
+          {% endif %}
+          
+          <div class="hab-footer">
+            <div class="hab-precio-info">
+              <span class="hab-precio-valor">S/ {{ "%.0f"|format(habitacion.precio_noche) }}</span>
+              <span class="hab-precio-texto">por noche</span>
+            </div>
+            <a href="/habitacion/{{ habitacion.idhabitacion }}" class="hab-btn-action">Ver Habitación</a>
+          </div>
         </div>
       </div>
       {% endfor %}

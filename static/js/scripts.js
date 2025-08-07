@@ -58,44 +58,93 @@ function checkAuthStatus() {
                 // Actualizar opciones de menú según rol de usuario
                 const accountMenu = document.getElementById('account-menu');
                 const mobileMenu = document.getElementById('mobile-menu');
+                
                 if (data.user.rol >= 3) {
+                    // Administrador (rol 3-4) - Acceso completo
                     accountMenu.innerHTML = `
-                        <a href="#perfil">Perfil</a>
-                        <a href="/gestion">Gestión</a>
-                        <a href="#gestion-personal">Gestion de Personal</a>
+                        <a href="/user/profile">Mi Perfil</a>
+                        <a href="/gestion">Gestión Habitaciones</a>
+                        <a href="#gestion-personal">Gestión de Personal</a>
                         <a href="#reportes">Reportes</a>
                         <a href="#ingresos">Ingresos</a>
                         <a href="#egresos">Egresos</a>
+                        <a href="#inventario">Inventario</a>
                         <hr>
                         <a href="#" onclick="logout()">Cerrar Sesión</a>
                     `;
                     mobileMenu.innerHTML = `
                         <a href="/">Inicio</a>
                         <a href="/habitaciones">Habitaciones</a>
-                        <a href="#nosotros">Nosotros</a>
-                        <a href="#perfil">Perfil</a>
-                        <a href="/gestion">Gestión</a>
-                        <a href="#gestion-personal">Gestion de Personal</a>
+                        <a href="/nosotros">Nosotros</a>
+                        <a href="/user/profile">Mi Perfil</a>
+                        <a href="/gestion">Gestión Habitaciones</a>
+                        <a href="#gestion-personal">Gestión de Personal</a>
                         <a href="#reportes">Reportes</a>
                         <a href="#ingresos">Ingresos</a>
                         <a href="#egresos">Egresos</a>
+                        <a href="#inventario">Inventario</a>
+                        <a href="#" onclick="logout()">Cerrar Sesión</a>
+                    `;
+                } else if (data.user.rol === 2) {
+                    // Almacenista (rol 2) - Gestión de inventario y reportes básicos
+                    accountMenu.innerHTML = `
+                        <a href="/user/profile">Mi Perfil</a>
+                        <a href="/inventario">Inventario</a>
+                        <a href="/reportes-almacen">Reportes de Almacén</a>
+                        <a href="/estado-habitaciones">Estado Habitaciones</a>
+                        <hr>
+                        <a href="#" onclick="logout()">Cerrar Sesión</a>
+                    `;
+                    mobileMenu.innerHTML = `
+                        <a href="/">Inicio</a>
+                        <a href="/habitaciones">Habitaciones</a>
+                        <a href="/nosotros">Nosotros</a>
+                        <a href="/user/profile">Mi Perfil</a>
+                        <a href="/inventario">Inventario</a>
+                        <a href="/reportes-almacen">Reportes de Almacén</a>
+                        <a href="/estado-habitaciones">Estado Habitaciones</a>
+                        <a href="#" onclick="logout()">Cerrar Sesión</a>
+                    `;
+                } else if (data.user.rol === 1) {
+                    // Recepcionista (rol 1) - Gestión de reservas y huéspedes
+                    accountMenu.innerHTML = `
+                        <a href="/user/profile">Mi Perfil</a>
+                        <a href="/gestion-reservas">Gestión de Reservas</a>
+                        <a href="/check">Check-in / Check-out</a>
+                        <a href="/gestion-usuario">Gestión de Huéspedes</a>
+                        <a href="/estado-habitaciones">Estado Habitaciones</a>
+                        <hr>
+                        <a href="#" onclick="logout()">Cerrar Sesión</a>
+                    `;
+                    mobileMenu.innerHTML = `
+                        <a href="/">Inicio</a>
+                        <a href="/habitaciones">Habitaciones</a>
+                        <a href="/nosotros">Nosotros</a>
+                        <a href="/user/profile">Mi Perfil</a>
+                        <a href="/gestion-reservas">Gestión de Reservas</a>
+                        <a href="/check">Check-in / Check-out</a>
+                        <a href="/gestion-usuario">Gestión de Huéspedes</a>
+                        <a href="/estado-habitaciones">Estado Habitaciones</a>
                         <a href="#" onclick="logout()">Cerrar Sesión</a>
                     `;
                 } else {
+                    // Usuario (rol 0) - Cliente normal
                     accountMenu.innerHTML = `
-                        <a href="#perfil">Mi Perfil</a>
-                        <a href="#reservas">Mis Reservas</a>
-                        <a href="#configuracion">Configuración</a>
+                        <a href="/user/profile">Mi Perfil</a>
+                        <a href="/user/reservations">Mis Reservas</a>
+                        <a href="/user/history">Historial de Estadías</a>
+                        <a href="/user/settings">Configuración</a>
                         <hr>
                         <a href="#" onclick="logout()">Cerrar Sesión</a>
                     `;
                     mobileMenu.innerHTML = `
                         <a href="/">Inicio</a>
                         <a href="/habitaciones">Habitaciones</a>
-                        <a href="#nosotros">Nosotros</a>
-                        <a href="#perfil">Mi Perfil</a>
-                        <a href="#reservas">Mis Reservas</a>
-                        <a href="#configuracion">Configuración</a>
+                        <a href="/nosotros">Nosotros</a>
+                        <a href="/user/profile">Mi Perfil</a>
+                        <a href="/user/reservations">Mis Reservas</a>
+                        <a href="/user/history">Historial de Estadías</a>
+                        <a href="/user/settings">Configuración</a>
                         <a href="#" onclick="logout()">Cerrar Sesión</a>
                     `;
                 }

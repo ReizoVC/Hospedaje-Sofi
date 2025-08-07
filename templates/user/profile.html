@@ -1,0 +1,155 @@
+{% extends "user_layout.html" %}
+
+{% block title %}Mi Perfil - Hospedaje Sofi{% endblock %}
+
+{% block page_title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<section class="profile-section">
+    <h2>Información Personal</h2>
+    
+    <form id="editProfileForm" action="{{ url_for('user.edit_profile') }}" method="POST">
+        <div class="profile-details">
+            <div class="detail-item">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" value="{{ user.nombre }}" disabled required>
+            </div>
+            
+            <div class="detail-item">
+                <label for="apellidos">Apellidos:</label>
+                <input type="text" id="apellidos" name="apellidos" value="{{ user.apellidos }}" disabled required>
+            </div>
+            
+            <div class="detail-item">
+                <label>Email:</label>
+                <span class="readonly-field">{{ user.correo }}</span>
+            </div>
+            
+            <div class="detail-item">
+                <label>DNI:</label>
+                <span class="readonly-field">{{ user.dni }}</span>
+            </div>
+            
+            <div class="detail-item">
+                <label for="telefono">Teléfono:</label>
+                <input type="tel" id="telefono" name="telefono" value="{{ user.telefono if user.telefono else '' }}" disabled>
+            </div>
+            
+            {% if user.rol != 0 %}
+            <div class="detail-item">
+                <label>Tipo de Usuario:</label>
+                <span class="readonly-field">
+                    {% if user.rol == 1 %}Recepcionista
+                    {% elif user.rol == 2 %}Almacenista
+                    {% elif user.rol == 3 %}Administrador
+                    {% elif user.rol == 4 %}Super Administrador
+                    {% else %}Usuario{% endif %}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="profile-actions">
+            <button type="button" onclick="toggleEditMode()" class="btn btn-primary" id="editButton">
+                <i class="fas fa-edit"></i>
+                Editar Perfil
+            </button>
+            
+            <button type="submit" class="btn btn-success" id="saveButton" style="display: none;">
+                <i class="fas fa-save"></i>
+                Guardar Cambios
+            </button>
+            
+            <button type="button" onclick="cancelEdit()" class="btn btn-secondary" id="cancelButton" style="display: none;">
+                <i class="fas fa-times"></i>
+                Cancelar
+            </button>
+        </div>
+    </form>
+</section>
+
+<section class="recent-activity-section">
+    <h2>Actividad Reciente</h2>
+    <ul>
+        <li>Perfil actualizado recientemente</li>
+        <li>Sesión iniciada hoy</li>
+        {% if user.rol == 0 %}
+        <li>Sin reservas recientes</li>
+        {% endif %}
+    </ul>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let originalValues = {};
+let isEditing = false;
+
+function toggleEditMode() {
+    const editButton = document.getElementById('editButton');
+    const saveButton = document.getElementById('saveButton');
+    const cancelButton = document.getElementById('cancelButton');
+    const nombre = document.getElementById('nombre');
+    const apellidos = document.getElementById('apellidos');
+    const telefono = document.getElementById('telefono');
+    
+    if (!isEditing) {
+        // Entrar en modo edición
+        // Guardar valores originales
+        originalValues = {
+            nombre: nombre.value,
+            apellidos: apellidos.value,
+            telefono: telefono.value
+        };
+        
+        // Habilitar campos
+        nombre.disabled = false;
+        apellidos.disabled = false;
+        telefono.disabled = false;
+        
+        // Cambiar botones
+        editButton.style.display = 'none';
+        saveButton.style.display = 'inline-flex';
+        cancelButton.style.display = 'inline-flex';
+        
+        // Añadir clase para resaltar campos editables
+        nombre.classList.add('editing');
+        apellidos.classList.add('editing');
+        telefono.classList.add('editing');
+        
+        isEditing = true;
+    }
+}
+
+function cancelEdit() {
+    const editButton = document.getElementById('editButton');
+    const saveButton = document.getElementById('saveButton');
+    const cancelButton = document.getElementById('cancelButton');
+    const nombre = document.getElementById('nombre');
+    const apellidos = document.getElementById('apellidos');
+    const telefono = document.getElementById('telefono');
+    
+    // Restaurar valores originales
+    nombre.value = originalValues.nombre;
+    apellidos.value = originalValues.apellidos;
+    telefono.value = originalValues.telefono;
+    
+    // Deshabilitar campos
+    nombre.disabled = true;
+    apellidos.disabled = true;
+    telefono.disabled = true;
+    
+    // Cambiar botones
+    editButton.style.display = 'inline-flex';
+    saveButton.style.display = 'none';
+    cancelButton.style.display = 'none';
+    
+    // Remover clase de edición
+    nombre.classList.remove('editing');
+    apellidos.classList.remove('editing');
+    telefono.classList.remove('editing');
+    
+    isEditing = false;
+}
+</script>
+{% endblock %}

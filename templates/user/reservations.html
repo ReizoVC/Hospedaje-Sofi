@@ -1,0 +1,56 @@
+{% extends "user_layout.html" %}
+
+{% block title %}Mis Reservas - Hospedaje Sofi{% endblock %}
+
+{% block page_title %}Mis Reservas{% endblock %}
+
+{% block content %}
+<section class="reservas-list-section">
+    <h2>Reservas Activas</h2>
+    
+    <div class="reserva-card upcoming">
+        <div class="status-badge text-success">Confirmada</div>
+        <h3>Habitación Deluxe - Suite 101</h3>
+        <p><strong>Fechas:</strong> 15/12/2024 - 18/12/2024</p>
+        <p><strong>Huéspedes:</strong> 2 personas</p>
+        <p><strong>Total:</strong> <span class="total-price">S/ 450.00</span></p>
+        <div class="card-actions">
+            <button class="btn btn-secondary btn-sm">
+                <i class="fas fa-eye"></i>
+                Ver Detalles
+            </button>
+            <button class="btn btn-danger btn-sm">
+                <i class="fas fa-times"></i>
+                Cancelar
+            </button>
+        </div>
+    </div>
+    
+    <h2>Historial de Reservas</h2>
+    
+    <div class="reserva-card past-reserva">
+        <div class="status-badge text-muted">Completada</div>
+        <h3>Habitación Estándar - 205</h3>
+        <p><strong>Fechas:</strong> 10/11/2024 - 12/11/2024</p>
+        <p><strong>Huéspedes:</strong> 1 persona</p>
+        <p><strong>Total:</strong> S/ 200.00</p>
+        <div class="card-actions">
+            <button class="btn btn-secondary btn-sm">
+                <i class="fas fa-eye"></i>
+                Ver Detalles
+            </button>
+            <button class="btn btn-primary btn-sm">
+                <i class="fas fa-star"></i>
+                Calificar
+            </button>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="/habitaciones" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            Nueva Reserva
+        </a>
+    </div>
+</section>
+{% endblock %}
