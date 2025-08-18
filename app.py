@@ -26,7 +26,13 @@ load_dotenv()
 app = Flask(__name__)
 
 # Configuración de la base de datos
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+# Heroku provee DATABASE_URL. Convertimos "postgres://" a "postgresql://" para SQLAlchemy 2.x
+database_url = os.environ.get('DATABASE_URL')
+if database_url and database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+# Permitir fallback local si no hay DATABASE_URL definido
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///local.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave_secreta')
 
