@@ -31,8 +31,19 @@ database_url = os.environ.get('DATABASE_URL')
 if database_url and database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
+# Si es Supabase y no se indicó sslmode, forzamos sslmode=require
+if database_url and 'supabase.co' in database_url and 'sslmode=' not in database_url:
+    separator = '&' if '?' in database_url else '?'
+    database_url = f"{database_url}{separator}sslmode=require"
+
 # Permitir fallback local si no hay DATABASE_URL definido
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///local.db'
+
+# Opciones del engine para conexiones más robustas en entornos como Heroku
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,
+}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave_secreta')
 
@@ -61,9 +72,11 @@ app.register_blueprint(almacenista)
 app.register_blueprint(user)
 app.register_blueprint(reservas)
 
-# Crear las tablas si no existen
-with app.app_context():
-    db.create_all()
+# Crear las tablas si no existen (solo si se habilita explícitamente)
+# En producción (Heroku) es preferible correr migraciones/creación vía one-off dyno
+if os.environ.get('AUTO_CREATE_TABLES') == '1':
+    with app.app_context():
+        db.create_all()
 
 if __name__ == '__main__':
     app.run(debug=True)
