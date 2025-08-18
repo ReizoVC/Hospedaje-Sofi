@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, session
+from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 from utils.db import db
 from models.habitaciones import Habitacion
@@ -11,6 +11,7 @@ from sqlalchemy import and_, or_
 import uuid
 import os
 from werkzeug.security import generate_password_hash
+from utils.auth import role_required, ROL_ADMIN
 
 admin = Blueprint('admin', __name__)
 
@@ -46,8 +47,8 @@ def verificar_almacenista():
     return None
 
 @admin.route('/gestion')
+@role_required(ROL_ADMIN)
 def gestion():
-    # Verificar en el frontend con JavaScript, no bloquear aquí
     return render_template('admin/gestion.html')
 
 # API para obtener todas las habitaciones

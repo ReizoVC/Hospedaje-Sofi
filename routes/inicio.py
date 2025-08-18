@@ -111,7 +111,7 @@ def detalle_habitacion(id):
         return render_template('pages/detalle_habitacion.html', habitacion=habitacion_data)
     except Exception as e:
         print(f"Error al cargar habitación {id}: {str(e)}")
-        return render_template('pages/error.html', mensaje="Habitación no encontrada"), 404
+    return render_template('errors/error.html', mensaje="Habitación no encontrada"), 404
 
 @inicio.route('/login')
 def login():
