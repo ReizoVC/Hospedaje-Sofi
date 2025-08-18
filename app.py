@@ -32,7 +32,7 @@ if database_url and database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
 # Si es Supabase y no se indicó sslmode, forzamos sslmode=require
-if database_url and 'supabase.co' in database_url and 'sslmode=' not in database_url:
+if database_url and 'supabase.' in database_url and 'sslmode=' not in database_url:
     separator = '&' if '?' in database_url else '?'
     database_url = f"{database_url}{separator}sslmode=require"
 
