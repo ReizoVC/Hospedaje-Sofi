@@ -11,7 +11,8 @@
         <div class="tabs-nav">
             <button class="tab-btn active" data-tab="habitaciones">Habitaciones</button>
             <button class="tab-btn" data-tab="reservas">Reservas</button>
-            <button class="tab-btn" data-tab="usuarios">Usuarios</button>
+            <button class="tab-btn" data-tab="personal">Personal</button>
+            <button class="tab-btn" data-tab="desactivados">Desactivados</button>
         </div>
 
         <!-- Contenido de pestañas -->
@@ -45,13 +46,79 @@
         </div>
 
         <div class="tab-content" id="reservas">
-            <h2>Gestión de Reservas</h2>
-            <p>Funcionalidad próximamente...</p>
+            <div class="crud-header">
+                <h2>Gestión de Reservas</h2>
+                <button class="btn-primary" id="btn-nueva-reserva">
+                    <i class="fas fa-plus"></i> Nueva Reserva
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table class="crud-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Código</th>
+                            <th>Usuario</th>
+                            <th>Habitación</th>
+                            <th>Ingreso</th>
+                            <th>Salida</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservas-tbody"></tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="tab-content" id="usuarios">
-            <h2>Gestión de Usuarios</h2>
-            <p>Funcionalidad próximamente...</p>
+        <div class="tab-content" id="personal">
+            <div class="crud-header">
+                <h2>Gestión de Personal</h2>
+                <button class="btn-primary" id="btn-nuevo-personal">
+                    <i class="fas fa-user-plus"></i> Nuevo Personal
+                </button>
+            </div>
+            <div class="table-container">
+                <table class="crud-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Apellidos</th>
+                            <th>Correo</th>
+                            <th>DNI</th>
+                            <th>Teléfono</th>
+                            <th>Rol</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="personal-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="desactivados">
+            <div class="crud-header">
+                <h2>Personal Desactivado</h2>
+                <button class="btn-secondary" id="btn-refrescar-desactivados">
+                    <i class="fas fa-rotate"></i> Recargar
+                </button>
+            </div>
+            <div class="table-container">
+                <table class="crud-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Apellidos</th>
+                            <th>Correo</th>
+                            <th>DNI</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="desactivados-tbody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>
@@ -147,6 +214,100 @@
         <div class="modal-footer">
             <button type="button" class="btn-secondary" id="btn-cerrar-imagenes">Cerrar</button>
         </div>
+    </div>
+</div>
+
+<!-- Modal para crear/editar reserva -->
+<div class="modal" id="modal-reserva">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-reserva-titulo">Nueva Reserva</h3>
+            <button class="modal-close" id="btn-cerrar-modal-reserva">&times;</button>
+        </div>
+        <form id="form-reserva">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="res-usuario">Usuario</label>
+                    <select id="res-usuario" name="idusuario" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="res-habitacion">Habitación</label>
+                    <select id="res-habitacion" name="idhabitacion" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="res-fechainicio">Fecha ingreso</label>
+                    <input type="date" id="res-fechainicio" name="fechainicio" required>
+                </div>
+                <div class="form-group">
+                    <label for="res-fechafin">Fecha salida</label>
+                    <input type="date" id="res-fechafin" name="fechafin" required>
+                </div>
+                <div class="form-group">
+                    <label for="res-estado">Estado</label>
+                    <select id="res-estado" name="estado">
+                        <option value="pendiente">pendiente</option>
+                        <option value="confirmada">confirmada</option>
+                        <option value="activa">activa</option>
+                        <option value="completada">completada</option>
+                        <option value="cancelada">cancelada</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="btn-cancelar-reserva">Cancelar</button>
+                <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+    </div>
+
+<!-- Modal para crear/editar personal -->
+<div class="modal" id="modal-personal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-personal-titulo">Nuevo Personal</h3>
+            <button class="modal-close" id="btn-cerrar-modal-personal">&times;</button>
+        </div>
+        <form id="form-personal">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="per-nombre">Nombre</label>
+                    <input type="text" id="per-nombre" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="per-apellidos">Apellidos</label>
+                    <input type="text" id="per-apellidos" name="apellidos" required>
+                </div>
+                <div class="form-group">
+                    <label for="per-correo">Correo</label>
+                    <input type="email" id="per-correo" name="correo" required>
+                </div>
+                <div class="form-group">
+                    <label for="per-dni">DNI</label>
+                    <input type="text" id="per-dni" name="dni" required>
+                </div>
+                <div class="form-group">
+                    <label for="per-telefono">Teléfono</label>
+                    <input type="text" id="per-telefono" name="telefono">
+                </div>
+                <div class="form-group">
+                    <label for="per-rol">Rol</label>
+                    <select id="per-rol" name="rol" required>
+                        <option value="2">Recepcionista</option>
+                        <option value="3">Almacenista</option>
+                        <!-- Los administradores no se mostrarán en las listas -->
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label for="per-clave">Clave <small>(dejar en blanco para no cambiar)</small></label>
+                    <input type="password" id="per-clave" name="clave" placeholder="••••••">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="btn-cancelar-personal">Cancelar</button>
+                <button type="submit" class="btn-primary" id="btn-guardar-personal">Guardar</button>
+            </div>
+        </form>
     </div>
 </div>
 

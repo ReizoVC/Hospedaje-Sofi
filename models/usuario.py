@@ -17,8 +17,19 @@ class Usuario(db.Model):
     correo = db.Column(db.String(255), unique=True, nullable=False)
     telefono = db.Column(db.String(20), nullable=True)
     clave = db.Column(db.String(255), nullable=False)
-    rol = db.Column(db.Integer, nullable=False, default=0)
+    rol = db.Column(db.Integer, nullable=False, default=1)  # Rol 1 = Usuario normal, Rol 0 = Cuenta eliminada
 
     def __repr__(self) -> str:
         return f"<Usuario {self.idusuario} - {self.correo}>"
+
+    def to_dict(self):
+        return {
+            'idusuario': str(self.idusuario),
+            'nombre': self.nombre,
+            'apellidos': self.apellidos,
+            'dni': self.dni,
+            'correo': self.correo,
+            'telefono': self.telefono,
+            'rol': self.rol
+        }
 

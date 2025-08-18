@@ -6,7 +6,7 @@ class Habitacion(db.Model):
     __tablename__ = 'habitaciones'
 
     idhabitacion = db.Column(db.Integer, primary_key=True)
-    numero = db.Column(db.Integer, nullable=False, unique=True)
+    numero = db.Column(db.String(10), nullable=False, unique=True)
     estado = db.Column(db.String(50), nullable=False)
     nombre = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.Text)
@@ -25,7 +25,7 @@ class Habitacion(db.Model):
     def to_dict(self):
         return {
             'idhabitacion': self.idhabitacion,
-            'numero': self.numero,
+            'numero': int(self.numero) if self.numero and self.numero.isdigit() else self.numero,
             'estado': self.estado,
             'nombre': self.nombre,
             'descripcion': self.descripcion,

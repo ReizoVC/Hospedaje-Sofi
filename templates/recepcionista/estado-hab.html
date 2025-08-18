@@ -11,9 +11,16 @@
 
       <!-- Header del contenido -->
       <div class="content-header fade-in-up">
-        <h3>Estado de Habitaciones</h3>
-        <p class="content-subtitle">Monitorea y gestiona el estado en tiempo real de todas las habitaciones del hotel
-        </p>
+        <div class="header-content">
+          <div class="header-text">
+            <h3>Estado de Habitaciones</h3>
+            <p class="content-subtitle">Visualiza el estado actual de todas las habitaciones del hotel en tiempo real</p>
+          </div>
+          <button class="refresh-btn" onclick="refrescarHabitaciones()" title="Actualizar estado de habitaciones">
+            <i class="fas fa-sync-alt"></i>
+            Actualizar
+          </button>
+        </div>
       </div>
 
       <!-- Estadísticas rápidas -->
@@ -52,7 +59,7 @@
       <div class="leyenda-container slide-in-left">
         <div class="leyenda-title">
           <i class="fas fa-info-circle me-1"></i>
-          Leyenda de Estados
+          Leyenda de Estados (Solo Visualización)
         </div>
         <div class="leyenda-items">
           <div class="leyenda-item">
@@ -68,96 +75,17 @@
             <span>Mantenimiento</span>
           </div>
         </div>
+        <div class="leyenda-note">
+          <small><i class="fas fa-eye me-1"></i>Los estados se actualizan automáticamente cada 30 segundos</small>
+        </div>
       </div>
 
       <!-- Grid de Habitaciones -->
-      <div class="habitaciones-grid fade-in-up">
-        <div class="habitacion disponible" onclick="toggleHabitacion(this)">
-          <div class="habitacion-icono">
-            <i class="fas fa-check-circle"></i>
-          </div>
-          <div class="habitacion-numero">
-            <i class="fas fa-door-open me-1"></i>
-            101
-          </div>
-          <div class="habitacion-estado">Disponible</div>
-        </div>
-
-        <div class="habitacion ocupado" onclick="toggleHabitacion(this)">
-          <div class="habitacion-icono">
-            <i class="fas fa-user"></i>
-          </div>
-          <div class="habitacion-numero">
-            <i class="fas fa-door-closed me-1"></i>
-            102
-          </div>
-          <div class="habitacion-estado">Ocupada</div>
-        </div>
-
-        <div class="habitacion mantenimiento" onclick="toggleHabitacion(this)">
-          <div class="habitacion-icono">
-            <i class="fas fa-tools"></i>
-          </div>
-          <div class="habitacion-numero">
-            <i class="fas fa-exclamation-triangle me-1"></i>
-            103
-          </div>
-          <div class="habitacion-estado">Mantenimiento</div>
-        </div>
-
-        <div class="habitacion disponible" onclick="toggleHabitacion(this)">
-          <div class="habitacion-icono">
-            <i class="fas fa-check-circle"></i>
-          </div>
-          <div class="habitacion-numero">
-            <i class="fas fa-door-open me-1"></i>
-            104
-          </div>
-          <div class="habitacion-estado">Disponible</div>
-        </div>
-
-        <div class="habitacion ocupado" onclick="toggleHabitacion(this)">
-          <div class="habitacion-icono">
-            <i class="fas fa-user"></i>
-          </div>
-          <div class="habitacion-numero">
-            <i class="fas fa-door-closed me-1"></i>
-            105
-          </div>
-          <div class="habitacion-estado">Ocupada</div>
-        </div>
-
-        <div class="habitacion mantenimiento" onclick="toggleHabitacion(this)">
-          <div class="habitacion-icono">
-            <i class="fas fa-tools"></i>
-          </div>
-          <div class="habitacion-numero">
-            <i class="fas fa-exclamation-triangle me-1"></i>
-            106
-          </div>
-          <div class="habitacion-estado">Mantenimiento</div>
-        </div>
-
-        <div class="habitacion disponible" onclick="toggleHabitacion(this)">
-          <div class="habitacion-icono">
-            <i class="fas fa-check-circle"></i>
-          </div>
-          <div class="habitacion-numero">
-            <i class="fas fa-door-open me-1"></i>
-            107
-          </div>
-          <div class="habitacion-estado">Disponible</div>
-        </div>
-
-        <div class="habitacion disponible" onclick="toggleHabitacion(this)">
-          <div class="habitacion-icono">
-            <i class="fas fa-check-circle"></i>
-          </div>
-          <div class="habitacion-numero">
-            <i class="fas fa-door-open me-1"></i>
-            108
-          </div>
-          <div class="habitacion-estado">Disponible</div>
+      <div class="habitaciones-grid fade-in-up" id="habitaciones-grid">
+        <!-- Las habitaciones se cargarán dinámicamente desde la base de datos -->
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>Cargando habitaciones...</p>
         </div>
       </div>
     </div>

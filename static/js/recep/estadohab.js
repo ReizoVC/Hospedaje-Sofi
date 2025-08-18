@@ -1,66 +1,146 @@
-function toggleHabitacion(element) {
-  // Simular cambio de estado al hacer clic
-  const estados = ['disponible', 'ocupado', 'mantenimiento'];
-  const iconos = {
-    'disponible': 'fas fa-check-circle',
-    'ocupado': 'fas fa-user', 
-    'mantenimiento': 'fas fa-tools'
-  };
-  const puertas = {
-    'disponible': 'fas fa-door-open',
-    'ocupado': 'fas fa-door-closed',
-    'mantenimiento': 'fas fa-exclamation-triangle'
-  };
-  const textos = {
-    'disponible': 'Disponible',
-    'ocupado': 'Ocupada',
-    'mantenimiento': 'Mantenimiento'
-  };
+// Variables globales
+let habitaciones = [];
 
-  let estadoActual = '';
-  estados.forEach(estado => {
-    if (element.classList.contains(estado)) {
-      estadoActual = estado;
+// Configuración de estados
+const ESTADOS_CONFIG = {
+  'disponible': {
+    icon: 'fas fa-check-circle',
+    puerta: 'fas fa-door-open',
+    texto: 'Disponible',
+    clase: 'disponible'
+  },
+  'ocupada': {
+    icon: 'fas fa-user',
+    puerta: 'fas fa-door-closed', 
+    texto: 'Ocupada',
+    clase: 'ocupado'
+  },
+  'mantenimiento': {
+    icon: 'fas fa-tools',
+    puerta: 'fas fa-exclamation-triangle',
+    texto: 'Mantenimiento',
+    clase: 'mantenimiento'
+  }
+};
+
+// Cargar habitaciones desde la API
+async function cargarHabitaciones() {
+  try {
+    const response = await fetch('/api/habitaciones-estado');
+    
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    habitaciones = data;
+    
+    renderizarHabitaciones();
+    actualizarEstadisticas();
+    
+  } catch (error) {
+    console.error('Error al cargar habitaciones:', error);
+    mostrarError('Error al cargar las habitaciones. Por favor, intenta de nuevo.');
+  }
+}
+
+// Renderizar habitaciones en el DOM
+function renderizarHabitaciones() {
+  const grid = document.getElementById('habitaciones-grid');
+  
+  if (habitaciones.length === 0) {
+    grid.innerHTML = `
+      <div class="error-container">
+        <i class="fas fa-home"></i>
+        <h3>No hay habitaciones registradas</h3>
+        <p>Contacta al administrador para agregar habitaciones al sistema.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  grid.innerHTML = habitaciones.map(habitacion => {
+    const estado = habitacion.estado.toLowerCase();
+    const config = ESTADOS_CONFIG[estado] || ESTADOS_CONFIG['disponible'];
+    
+    return `
+      <div class="habitacion ${config.clase}" 
+           data-id="${habitacion.idhabitacion}" 
+           data-numero="${habitacion.numero}">
+        <div class="habitacion-icono">
+          <i class="${config.icon}"></i>
+        </div>
+        <div class="habitacion-numero">
+          <i class="${config.puerta} me-1"></i>
+          ${habitacion.numero}
+        </div>
+        <div class="habitacion-estado">${config.texto}</div>
+        <div class="habitacion-info">
+          <small>${habitacion.nombre}</small>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Mostrar mensaje de error
+function mostrarError(mensaje) {
+  const grid = document.getElementById('habitaciones-grid');
+  grid.innerHTML = `
+    <div class="error-container">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3>Error</h3>
+      <p>${mensaje}</p>
+      <button class="retry-button" onclick="cargarHabitaciones()">
+        <i class="fas fa-redo me-1"></i>
+        Reintentar
+      </button>
+    </div>
+  `;
+}
+
+// Actualizar estadísticas
+function actualizarEstadisticas() {
+  const contadores = {
+    total: habitaciones.length,
+    disponible: 0,
+    ocupada: 0,
+    mantenimiento: 0
+  };
+  
+  habitaciones.forEach(habitacion => {
+    const estado = habitacion.estado.toLowerCase();
+    if (contadores.hasOwnProperty(estado)) {
+      contadores[estado]++;
     }
   });
-
-  let siguienteEstado = estados[(estados.indexOf(estadoActual) + 1) % estados.length];
-
-  // Remover clase actual
-  element.classList.remove(estadoActual);
-  // Agregar nueva clase
-  element.classList.add(siguienteEstado);
-
-  // Actualizar icono
-  const iconoElement = element.querySelector('.habitacion-icono i');
-  iconoElement.className = iconos[siguienteEstado];
-
-  // Actualizar icono de puerta
-  const puertaElement = element.querySelector('.habitacion-numero i');
-  puertaElement.className = `${puertas[siguienteEstado]} me-1`;
-
-  // Actualizar texto
-  const estadoElement = element.querySelector('.habitacion-estado');
-  estadoElement.textContent = textos[siguienteEstado];
-
-  // Actualizar estadísticas
-  actualizarEstadisticas();
+  
+  // Actualizar números en las estadísticas
+  const statNumbers = document.querySelectorAll('.stat-number');
+  if (statNumbers.length >= 4) {
+    statNumbers[0].textContent = contadores.total;
+    statNumbers[1].textContent = contadores.disponible;
+    statNumbers[2].textContent = contadores.ocupada;
+    statNumbers[3].textContent = contadores.mantenimiento;
+  }
 }
 
-function actualizarEstadisticas() {
-  const habitaciones = document.querySelectorAll('.habitacion');
-  let disponibles = 0, ocupadas = 0, mantenimiento = 0;
+// Inicializar cuando se carga el DOM
+document.addEventListener('DOMContentLoaded', function() {
+  cargarHabitaciones();
+  
+  // Actualizar cada 30 segundos para reflejar cambios realizados desde otras interfaces
+  setInterval(cargarHabitaciones, 30000);
+});
 
-  habitaciones.forEach(hab => {
-    if (hab.classList.contains('disponible')) disponibles++;
-    else if (hab.classList.contains('ocupado')) ocupadas++;
-    else if (hab.classList.contains('mantenimiento')) mantenimiento++;
-  });
-
-  document.querySelectorAll('.stat-number')[1].textContent = disponibles;
-  document.querySelectorAll('.stat-number')[2].textContent = ocupadas;
-  document.querySelectorAll('.stat-number')[3].textContent = mantenimiento;
+// Función para refrescar manualmente
+function refrescarHabitaciones() {
+  const grid = document.getElementById('habitaciones-grid');
+  grid.innerHTML = `
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Actualizando habitaciones...</p>
+    </div>
+  `;
+  cargarHabitaciones();
 }
-
-// Inicializar estadísticas al cargar la página
-document.addEventListener('DOMContentLoaded', actualizarEstadisticas);

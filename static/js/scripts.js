@@ -59,15 +59,12 @@ function checkAuthStatus() {
                 const accountMenu = document.getElementById('account-menu');
                 const mobileMenu = document.getElementById('mobile-menu');
                 
-                if (data.user.rol >= 3) {
-                    // Administrador (rol 3-4) - Acceso completo
+                if (data.user.rol >= 4) {
+                    // Administrador (rol 4) - Un único enlace al panel
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
-                        <a href="/gestion">Gestión Habitaciones</a>
-                        <a href="#gestion-personal">Gestión de Personal</a>
+                        <a href="/gestion">Panel de Gestión</a>
                         <a href="#reportes">Reportes</a>
-                        <a href="#ingresos">Ingresos</a>
-                        <a href="#egresos">Egresos</a>
                         <a href="#inventario">Inventario</a>
                         <hr>
                         <a href="#" onclick="logout()">Cerrar Sesión</a>
@@ -77,36 +74,33 @@ function checkAuthStatus() {
                         <a href="/habitaciones">Habitaciones</a>
                         <a href="/nosotros">Nosotros</a>
                         <a href="/user/profile">Mi Perfil</a>
-                        <a href="/gestion">Gestión Habitaciones</a>
-                        <a href="#gestion-personal">Gestión de Personal</a>
+                        <a href="/gestion">Panel de Gestión</a>
                         <a href="#reportes">Reportes</a>
-                        <a href="#ingresos">Ingresos</a>
-                        <a href="#egresos">Egresos</a>
                         <a href="#inventario">Inventario</a>
                         <a href="#" onclick="logout()">Cerrar Sesión</a>
+                    `;
+                } else if (data.user.rol === 3) {
+                    // Almacenista (rol 3) - Gestión de inventario y reportes básicos
+                    accountMenu.innerHTML = `
+                        <a href="/user/profile">Mi Perfil</a>
+                        <a href="/inventario">Inventario</a>
+                        <a href="/reportes-almacen">Reportes de Almacén</a>
+                        <a href="/estado-habitaciones">Estado Habitaciones</a>
+                        <hr>
+                        <a href="" onclick="logout()">Cerrar Sesión</a>
+                    `;
+                    mobileMenu.innerHTML = `
+                        <a href="/">Inicio</a>
+                        <a href="/habitaciones">Habitaciones</a>
+                        <a href="/nosotros">Nosotros</a>
+                        <a href="/user/profile">Mi Perfil</a>
+                        <a href="/inventario">Inventario</a>
+                        <a href="/reportes-almacen">Reportes de Almacén</a>
+                        <a href="/estado-habitaciones">Estado Habitaciones</a>
+                        <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
                 } else if (data.user.rol === 2) {
-                    // Almacenista (rol 2) - Gestión de inventario y reportes básicos
-                    accountMenu.innerHTML = `
-                        <a href="/user/profile">Mi Perfil</a>
-                        <a href="/inventario">Inventario</a>
-                        <a href="/reportes-almacen">Reportes de Almacén</a>
-                        <a href="/estado-habitaciones">Estado Habitaciones</a>
-                        <hr>
-                        <a href="#" onclick="logout()">Cerrar Sesión</a>
-                    `;
-                    mobileMenu.innerHTML = `
-                        <a href="/">Inicio</a>
-                        <a href="/habitaciones">Habitaciones</a>
-                        <a href="/nosotros">Nosotros</a>
-                        <a href="/user/profile">Mi Perfil</a>
-                        <a href="/inventario">Inventario</a>
-                        <a href="/reportes-almacen">Reportes de Almacén</a>
-                        <a href="/estado-habitaciones">Estado Habitaciones</a>
-                        <a href="#" onclick="logout()">Cerrar Sesión</a>
-                    `;
-                } else if (data.user.rol === 1) {
-                    // Recepcionista (rol 1) - Gestión de reservas y huéspedes
+                    // Recepcionista (rol 2) - Gestión de reservas y huéspedes
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
                         <a href="/gestion-reservas">Gestión de Reservas</a>
@@ -114,7 +108,7 @@ function checkAuthStatus() {
                         <a href="/gestion-usuario">Gestión de Huéspedes</a>
                         <a href="/estado-habitaciones">Estado Habitaciones</a>
                         <hr>
-                        <a href="#" onclick="logout()">Cerrar Sesión</a>
+                        <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
                     mobileMenu.innerHTML = `
                         <a href="/">Inicio</a>
@@ -125,17 +119,17 @@ function checkAuthStatus() {
                         <a href="/check">Check-in / Check-out</a>
                         <a href="/gestion-usuario">Gestión de Huéspedes</a>
                         <a href="/estado-habitaciones">Estado Habitaciones</a>
-                        <a href="#" onclick="logout()">Cerrar Sesión</a>
+                        <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
                 } else {
-                    // Usuario (rol 0) - Cliente normal
+                    // Usuario normal (rol 1) - Cliente normal
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
                         <a href="/user/reservations">Mis Reservas</a>
                         <a href="/user/history">Historial de Estadías</a>
                         <a href="/user/settings">Configuración</a>
                         <hr>
-                        <a href="#" onclick="logout()">Cerrar Sesión</a>
+                        <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
                     mobileMenu.innerHTML = `
                         <a href="/">Inicio</a>
@@ -145,7 +139,7 @@ function checkAuthStatus() {
                         <a href="/user/reservations">Mis Reservas</a>
                         <a href="/user/history">Historial de Estadías</a>
                         <a href="/user/settings">Configuración</a>
-                        <a href="#" onclick="logout()">Cerrar Sesión</a>
+                        <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
                 }
             } else {

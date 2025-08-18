@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request, jsonify
 from utils.db import db
 from models.usuario import Usuario
+from models.reserva import Reserva
 
 user = Blueprint('user', __name__, url_prefix='/user')
 
@@ -42,8 +43,26 @@ def reservations():
         if not usuario:
             flash('Usuario no encontrado', 'error')
             return redirect(url_for('auth.login'))
-        
-        return render_template('user/reservations.html', user=usuario)
+
+        # Consultar reservas del usuario
+        reservas = (
+            Reserva.query
+            .filter_by(idusuario=usuario.idusuario)
+            .order_by(Reserva.fechainicio.desc())
+            .all()
+        )
+
+        # Separar por estado para secciones
+        estados_activas = {'pendiente', 'confirmada', 'activa'}
+        reservas_activas = [r for r in reservas if r.estado in estados_activas]
+        reservas_historial = [r for r in reservas if r.estado not in estados_activas]
+
+        return render_template(
+            'user/reservations.html',
+            user=usuario,
+            reservas_activas=reservas_activas,
+            reservas_historial=reservas_historial,
+        )
     except Exception as e:
         print(f"Error al cargar reservas: {str(e)}")
         flash('Error al cargar las reservas', 'error')

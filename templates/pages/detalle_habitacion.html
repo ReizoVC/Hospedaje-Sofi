@@ -62,13 +62,358 @@
                         <span class="precio-valor">S/ {{ "%.0f"|format(habitacion.precio_noche) }}</span>
                         <span class="precio-texto">por noche</span>
                     </div>
-                    <button class="btn-reservar">Reservar Ahora</button>
+                    
+                    <!-- Botón de reserva -->
+                    <div class="formulario-reserva">
+                        {% if user %}
+                        <button class="btn-reservar" onclick="abrirModalReserva()">Reservar Ahora</button>
+                        {% else %}
+                        <a href="/login" class="btn-reservar">Iniciar Sesión para Reservar</a>
+                        {% endif %}
+                    </div>
+                    
                     <a href="/habitaciones" class="btn-volver">← Volver a Habitaciones</a>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- Modal de Reserva -->
+<div id="modalReserva" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Reservar {{ habitacion.nombre }}</h2>
+            <span class="close" onclick="cerrarModalReserva()">&times;</span>
+        </div>
+        
+        <div class="modal-body">
+            <div class="habitacion-resumen">
+                <img src="{{ habitacion.imagenes[0] if habitacion.imagenes else '/static/images/index/hab1.avif' }}" alt="{{ habitacion.nombre }}" class="habitacion-imagen">
+                <div class="habitacion-info">
+                    <h3>{{ habitacion.nombre }}</h3>
+                    <p class="precio-noche">S/ {{ "%.0f"|format(habitacion.precio_noche) }} por noche</p>
+                    <p class="capacidad">Capacidad: {{ habitacion.capacidad }} persona{% if habitacion.capacidad != 1 %}s{% endif %}</p>
+                </div>
+            </div>
+            
+            <form id="formReserva" class="form-reserva">
+                <div class="fechas-container">
+                    <div class="fecha-grupo">
+                        <label for="modal-fecha-inicio">Fecha de llegada:</label>
+                        <input type="date" id="modal-fecha-inicio" name="fecha-inicio" min="{{ fecha_minima() }}" required>
+                    </div>
+                    <div class="fecha-grupo">
+                        <label for="modal-fecha-fin">Fecha de salida:</label>
+                        <input type="date" id="modal-fecha-fin" name="fecha-fin" min="{{ fecha_minima() }}" required>
+                    </div>
+                </div>
+                
+                <div class="resumen-reserva" id="resumenReserva" style="display: none;">
+                    <div class="resumen-item">
+                        <span class="label">Noches:</span>
+                        <span id="cantidadNoches">0</span>
+                    </div>
+                    <div class="resumen-item">
+                        <span class="label">Precio por noche:</span>
+                        <span>S/ {{ "%.0f"|format(habitacion.precio_noche) }}</span>
+                    </div>
+                    <div class="resumen-item total">
+                        <span class="label">Total:</span>
+                        <span class="precio-total-modal">S/ <span id="precioTotalModal">0</span></span>
+                    </div>
+                </div>
+                
+                <div class="disponibilidad-mensaje" id="disponibilidadMensaje"></div>
+            </form>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" class="btn-cancelar-modal" onclick="cerrarModalReserva()">Cancelar</button>
+            <button type="button" id="btnConfirmarReserva" class="btn-confirmar-reserva" onclick="confirmarReserva()" disabled>
+                Confirmar Reserva
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Estilos del modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 0;
+    border: none;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close {
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close:hover {
+    color: #ddd;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.habitacion-resumen {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.habitacion-imagen {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.habitacion-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.precio-noche {
+    margin: 0;
+    color: #007bff;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.capacidad {
+    margin: 0.25rem 0 0 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.fechas-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.fecha-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.fecha-grupo label {
+    font-weight: bold;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.fecha-grupo input {
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.fecha-grupo input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.resumen-reserva {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.resumen-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.resumen-item:last-child {
+    margin-bottom: 0;
+}
+
+.resumen-item.total {
+    border-top: 2px solid #dee2e6;
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.resumen-item .label {
+    color: #666;
+}
+
+.precio-total-modal {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.disponibilidad-mensaje {
+    margin-top: 1rem;
+    min-height: 30px;
+}
+
+.success-mensaje {
+    color: #155724;
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.error-mensaje {
+    color: #721c24;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.loading-mensaje {
+    color: #856404;
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-style: italic;
+}
+
+.modal-footer {
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    border-radius: 0 0 15px 15px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.btn-cancelar-modal, .btn-confirmar-reserva {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-cancelar-modal {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-cancelar-modal:hover {
+    background: #5a6268;
+}
+
+.btn-confirmar-reserva {
+    background: #28a745;
+    color: white;
+}
+
+.btn-confirmar-reserva:hover:not(:disabled) {
+    background: #218838;
+}
+
+.btn-confirmar-reserva:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 10% auto;
+        width: 95%;
+    }
+    
+    .modal-header, .modal-body, .modal-footer {
+        padding: 1rem;
+    }
+    
+    .fechas-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .habitacion-resumen {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .habitacion-imagen {
+        width: 100%;
+        height: 150px;
+        align-self: center;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+}
+</style>
 
 <script>
 function cambiarImagen(nuevaImagen) {
@@ -77,6 +422,173 @@ function cambiarImagen(nuevaImagen) {
     // Actualizar clase active en miniaturas
     document.querySelectorAll('.miniatura').forEach(img => img.classList.remove('active'));
     event.target.classList.add('active');
+}
+
+// Variables globales
+const precioPorNoche = {{ habitacion.precio_noche }};
+let fechasValidas = false;
+
+// Modal functions
+function abrirModalReserva() {
+    document.getElementById('modalReserva').style.display = 'block';
+    // Configurar fechas mínimas
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('modal-fecha-inicio').min = hoy;
+    document.getElementById('modal-fecha-fin').min = hoy;
+}
+
+function cerrarModalReserva() {
+    document.getElementById('modalReserva').style.display = 'none';
+    // Limpiar formulario
+    document.getElementById('formReserva').reset();
+    document.getElementById('resumenReserva').style.display = 'none';
+    document.getElementById('disponibilidadMensaje').innerHTML = '';
+    document.getElementById('btnConfirmarReserva').disabled = true;
+    fechasValidas = false;
+}
+
+// Cerrar modal al hacer click fuera de él
+window.onclick = function(event) {
+    const modal = document.getElementById('modalReserva');
+    if (event.target == modal) {
+        cerrarModalReserva();
+    }
+}
+
+// Configurar eventos cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    const fechaInicio = document.getElementById('modal-fecha-inicio');
+    const fechaFin = document.getElementById('modal-fecha-fin');
+    
+    fechaInicio.addEventListener('change', function() {
+        // Actualizar fecha mínima de salida
+        fechaFin.min = fechaInicio.value;
+        
+        // Si la fecha de fin es anterior o igual, limpiarla
+        if (fechaFin.value && fechaFin.value <= fechaInicio.value) {
+            fechaFin.value = '';
+        }
+        
+        validarYCalcular();
+    });
+    
+    fechaFin.addEventListener('change', validarYCalcular);
+});
+
+async function validarYCalcular() {
+    const fechaInicio = document.getElementById('modal-fecha-inicio').value;
+    const fechaFin = document.getElementById('modal-fecha-fin').value;
+    const resumen = document.getElementById('resumenReserva');
+    const mensaje = document.getElementById('disponibilidadMensaje');
+    const btnConfirmar = document.getElementById('btnConfirmarReserva');
+    
+    // Limpiar estados anteriores
+    mensaje.innerHTML = '';
+    btnConfirmar.disabled = true;
+    fechasValidas = false;
+    
+    if (!fechaInicio || !fechaFin) {
+        resumen.style.display = 'none';
+        return;
+    }
+    
+    const inicio = new Date(fechaInicio);
+    const fin = new Date(fechaFin);
+    
+    if (fin <= inicio) {
+        mensaje.innerHTML = '<div class="error-mensaje">La fecha de salida debe ser posterior a la fecha de llegada</div>';
+        resumen.style.display = 'none';
+        return;
+    }
+    
+    // Calcular noches y precio
+    const diffTime = Math.abs(fin - inicio);
+    const noches = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const total = noches * precioPorNoche;
+    
+    // Mostrar cálculo
+    document.getElementById('cantidadNoches').textContent = noches;
+    document.getElementById('precioTotalModal').textContent = total.toFixed(0);
+    resumen.style.display = 'block';
+    
+    // Verificar disponibilidad
+    mensaje.innerHTML = '<div class="loading-mensaje">Verificando disponibilidad...</div>';
+    
+    try {
+        const response = await fetch('/reservas/verificar-disponibilidad', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                idhabitacion: {{ habitacion.idhabitacion }},
+                fechainicio: fechaInicio,
+                fechafin: fechaFin
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.disponible) {
+            mensaje.innerHTML = '<div class="success-mensaje">✓ Habitación disponible</div>';
+            btnConfirmar.disabled = false;
+            fechasValidas = true;
+        } else {
+            mensaje.innerHTML = '<div class="error-mensaje">✗ ' + data.message + '</div>';
+            btnConfirmar.disabled = true;
+            fechasValidas = false;
+        }
+    } catch (error) {
+        console.error('Error al verificar disponibilidad:', error);
+        mensaje.innerHTML = '<div class="error-mensaje">Error al verificar disponibilidad</div>';
+        btnConfirmar.disabled = true;
+        fechasValidas = false;
+    }
+}
+
+async function confirmarReserva() {
+    if (!fechasValidas) {
+        alert('Por favor verifica las fechas seleccionadas');
+        return;
+    }
+    
+    const fechaInicio = document.getElementById('modal-fecha-inicio').value;
+    const fechaFin = document.getElementById('modal-fecha-fin').value;
+    const btnConfirmar = document.getElementById('btnConfirmarReserva');
+    
+    // Deshabilitar botón durante la petición
+    btnConfirmar.disabled = true;
+    btnConfirmar.textContent = 'Procesando...';
+    
+    try {
+        const response = await fetch('/reservas/crear', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                idhabitacion: {{ habitacion.idhabitacion }},
+                fechainicio: fechaInicio,
+                fechafin: fechaFin
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(`¡Reserva creada exitosamente!\n\nCódigo de reserva: ${data.codigo_reserva}\n\nSerás redirigido a tus reservas.`);
+            window.location.href = '/reservas/mis-reservas';
+        } else {
+            alert(data.message || 'Error al crear la reserva');
+            btnConfirmar.disabled = false;
+            btnConfirmar.textContent = 'Confirmar Reserva';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al procesar la reserva. Inténtalo de nuevo.');
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = 'Confirmar Reserva';
+    }
 }
 </script>
 {% endblock %}

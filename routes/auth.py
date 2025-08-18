@@ -43,7 +43,7 @@ def register():
             correo=data['email'],
             telefono=data['phone'],
             clave=hashed_password,
-            rol=0
+            rol=1  # Rol 1 = Usuario normal (rol 0 = cuenta eliminada)
         )
         
         db.session.add(new_user)
@@ -74,11 +74,15 @@ def login():
         # Buscar usuario por email
         user = Usuario.query.filter_by(correo=data['email']).first()
         
-        # Verificar contraseña con hash MD5
+        # Verificar que el usuario existe, la contraseña es correcta Y la cuenta no está eliminada
         input_password_hash = hashlib.md5(data['password'].encode()).hexdigest()
         
         if not user or user.clave != input_password_hash:
             return jsonify({'error': 'Credenciales inválidas'}), 401
+            
+        # Verificar que la cuenta no esté eliminada (rol 0)
+        if user.rol == 0:
+            return jsonify({'error': 'Esta cuenta ha sido desactivada. Contacte al administrador.'}), 403
         
         # Crear sesión
         session['user_id'] = str(user.idusuario)

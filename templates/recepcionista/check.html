@@ -21,21 +21,21 @@
           <div class="stat-icon checkin">
             <i class="fas fa-sign-in-alt"></i>
           </div>
-          <div class="stat-number">1</div>
+          <div class="stat-number">0</div>
           <div class="stat-label">Pendientes Check-In</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon checkout">
             <i class="fas fa-sign-out-alt"></i>
           </div>
-          <div class="stat-number">1</div>
+          <div class="stat-number">0</div>
           <div class="stat-label">Pendientes Check-Out</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon occupied">
             <i class="fas fa-bed"></i>
           </div>
-          <div class="stat-number">1</div>
+          <div class="stat-number">0</div>
           <div class="stat-label">Habitaciones Ocupadas</div>
         </div>
       </div>
@@ -56,42 +56,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td><strong>1</strong></td>
-              <td><span style="font-weight: 600; color: var(--primary-color);">RZ001</span></td>
-              <td>
-                <div class="cliente-info">
-                  <div class="cliente-avatar" style="background: var(--primary-color);">PG</div>
-                  Pedro García
-                </div>
-              </td>
-              <td><span style="font-weight: 600;">302</span></td>
-              <td><span class="badge warning"><i class="fas fa-clock"></i>Reservado</span></td>
-              <td style="color: var(--secondary-color);">--</td>
-              <td style="color: var(--secondary-color);">--</td>
-              <td>
-                <button class="btn btn-checkin" onclick="openModal('modalCheckIn')">
-                  <i class="fas fa-sign-in-alt"></i>Check-In
-                </button>
-              </td>
-            </tr>
-            <tr>
-              <td><strong>2</strong></td>
-              <td><span style="font-weight: 600; color: var(--primary-color);">RZ002</span></td>
-              <td>
-                <div class="cliente-info">
-                  <div class="cliente-avatar" style="background: var(--success-color);">AT</div>
-                  Ana Torres
-                </div>
-              </td>
-              <td><span style="font-weight: 600;">204</span></td>
-              <td><span class="badge success"><i class="fas fa-check"></i>Ocupado</span></td>
-              <td style="font-weight: 500;">2025-07-22 14:00</td>
-              <td style="color: var(--secondary-color);">--</td>
-              <td>
-                <button class="btn btn-checkout" onclick="openModal('modalCheckOut')">
-                  <i class="fas fa-sign-out-alt"></i>Check-Out
-                </button>
+            <!-- Los datos se cargarán dinámicamente desde JavaScript -->
+            <tr id="loading-row">
+              <td colspan="8" style="text-align: center; padding: 2rem; color: var(--secondary-color);">
+                <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 1rem; display: block;"></i>
+                Cargando reservas...
               </td>
             </tr>
           </tbody>

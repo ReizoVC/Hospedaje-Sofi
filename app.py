@@ -6,6 +6,8 @@ from utils.db import db
 from models.usuario import Usuario
 from models.habitaciones import Habitacion
 from models.imagenes_habitaciones import ImagenHabitacion
+from models.reserva import Reserva
+from models.checkinout import CheckInOut
 
 from routes.inicio import inicio
 from routes.auth import auth
@@ -13,6 +15,7 @@ from routes.admin import admin
 from routes.recepcionista import recepcionista
 from routes.almacenista import almacenista
 from routes.user import user
+from routes.reservas import reservas
 from dotenv import load_dotenv
 import os
 
@@ -25,7 +28,7 @@ app = Flask(__name__)
 # Configuración de la base de datos
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'tu_clave_secreta_aqui_muy_segura_123')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave_secreta')
 
 # Inicializar extensiones
 db.init_app(app)
@@ -50,6 +53,7 @@ app.register_blueprint(admin)
 app.register_blueprint(recepcionista)
 app.register_blueprint(almacenista)
 app.register_blueprint(user)
+app.register_blueprint(reservas)
 
 # Crear las tablas si no existen
 with app.app_context():

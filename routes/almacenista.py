@@ -8,7 +8,7 @@ almacenista = Blueprint('almacenista', __name__)
 def verificar_almacenista():
     if 'user_id' not in session:
         return jsonify({'error': 'No autenticado'}), 401
-    if session.get('user_rol', 0) < 2:
+    if session.get('user_rol', 0) < 3:  # Rol 3 = Almacenista o superior
         return jsonify({'error': 'Acceso no autorizado - se requiere rol de almacenista o superior'}), 403
     return None
 

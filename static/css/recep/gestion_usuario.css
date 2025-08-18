@@ -180,6 +180,11 @@ html, body {
   transition: all 0.3s ease;
 }
 
+.table tbody tr:hover {
+  background-color: rgba(37, 99, 235, 0.05);
+  transform: translateY(-1px);
+}
+
 .table tbody td {
   padding: 1.5rem 1rem;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
@@ -545,6 +550,26 @@ html, body {
   color: var(--secondary-color);
 }
 
+/* Información de contacto */
+.contact-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--dark-color);
+  font-weight: 500;
+}
+
+.contact-info i {
+  color: var(--primary-color);
+  width: 16px;
+}
+
+.text-muted {
+  color: var(--secondary-color);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
 /* Animaciones para modal */
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -631,6 +656,14 @@ html, body {
     margin-right: 0.5rem;
   }
 
+  .contact-info {
+    font-size: 0.8rem;
+  }
+
+  .contact-info i {
+    width: 12px;
+  }
+
   .btn {
     padding: 0.5rem 1rem;
     font-size: 0.75rem;
@@ -672,5 +705,103 @@ html, body {
 
   .content-header h2::before {
     font-size: 2rem;
+  }
+}
+
+/* Estilos para edición inline */
+.form-control-inline {
+  width: 100%;
+  max-width: 220px;
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: white;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control-inline:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* Estilos específicos para campos de contacto */
+.contact-info .form-control-inline {
+  min-width: 200px;
+}
+
+.contact-info .edit-mode input[name="correo"] {
+  background: #f8fafc;
+}
+
+.contact-info .edit-mode input[name="telefono"] {
+  background: #f0f9ff;
+}
+
+/* Indicador visual de campos editables */
+.contact-info:hover .display-mode {
+  background: rgba(37, 99, 235, 0.05);
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+/* Mejorar visibilidad de botones de edición */
+.btn-edit {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-edit:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+/* Botones de acción inline */
+.action-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+  padding: 6px 10px;
+  min-width: 35px;
+}
+
+/* Transiciones suaves para el cambio de modo */
+.display-mode, .edit-mode {
+  transition: opacity 0.2s ease;
+}
+
+/* Mejorar el espaciado en celdas */
+td .contact-info {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+/* Responsive para edición inline */
+@media (max-width: 768px) {
+  .form-control-inline {
+    max-width: 150px;
+    font-size: 0.8rem;
+  }
+  
+  .user-name .form-control-inline {
+    max-width: 100px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .action-buttons .btn {
+    width: 100%;
+    min-width: auto;
   }
 }

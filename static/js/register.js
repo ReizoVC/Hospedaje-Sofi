@@ -1,6 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
     const registerForm = document.querySelector('form');
     
+    // Función fallback para mostrar mensajes si las funciones globales no están disponibles
+    const showMessage = (message, type = 'info') => {
+        if (typeof window.showSuccess === 'function' && type === 'success') {
+            window.showSuccess(message);
+        } else if (typeof window.showError === 'function' && type === 'error') {
+            window.showError(message);
+        } else {
+            // Fallback básico
+            alert(message);
+        }
+    };
+    
     registerForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -15,12 +27,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Validaciones básicas
         if (formData.dni.length !== 8) {
-            alert('El DNI debe tener 8 dígitos');
+            showMessage('El DNI debe tener 8 dígitos', 'error');
             return;
         }
         
         if (formData.password.length < 6) {
-            alert('La contraseña debe tener al menos 6 caracteres');
+            showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
             return;
         }
         
@@ -36,15 +48,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             if (response.ok) {
-                alert('Usuario registrado exitosamente');
-                // Redirigir al login
-                window.location.href = '/login';
+                showMessage('¡Usuario registrado exitosamente!', 'success');
+                // Pequeña pausa para mostrar la notificación antes de redirigir
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 1500);
             } else {
-                alert(data.error || 'Error al registrar usuario');
+                showMessage(data.error || 'Error al registrar usuario', 'error');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error de conexión. Intenta nuevamente.');
+            showMessage('Error de conexión. Intenta nuevamente.', 'error');
         }
     });
     

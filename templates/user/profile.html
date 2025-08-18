@@ -35,14 +35,13 @@
                 <input type="tel" id="telefono" name="telefono" value="{{ user.telefono if user.telefono else '' }}" disabled>
             </div>
             
-            {% if user.rol != 0 %}
+            {% if user.rol > 1 %}
             <div class="detail-item">
                 <label>Tipo de Usuario:</label>
                 <span class="readonly-field">
-                    {% if user.rol == 1 %}Recepcionista
-                    {% elif user.rol == 2 %}Almacenista
-                    {% elif user.rol == 3 %}Administrador
-                    {% elif user.rol == 4 %}Super Administrador
+                    {% if user.rol == 2 %}Recepcionista
+                    {% elif user.rol == 3 %}Almacenista
+                    {% elif user.rol == 4 %}Administrador
                     {% else %}Usuario{% endif %}
                 </span>
             </div>
@@ -73,7 +72,7 @@
     <ul>
         <li>Perfil actualizado recientemente</li>
         <li>Sesión iniciada hoy</li>
-        {% if user.rol == 0 %}
+        {% if user.rol == 1 %}
         <li>Sin reservas recientes</li>
         {% endif %}
     </ul>

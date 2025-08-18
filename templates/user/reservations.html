@@ -7,45 +7,57 @@
 {% block content %}
 <section class="reservas-list-section">
     <h2>Reservas Activas</h2>
-    
-    <div class="reserva-card upcoming">
-        <div class="status-badge text-success">Confirmada</div>
-        <h3>Habitación Deluxe - Suite 101</h3>
-        <p><strong>Fechas:</strong> 15/12/2024 - 18/12/2024</p>
-        <p><strong>Huéspedes:</strong> 2 personas</p>
-        <p><strong>Total:</strong> <span class="total-price">S/ 450.00</span></p>
-        <div class="card-actions">
-            <button class="btn btn-secondary btn-sm">
-                <i class="fas fa-eye"></i>
-                Ver Detalles
-            </button>
-            <button class="btn btn-danger btn-sm">
-                <i class="fas fa-times"></i>
-                Cancelar
-            </button>
+    {% if reservas_activas and reservas_activas|length > 0 %}
+        {% for r in reservas_activas %}
+        <div class="reserva-card upcoming">
+            <div class="status-badge text-success">{{ r.estado|capitalize }}</div>
+            <h3>
+                {% if r.habitacion %}
+                    {{ r.habitacion.nombre }} - {{ r.habitacion.numero }}
+                {% else %}
+                    Habitación #{{ r.idhabitacion }}
+                {% endif %}
+            </h3>
+            <p><strong>Fechas:</strong> {{ r.fechainicio.strftime('%d/%m/%Y') }} - {{ r.fechafin.strftime('%d/%m/%Y') }}</p>
+            <p><strong>Código:</strong> {{ r.codigoreserva }}</p>
+            <div class="card-actions">
+                <a class="btn btn-secondary btn-sm" href="/reservas/{{ r.idreserva }}">
+                    <i class="fas fa-eye"></i>
+                    Ver Detalles
+                </a>
+            </div>
         </div>
-    </div>
-    
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">Aún no tienes reservas activas.</p>
+    {% endif %}
+
     <h2>Historial de Reservas</h2>
-    
-    <div class="reserva-card past-reserva">
-        <div class="status-badge text-muted">Completada</div>
-        <h3>Habitación Estándar - 205</h3>
-        <p><strong>Fechas:</strong> 10/11/2024 - 12/11/2024</p>
-        <p><strong>Huéspedes:</strong> 1 persona</p>
-        <p><strong>Total:</strong> S/ 200.00</p>
-        <div class="card-actions">
-            <button class="btn btn-secondary btn-sm">
-                <i class="fas fa-eye"></i>
-                Ver Detalles
-            </button>
-            <button class="btn btn-primary btn-sm">
-                <i class="fas fa-star"></i>
-                Calificar
-            </button>
+    {% if reservas_historial and reservas_historial|length > 0 %}
+        {% for r in reservas_historial %}
+        <div class="reserva-card past-reserva">
+            <div class="status-badge text-muted">{{ r.estado|capitalize }}</div>
+            <h3>
+                {% if r.habitacion %}
+                    {{ r.habitacion.nombre }} - {{ r.habitacion.numero }}
+                {% else %}
+                    Habitación #{{ r.idhabitacion }}
+                {% endif %}
+            </h3>
+            <p><strong>Fechas:</strong> {{ r.fechainicio.strftime('%d/%m/%Y') }} - {{ r.fechafin.strftime('%d/%m/%Y') }}</p>
+            <p><strong>Código:</strong> {{ r.codigoreserva }}</p>
+            <div class="card-actions">
+                <a class="btn btn-secondary btn-sm" href="/reservas/{{ r.idreserva }}">
+                    <i class="fas fa-eye"></i>
+                    Ver Detalles
+                </a>
+            </div>
         </div>
-    </div>
-    
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">Aún no hay reservas en tu historial.</p>
+    {% endif %}
+
     <div style="text-align: center; margin-top: 2rem;">
         <a href="/habitaciones" class="btn btn-primary">
             <i class="fas fa-plus"></i>

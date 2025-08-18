@@ -27,65 +27,106 @@
             <div class="habitaciones-grupo">
                 <div class="grupo">
                     <h3>Más Populares</h3>
-                    <div class="cards">
-                        <div class="card">
-                            <img src="{{ url_for('static', filename='images/index/hab1.avif') }}" alt="Habitación 1">
-                            <h4>Suite Andina Deluxe</h4>
-                            <p>Espaciosa con vista a la selva, cama king y minibar.</p>
-                            <a href="#" class="btn-card">Ver más detalles</a>
+                    <div class="grid-habitaciones">
+                        {% for habitacion in habitaciones_populares %}
+                        <div class="hab-card">
+                            <div class="hab-image">
+                                <img src="{{ habitacion.imagen_url }}" alt="{{ habitacion.nombre }}">
+                                <span class="estado-badge estado-{{ habitacion.estado.lower() }}">{{ habitacion.estado }}</span>
+                            </div>
+                            <div class="hab-content">
+                                <h3 class="hab-nombre">{{ habitacion.nombre }}</h3>
+                                
+                                {% if habitacion.servicios %}
+                                <div class="hab-servicios-pills">
+                                    {% for servicio in habitacion.servicios[:3] %}
+                                    <span class="hab-servicio-pill">{{ servicio }}</span>
+                                    {% endfor %}
+                                    {% if habitacion.servicios|length > 3 %}
+                                    <span class="hab-servicio-pill more">+{{ habitacion.servicios|length - 3 }}</span>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                <div class="hab-footer">
+                                    <div class="hab-precio-info">
+                                        <span class="hab-precio-valor">S/ {{ "%.0f"|format(habitacion.precio_noche) }}</span>
+                                        <span class="hab-precio-texto">por noche</span>
+                                    </div>
+                                    <a href="/habitacion/{{ habitacion.idhabitacion }}" class="hab-btn-action">Ver Habitación</a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card">
-                            <img src="{{ url_for('static', filename='images/index/hab2.avif') }}" alt="Habitación 2">
-                            <h4>Habitación Familiar</h4>
-                            <p>Ideal para 4 personas, cómoda y con aire acondicionado.</p>
-                            <a href="#" class="btn-card">Ver más detalles</a>
+                        {% endfor %}
+                        
+                        {% if not habitaciones_populares %}
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                            <h3>No hay habitaciones disponibles</h3>
+                            <p>Pronto tendremos habitaciones destacadas para ti.</p>
                         </div>
-                        <div class="card">
-                            <img src="{{ url_for('static', filename='images/index/hab3.jpg') }}" alt="Habitación 3">
-                            <h4>Habitación Premium</h4>
-                            <p>Diseño moderno con balcón privado y desayuno incluido.</p>
-                            <a href="#" class="btn-card">Ver más detalles</a>
-                        </div>
-                        <div class="card">
-                            <img src="{{ url_for('static', filename='images/index/hab4.jpg') }}" alt="Habitación 4">
-                            <h4>Deluxe Jungle View</h4>
-                            <p>Vista panorámica a la selva y decoración amazónica.</p>
-                            <a href="#" class="btn-card">Ver más detalles</a>
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <div class="grupo">
-                    <h3>Más Accesibles</h3>
-                    <div class="cards">
-                        <div class="card">
-                            <img src="{{ url_for('static', filename='images/index/hab2.avif') }}" alt="Habitación 5">
-                            <h4>Estándar Económica</h4>
-                            <p>Perfecta para viajeros, buena ubicación y precio.</p>
-                            <a href="#" class="btn-card">Ver más detalles</a>
+                    <h3>Más Lujosas</h3>
+                    <div class="grid-habitaciones">
+                        {% for habitacion in habitaciones_lujosas %}
+                        <div class="hab-card">
+                            <div class="hab-image">
+                                <img src="{{ habitacion.imagen_url }}" alt="{{ habitacion.nombre }}">
+                                <span class="estado-badge estado-{{ habitacion.estado.lower() }}">{{ habitacion.estado }}</span>
+                            </div>
+                            <div class="hab-content">
+                                <h3 class="hab-nombre">{{ habitacion.nombre }}</h3>
+                                
+                                {% if habitacion.servicios %}
+                                <div class="hab-servicios-pills">
+                                    {% for servicio in habitacion.servicios[:3] %}
+                                    <span class="hab-servicio-pill">{{ servicio }}</span>
+                                    {% endfor %}
+                                    {% if habitacion.servicios|length > 3 %}
+                                    <span class="hab-servicio-pill more">+{{ habitacion.servicios|length - 3 }}</span>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                <div class="hab-footer">
+                                    <div class="hab-precio-info">
+                                        <span class="hab-precio-valor">S/ {{ "%.0f"|format(habitacion.precio_noche) }}</span>
+                                        <span class="hab-precio-texto">por noche</span>
+                                    </div>
+                                    <a href="/habitacion/{{ habitacion.idhabitacion }}" class="hab-btn-action">Ver Habitación</a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card">
-                            <img src="{{ url_for('static', filename='images/index/hab2.avif') }}" alt="Habitación 6">
-                            <h4>Individual Básica</h4>
-                            <p>Ideal para estancias cortas, incluye desayuno.</p>
-                            <a href="#" class="btn-card">Ver más detalles</a>
+                        {% endfor %}
+                        
+                        {% if not habitaciones_lujosas %}
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                            <h3>No hay habitaciones disponibles</h3>
+                            <p>Pronto tendremos habitaciones de lujo para ti.</p>
                         </div>
-                        <div class="card">
-                            <img src="{{ url_for('static', filename='images/index/hab3.jpg') }}" alt="Habitación 7">
-                            <h4>Doble Compartida</h4>
-                            <p>Opción económica para 2, ventilación natural.</p>
-                            <a href="#" class="btn-card">Ver más detalles</a>
-                        </div>
-                        <div class="card">
-                            <img src="{{ url_for('static', filename='images/index/hab4.jpg') }}" alt="Habitación 8">
-                            <h4>Mini Suite Asequible</h4>
-                            <p>Pequeña pero elegante, con aire acondicionado.</p>
-                            <a href="#" class="btn-card">Ver más detalles</a>
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Sección del Mapa -->
+    <section class="ubicacion-mapa">
+        <div class="container">
+            <h2>Nuestra Ubicación</h2>
+            <p class="descripcion-ubicacion">Encuéntranos en el corazón de Loreto, Amazonas peruano</p>
+            <div class="mapa-container">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63684.59392884949!2d-70.51364709577028!3d-3.961150571150118!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91ed8be342f863e1%3A0xe8733324db0b169e!2sHospedaje%20SOFI!5e0!3m2!1ses-419!2spe!4v1754555628265!5m2!1ses-419!2spe" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </section>
 {% endblock %}
