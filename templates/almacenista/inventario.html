@@ -1,0 +1,145 @@
+{% extends "layout.html" %}
+{% block title %}Inventario | Almacenista{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/almacenista/inventario.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="inventario">
+  <div class="container">
+    <div class="content-header">
+      <h1 class="titulo-seccion">Inventario</h1>
+      <button id="btn-nuevo" class="btn btn-primary">+ Nuevo producto</button>
+    </div>
+
+    <section class="stats-container">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-productos">0</div>
+        <div class="stat-label">Productos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-bajos">0</div>
+        <div class="stat-label">Bajo stock</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-porvencer">0</div>
+        <div class="stat-label">Por vencer ≤ 15d</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-stock">0</div>
+        <div class="stat-label">Stock total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-costototal">S/ 0</div>
+        <div class="stat-label">Costo total</div>
+      </div>
+    </section>
+
+    
+
+    <div class="tabla-wrapper">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Costo unitario</th>
+            <th>Costo total</th>
+            <th>Cantidad</th>
+            <th>Umbral</th>
+            <th>Vence</th>
+            <th>Días</th>
+            <th>Estado</th>
+            <th style="width: 140px;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-productos">
+          <tr><td colspan="10" style="text-align:center; padding: 1rem;">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Modal Nuevo Producto -->
+<div id="modalProducto" class="modal" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalProductoTitulo">Nuevo producto</h3>
+      <span class="close" data-close="modalProducto">&times;</span>
+    </div>
+    <div class="modal-body">
+      <form id="formProducto">
+        <input type="hidden" id="prod-id" />
+        <div class="form-row">
+          <label>Nombre</label>
+          <input id="prod-nombre" type="text" required />
+        </div>
+        <div class="form-row">
+          <label>Cantidad inicial</label>
+          <input id="prod-cantidad" type="number" min="0" value="0" />
+        </div>
+        <div class="form-row">
+          <label>Costo unitario</label>
+          <input id="prod-costo" type="number" step="1" min="0" value="0" />
+        </div>
+        <div class="form-row">
+          <label>Umbral mínimo</label>
+          <input id="prod-umbral" type="number" min="0" value="0" />
+        </div>
+        <div class="form-row">
+          <label>Fecha de vencimiento</label>
+          <input id="prod-fv" type="date" />
+        </div>
+        <div class="form-row">
+          <label style="display:flex;align-items:center;gap:.5rem;font-weight:500;color:#374151">
+            <input id="prod-sin-fv" type="checkbox" /> Sin fecha de vencimiento
+          </label>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" data-close="modalProducto">Cancelar</button>
+      <button id="btn-guardar-producto" class="btn-primary">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Movimiento -->
+<div id="modalMovimiento" class="modal" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Registrar movimiento</h3>
+      <span class="close" data-close="modalMovimiento">&times;</span>
+    </div>
+    <div class="modal-body">
+      <form id="formMovimiento">
+        <input type="hidden" id="mov-idproducto" />
+        <div class="form-row">
+          <label>Tipo</label>
+          <select id="mov-tipo">
+            <option value="entrada">Entrada</option>
+            <option value="salida">Salida</option>
+            <option value="ajuste">Ajuste</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Cantidad</label>
+          <input id="mov-cantidad" type="number" min="1" value="1" />
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" data-close="modalMovimiento">Cancelar</button>
+      <button id="btn-registrar-mov" class="btn-primary">Registrar</button>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/almacenista/inventario.js') }}"></script>
+{% endblock %}

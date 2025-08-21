@@ -64,8 +64,8 @@ function checkAuthStatus() {
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
                         <a href="/gestion">Panel de Gestión</a>
-                        <a href="#reportes">Reportes</a>
-                        <a href="#inventario">Inventario</a>
+                        <a href="/reportes-admin">Reportes</a>
+                        <a href="/inventario">Inventario</a>
                         <hr>
                         <a href="#" onclick="logout()">Cerrar Sesión</a>
                     `;
@@ -75,8 +75,8 @@ function checkAuthStatus() {
                         <a href="/nosotros">Nosotros</a>
                         <a href="/user/profile">Mi Perfil</a>
                         <a href="/gestion">Panel de Gestión</a>
-                        <a href="#reportes">Reportes</a>
-                        <a href="#inventario">Inventario</a>
+                        <a href="/reportes-admin">Reportes</a>
+                        <a href="/inventario">Inventario</a>
                         <a href="#" onclick="logout()">Cerrar Sesión</a>
                     `;
                 } else if (data.user.rol === 3) {
@@ -85,7 +85,6 @@ function checkAuthStatus() {
                         <a href="/user/profile">Mi Perfil</a>
                         <a href="/inventario">Inventario</a>
                         <a href="/reportes-almacen">Reportes de Almacén</a>
-                        <a href="/estado-habitaciones">Estado Habitaciones</a>
                         <hr>
                         <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
@@ -96,7 +95,6 @@ function checkAuthStatus() {
                         <a href="/user/profile">Mi Perfil</a>
                         <a href="/inventario">Inventario</a>
                         <a href="/reportes-almacen">Reportes de Almacén</a>
-                        <a href="/estado-habitaciones">Estado Habitaciones</a>
                         <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
                 } else if (data.user.rol === 2) {
@@ -151,7 +149,7 @@ function checkAuthStatus() {
                 mobileMenu.innerHTML = `
                     <a href=\"/\">Inicio</a>
                     <a href=\"/habitaciones\">Habitaciones</a>
-                    <a href=\"#nosotros\">Nosotros</a>
+                    <a href=\"/nosotros\">Nosotros</a>
                     <a href=\"/login\">Iniciar Sesión</a>
                 `;
             }

@@ -1,6 +1,10 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 from utils.db import db
-from models.habitaciones import Habitacion
+from models.producto import Producto
+from models.movimientos import Movimientos
+from models.egreso import Egreso
+from datetime import datetime, date
+import uuid
 
 almacenista = Blueprint('almacenista', __name__)
 
@@ -11,6 +15,20 @@ def verificar_almacenista():
     if session.get('user_rol', 0) < 3:  # Rol 3 = Almacenista o superior
         return jsonify({'error': 'Acceso no autorizado - se requiere rol de almacenista o superior'}), 403
     return None
+
+# Aplicar protección a todas las rutas del blueprint (HTML y API)
+@almacenista.before_request
+def _proteger_rutas_almacenista():
+    # Para endpoints HTML redirigimos a login; para APIs retornamos JSON
+    is_api = request.path.startswith('/api/')
+    if 'user_id' not in session:
+        if is_api:
+            return jsonify({'error': 'No autenticado'}), 401
+        return redirect(url_for('auth.login_page'))
+    if session.get('user_rol', 0) < 3:
+        if is_api:
+            return jsonify({'error': 'Acceso no autorizado - se requiere rol de almacenista o superior'}), 403
+        return redirect(url_for('auth.login_page'))
 
 @almacenista.route('/inventario')
 def inventario():
@@ -32,66 +50,230 @@ def reportes_almacen():
     
     return render_template('almacenista/reportes.html')
 
-@almacenista.route('/estado-habitaciones')
-def estado_habitaciones():
-    # Verificar permisos de almacenista o superior
-    error = verificar_almacenista()
-    if error:
-        # Redirigir a login si no está autenticado
-        return redirect(url_for('auth.login_page'))
     
-    return render_template('almacenista/estado_habitaciones.html')
 
-# API para obtener estadísticas de habitaciones para reportes
-@almacenista.route('/api/estadisticas-habitaciones', methods=['GET'])
-def obtener_estadisticas_habitaciones():
+# ===================== INVENTARIO: PRODUCTOS =====================
+
+@almacenista.route('/api/productos', methods=['GET'])
+def listar_productos():
     error = verificar_almacenista()
     if error:
         return error
-    
     try:
-        habitaciones = Habitacion.query.all()
-        
-        # Contar por estado
-        estadisticas = {
-            'total': len(habitaciones),
-            'disponible': len([h for h in habitaciones if h.estado == 'disponible']),
-            'ocupada': len([h for h in habitaciones if h.estado == 'ocupada']),
-            'mantenimiento': len([h for h in habitaciones if h.estado == 'mantenimiento']),
-            'limpieza': len([h for h in habitaciones if h.estado == 'limpieza'])
-        }
-        
-        return jsonify(estadisticas)
-    except Exception as e:
-        return jsonify({'error': f'Error al obtener estadísticas: {str(e)}'}), 500
+        q = Producto.query
+        # Filtros opcionales
+        nombre = request.args.get('q')
+        bajos = request.args.get('bajos')  # '1' para bajo stock
+        por_vencer_dias = request.args.get('por_vencer_dias')
 
-# API para obtener habitaciones con filtros para inventario
-@almacenista.route('/api/habitaciones-inventario', methods=['GET'])
-def obtener_habitaciones_inventario():
+        if nombre:
+            q = q.filter(Producto.nombre.ilike(f"%{nombre}%"))
+        productos = q.all()
+
+        data = [p.to_dict() for p in productos]
+
+        if bajos == '1':
+            data = [d for d in data if d['bajo_stock']]
+        if por_vencer_dias and por_vencer_dias.isdigit():
+            dias = int(por_vencer_dias)
+            hoy = date.today()
+            data = [d for d in data if d['dias_para_vencer'] is not None and d['dias_para_vencer'] <= dias]
+
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': f'Error al listar productos: {str(e)}'}), 500
+
+
+@almacenista.route('/api/productos', methods=['POST'])
+def crear_producto():
     error = verificar_almacenista()
     if error:
         return error
-    
     try:
-        estado_filtro = request.args.get('estado', None)
-        
-        if estado_filtro:
-            habitaciones = Habitacion.query.filter_by(estado=estado_filtro).all()
-        else:
-            habitaciones = Habitacion.query.all()
-        
-        habitaciones_list = []
-        for habitacion in habitaciones:
-            habitacion_dict = {
-                'idhabitacion': habitacion.idhabitacion,
-                'numero': habitacion.numero,
-                'estado': habitacion.estado,
-                'nombre': habitacion.nombre,
-                'capacidad': habitacion.capacidad,
-                'servicios': habitacion.servicios or []
-            }
-            habitaciones_list.append(habitacion_dict)
-        
-        return jsonify(habitaciones_list)
+        data = request.get_json() or {}
+        nombre = (data.get('nombre') or '').strip()
+        if not nombre:
+            return jsonify({'error': 'Nombre requerido'}), 400
+        if Producto.query.filter(Producto.nombre.ilike(nombre)).first():
+            return jsonify({'error': 'Ya existe un producto con ese nombre'}), 400
+
+        cantidad = int(data.get('cantidad') or 0)
+        umbral = int(data.get('umbralminimo') or 0)
+        costo = int(data.get('costo') or 0)
+        fv = data.get('fecha_vencimiento')
+        fv_date = datetime.strptime(fv, '%Y-%m-%d').date() if fv else None
+
+        p = Producto(nombre=nombre, cantidad=cantidad, umbralminimo=umbral, costo=costo, fecha_vencimiento=fv_date)
+        db.session.add(p)
+        # Obtener el id generado sin cerrar la transacción
+        db.session.flush()
+
+        # Si hay cantidad inicial, registrar movimiento de entrada (solo registro, sin volver a alterar stock)
+        if cantidad and cantidad > 0:
+            sid = session.get('user_id')
+            user_uuid = uuid.UUID(sid) if isinstance(sid, str) else sid
+            mov = Movimientos(
+                idproducto=p.idproducto,
+                idusuario=user_uuid,
+                tipo='entrada',
+                cantidad=cantidad,
+                fecha=datetime.utcnow(),
+            )
+            db.session.add(mov)
+            # Forzar cálculo de costototal y obtener id del movimiento
+            db.session.flush()
+            # Crear egreso si corresponde
+            if (mov.costototal or 0) > 0:
+                eg = Egreso(
+                    idmovimiento=mov.idmovimiento,
+                    descripcion=f"Entrada inicial de producto {p.nombre}",
+                    monto=float(mov.costototal or 0),
+                    fechaegreso=mov.fecha.date() if hasattr(mov.fecha, 'date') else date.today(),
+                )
+                db.session.add(eg)
+
+        db.session.commit()
+        return jsonify({'message': 'Producto creado', 'producto': p.to_dict()}), 201
     except Exception as e:
-        return jsonify({'error': f'Error al obtener habitaciones: {str(e)}'}), 500
+        db.session.rollback()
+        return jsonify({'error': f'Error al crear producto: {str(e)}'}), 500
+
+
+@almacenista.route('/api/productos/<int:idproducto>', methods=['PUT'])
+def actualizar_producto(idproducto):
+    error = verificar_almacenista()
+    if error:
+        return error
+    try:
+        p = Producto.query.get_or_404(idproducto)
+        data = request.get_json() or {}
+        if 'nombre' in data and data['nombre']:
+            nombre = data['nombre'].strip()
+            if nombre != p.nombre and Producto.query.filter(Producto.nombre.ilike(nombre)).first():
+                return jsonify({'error': 'Ya existe un producto con ese nombre'}), 400
+            p.nombre = nombre
+        if 'umbralminimo' in data:
+            p.umbralminimo = int(data['umbralminimo'] or 0)
+        if 'fecha_vencimiento' in data:
+            fv = data.get('fecha_vencimiento')
+            p.fecha_vencimiento = datetime.strptime(fv, '%Y-%m-%d').date() if fv else None
+        if 'costo' in data:
+            try:
+                p.costo = int(data.get('costo') or 0)
+            except Exception:
+                return jsonify({'error': 'Costo inválido'}), 400
+        # Nota: cantidad no se edita directo aquí; se gestiona por movimientos
+        db.session.commit()
+        return jsonify({'message': 'Producto actualizado', 'producto': p.to_dict()})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error al actualizar producto: {str(e)}'}), 500
+
+
+@almacenista.route('/api/productos/<int:idproducto>', methods=['DELETE'])
+def eliminar_producto(idproducto):
+    error = verificar_almacenista()
+    if error:
+        return error
+    try:
+        p = Producto.query.get_or_404(idproducto)
+        # Reglas simples: permitir borrar si no hay movimientos, de lo contrario bloquear para mantener historial
+        if p.movimientos and len(p.movimientos) > 0:
+            return jsonify({'error': 'No se puede eliminar un producto con movimientos registrados'}), 400
+        db.session.delete(p)
+        db.session.commit()
+        return jsonify({'message': 'Producto eliminado'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error al eliminar producto: {str(e)}'}), 500
+
+
+# ===================== INVENTARIO: MOVIMIENTOS =====================
+
+@almacenista.route('/api/movimientos', methods=['GET'])
+def listar_movimientos():
+    error = verificar_almacenista()
+    if error:
+        return error
+    try:
+        q = Movimientos.query
+        idproducto = request.args.get('idproducto')
+        tipo = request.args.get('tipo')  # entrada/salida/ajuste
+        if idproducto and idproducto.isdigit():
+            q = q.filter(Movimientos.idproducto == int(idproducto))
+        if tipo in ('entrada', 'salida', 'ajuste'):
+            q = q.filter(Movimientos.tipo == tipo)
+        movimientos = q.order_by(Movimientos.fecha.desc()).limit(200).all()
+        return jsonify([m.to_dict() for m in movimientos])
+    except Exception as e:
+        return jsonify({'error': f'Error al listar movimientos: {str(e)}'}), 500
+
+
+def _aplicar_movimiento_stock(producto: Producto, tipo: str, cantidad: int):
+    if cantidad <= 0:
+        raise ValueError('La cantidad debe ser mayor a 0')
+    if tipo == 'entrada':
+        producto.cantidad = int(producto.cantidad or 0) + cantidad
+    elif tipo == 'salida':
+        disponible = int(producto.cantidad or 0)
+        if cantidad > disponible:
+            raise ValueError('Stock insuficiente')
+        producto.cantidad = disponible - cantidad
+    elif tipo == 'ajuste':
+        # Para simplicidad, ajuste positivo suma y negativo resta; aquí solo permitimos positivo y usar campo 'signo' si lo agregas luego
+        producto.cantidad = int(producto.cantidad or 0) + cantidad
+    else:
+        raise ValueError('Tipo de movimiento no válido')
+
+
+@almacenista.route('/api/movimientos', methods=['POST'])
+def crear_movimiento():
+    error = verificar_almacenista()
+    if error:
+        return error
+    try:
+        data = request.get_json() or {}
+        idproducto = data.get('idproducto')
+        tipo = data.get('tipo')
+        cantidad = int(data.get('cantidad') or 0)
+        if not idproducto or not tipo or cantidad <= 0:
+            return jsonify({'error': 'Datos incompletos: idproducto, tipo y cantidad > 0 son requeridos'}), 400
+        if tipo not in ('entrada', 'salida', 'ajuste'):
+            return jsonify({'error': 'Tipo inválido'}), 400
+
+        producto = Producto.query.get_or_404(idproducto)
+
+        # Aplicar stock y registrar movimiento de forma atómica
+        _aplicar_movimiento_stock(producto, tipo, cantidad)
+
+        # Normalizar UUID de usuario
+        sid = session.get('user_id')
+        user_uuid = uuid.UUID(sid) if isinstance(sid, str) else sid
+
+        mov = Movimientos(
+            idproducto=producto.idproducto,
+            idusuario=user_uuid,  # UUID almacenado en sesión
+            tipo=tipo,
+            cantidad=cantidad,
+            fecha=datetime.utcnow(),
+        )
+        db.session.add(mov)
+        # Flush para calcular costototal via listener y obtener idmovimiento
+        db.session.flush()
+        # Si es entrada y tiene costo, crear egreso
+        if tipo == 'entrada' and (mov.costototal or 0) > 0:
+            eg = Egreso(
+                idmovimiento=mov.idmovimiento,
+                descripcion=f"Entrada de stock producto {producto.nombre}",
+                monto=float(mov.costototal or 0),
+                fechaegreso=mov.fecha.date() if hasattr(mov.fecha, 'date') else date.today(),
+            )
+            db.session.add(eg)
+        db.session.commit()
+        return jsonify({'message': 'Movimiento registrado', 'producto': producto.to_dict(), 'movimiento': mov.to_dict()}), 201
+    except ValueError as ve:
+        db.session.rollback()
+        return jsonify({'error': str(ve)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error al crear movimiento: {str(e)}'}), 500

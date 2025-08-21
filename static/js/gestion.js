@@ -265,16 +265,25 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!personalActual){
                 if (!payload.clave){ showWarning('Ingrese una clave'); return; }
                 const res = await fetch('/api/personal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                const data = await res.json();
+                const raw = await res.text();
+                let data; try { data = JSON.parse(raw); } catch { data = { raw } }
                 if (res.ok){ showSuccess('Personal creado'); cerrarModalPersonal(); cargarPersonal(); }
-                else showError(data.error || 'No se pudo crear');
+                else {
+                    const safePayload = { ...payload }; if (safePayload.clave) safePayload.clave = '***';
+                    console.error('Error creando personal', { status: res.status, statusText: res.statusText, response: data, payload: safePayload });
+                    showError((data && data.error) || 'No se pudo crear');
+                }
             } else {
                 const res = await fetch(`/api/personal/${personalActual.idusuario}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                const data = await res.json();
+                const raw = await res.text();
+                let data; try { data = JSON.parse(raw); } catch { data = { raw } }
                 if (res.ok){ showSuccess('Personal actualizado'); cerrarModalPersonal(); cargarPersonal(); }
-                else showError(data.error || 'No se pudo actualizar');
+                else {
+                    console.error('Error actualizando personal', { status: res.status, statusText: res.statusText, response: data, id: personalActual.idusuario });
+                    showError((data && data.error) || 'No se pudo actualizar');
+                }
             }
-        } catch (e) { showError('Error de conexión'); }
+        } catch (e) { console.error('Error de conexión al crear/actualizar personal', e); showError('Error de conexión'); }
     }
     
     function abrirModal(habitacion = null) {

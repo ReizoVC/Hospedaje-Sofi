@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+{% block title %}Reportes | Almacenista{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/almacenista/reportes.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="reportes-almacen">
+  <div class="container">
+    <h1>Reportes de Inventario</h1>
+
+    <div class="tarjetas">
+      <div class="card">
+        <h3>Resumen de inventario</h3>
+        <div id="estadisticas-inv">
+          <table class="tabla tabla-resumen">
+            <thead>
+              <tr>
+                <th>Métrica</th>
+                <th>Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Productos</td>
+                <td><strong id="inv-productos">-</strong></td>
+              </tr>
+              <tr>
+                <td>Bajo stock</td>
+                <td><strong id="inv-bajos">-</strong></td>
+              </tr>
+              <tr>
+                <td>Por vencer (15d)</td>
+                <td><strong id="inv-vencer">-</strong></td>
+              </tr>
+              <tr>
+                <td>Mov. 7 días</td>
+                <td><strong id="inv-movs7">-</strong></td>
+              </tr>
+              <tr>
+                <td>Stock total</td>
+                <td><strong id="inv-stock">-</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Alertas de inventario</h3>
+        <ul id="alertas" class="lista"></ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:2rem;">Últimos movimientos</h3>
+    <div class="tabla-wrapper">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Producto</th>
+            <th>Tipo</th>
+            <th>Cantidad</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-movs">
+          <tr><td colspan="4" style="text-align:center; padding: 1rem;">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/almacenista/reportes.js') }}"></script>
+{% endblock %}

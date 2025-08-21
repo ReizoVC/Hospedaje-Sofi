@@ -1,0 +1,129 @@
+{% extends "layout.html" %}
+
+{% block title %}Hospedaje Sofi | Reportes (Admin){% endblock %}
+
+{% block content %}
+<section class="gestion-container">
+  <div class="container">
+    <h1 class="titulo-seccion">Reportes de Administración</h1>
+
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="ingresos">Ingresos</button>
+      <button class="tab-btn" data-tab="egresos">Egresos</button>
+    </div>
+
+    
+
+    <div class="tab-content active" id="ingresos">
+      <div class="table-container">
+        <table class="crud-table">
+          <thead>
+            <tr>
+              <th>Fecha Inicio</th>
+              <th>Fecha Fin</th>
+              <th>Habitación</th>
+              <th>Noches</th>
+              <th>Estado</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-ingresos"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="5" style="text-align:right; font-weight:600;">Total</td>
+              <td id="total-ingresos" style="font-weight:700;"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-content" id="egresos">
+      <div class="table-container">
+        <table class="crud-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Producto</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>Costo unit.</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-egresos"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="5" style="text-align:right; font-weight:600;">Total</td>
+              <td id="total-egresos" style="font-weight:700;"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabs = document.querySelectorAll('.tab-content');
+  tabBtns.forEach(b=>b.addEventListener('click', ()=>{
+    tabBtns.forEach(x=>x.classList.remove('active'));
+    tabs.forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.tab).classList.add('active');
+  }));
+
+  function fmt(n){
+    return new Intl.NumberFormat('es-PE', { style:'currency', currency:'PEN' }).format(n||0);
+  }
+
+  async function cargarIngresos(){
+  const res = await fetch(`/api/reportes/admin/ingresos`);
+    const data = await res.json();
+    const tb = document.getElementById('tbody-ingresos');
+    tb.innerHTML = '';
+    (data.items||[]).forEach(it=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${it.fecha_inicio||''}</td>
+        <td>${it.fecha_fin||''}</td>
+        <td>${it.habitacion? (it.habitacion.numero || it.habitacion.nombre) : ''}</td>
+        <td>${it.noches||0}</td>
+        <td>${it.estado||''}</td>
+        <td>${fmt(it.monto)}</td>
+      `;
+      tb.appendChild(tr);
+    });
+    document.getElementById('total-ingresos').textContent = fmt(data.total||0);
+  }
+
+  async function cargarEgresos(){
+  const res = await fetch(`/api/reportes/admin/egresos`);
+    const data = await res.json();
+    const tb = document.getElementById('tbody-egresos');
+    tb.innerHTML = '';
+    (data.items||[]).forEach(it=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${it.fecha? it.fecha.substring(0,10): ''}</td>
+        <td>${it.producto? it.producto.nombre: ''}</td>
+        <td>${it.tipo||''}</td>
+        <td>${it.cantidad||0}</td>
+        <td>${fmt(it.costo_unitario||0)}</td>
+        <td>${fmt(it.monto||0)}</td>
+      `;
+      tb.appendChild(tr);
+    });
+    document.getElementById('total-egresos').textContent = fmt(data.total||0);
+  }
+
+  // Cargar directamente sin filtros (usa por defecto últimos 30 días en backend)
+  cargarIngresos();
+  cargarEgresos();
+})();
+</script>
+{% endblock %}

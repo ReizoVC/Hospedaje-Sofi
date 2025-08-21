@@ -8,6 +8,10 @@ from models.habitaciones import Habitacion
 from models.imagenes_habitaciones import ImagenHabitacion
 from models.reserva import Reserva
 from models.checkinout import CheckInOut
+from models.producto import Producto
+from models.movimientos import Movimientos
+from models.egreso import Egreso
+from models.ingreso import Ingreso  # <-- nuevo
 
 from routes.inicio import inicio
 from routes.auth import auth

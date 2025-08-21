@@ -8,6 +8,11 @@
             <li><a href="{{ url_for('user.profile') }}"><i class="fas fa-user-circle"></i> Mi Perfil</a></li>
             <li><a href="{{ url_for('user.reservations') }}"><i class="fas fa-clipboard-list"></i> Mis Reservas</a></li>
             <li><a href="{{ url_for('user.settings') }}"><i class="fas fa-cog"></i> Configuración</a></li>
+            {% if session.get('user_rol', 0) >= 3 %}
+            <li class="nav-section-title">Almacén</li>
+            <li><a href="{{ url_for('almacenista.inventario') }}"><i class="fas fa-boxes-stacked"></i> Inventario</a></li>
+            <li><a href="{{ url_for('almacenista.reportes_almacen') }}"><i class="fas fa-chart-line"></i> Reportes</a></li>
+            {% endif %}
             <li><a href="{{ url_for('auth.logout_user') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
         </ul>
     </nav>

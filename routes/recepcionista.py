@@ -4,7 +4,9 @@ from models.habitaciones import Habitacion
 from models.usuario import Usuario
 from models.reserva import Reserva
 from models.checkinout import CheckInOut
-from werkzeug.security import generate_password_hash
+from models.ingreso import registrar_ingreso_por_confirmacion
+from models.ingreso import registrar_ingreso_por_confirmacion  # nuevo
+import hashlib
 from datetime import datetime, date
 from sqlalchemy import and_, or_
 
@@ -153,10 +155,10 @@ def crear_usuario_cliente():
         # Validar que el correo no exista
         if Usuario.query.filter_by(correo=data['correo']).first():
             return jsonify({'error': 'Ya existe un usuario con este correo'}), 400
-        
-        # Hashear la contraseña
-        password_hash = generate_password_hash(data['clave'])
-        
+
+        # Hashear la contraseña con MD5
+        password_hash = hashlib.md5(data['clave'].encode()).hexdigest()
+
         nuevo_usuario = Usuario(
             nombre=data['nombre'],
             apellidos=data['apellidos'],
@@ -213,7 +215,7 @@ def actualizar_usuario_cliente(id):
         if 'telefono' in data:
             usuario.telefono = data['telefono']
         if 'clave' in data and data['clave']:
-            usuario.clave = generate_password_hash(data['clave'])
+            usuario.clave = hashlib.md5(data['clave'].encode()).hexdigest()
         
         db.session.commit()
         
@@ -387,15 +389,22 @@ def crear_reserva():
             return jsonify({'error': 'La habitación no está disponible en las fechas seleccionadas'}), 400
         
         # Crear la reserva
+        estado = data.get('estado', 'pendiente')
         nueva_reserva = Reserva(
             idusuario=data['idusuario'],
             idhabitacion=data['idhabitacion'],
             fechainicio=fecha_inicio,
             fechafin=fecha_fin,
-            estado=data.get('estado', 'pendiente')
+            estado=estado
         )
         
         db.session.add(nueva_reserva)
+        db.session.flush()  # obtener idreserva antes de commit
+        
+        # Si se crea ya confirmada, registrar ingreso inmediatamente
+        if estado == 'confirmada':
+            registrar_ingreso_por_confirmacion(nueva_reserva, habitacion=habitacion)
+        
         db.session.commit()
         
         return jsonify({
@@ -425,7 +434,16 @@ def actualizar_estado_reserva(id):
         if nuevo_estado not in estados_validos:
             return jsonify({'error': 'Estado no válido. El estado "activa" solo se asigna mediante check-in.'}), 400
         
+        # Si pasa a confirmada y antes no lo estaba, registrar ingreso
+        crear_ingreso = (nuevo_estado == 'confirmada' and reserva.estado != 'confirmada')
+        
         reserva.estado = nuevo_estado
+        
+        if crear_ingreso:
+            # calcular y crear ingreso asociado a la reserva confirmada
+            habitacion = Habitacion.query.get(reserva.idhabitacion)
+            registrar_ingreso_por_confirmacion(reserva, habitacion=habitacion)
+        
         db.session.commit()
         
         return jsonify({'message': f'Estado de reserva actualizado a {nuevo_estado}'})
@@ -502,20 +520,21 @@ def actualizar_reserva(id):
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No se proporcionaron datos'}), 400
-        
+
         # Buscar la reserva
         reserva = Reserva.query.filter_by(idreserva=id).first()
         if not reserva:
             return jsonify({'error': 'Reserva no encontrada'}), 404
-        
+        prev_estado = reserva.estado
+
         # Verificar si ya pasó la fecha de inicio
         hoy = date.today()
         ya_comenzo = reserva.fechainicio <= hoy
         es_pendiente = reserva.estado == 'pendiente'
-        
+
         # Solo se puede editar completamente si es pendiente Y no ha comenzado
         puede_editar_completo = es_pendiente and not ya_comenzo
-        
+
         # Si no se puede editar completamente, solo permitir cambio de estado
         if not puede_editar_completo:
             if 'estado' not in data:
@@ -525,56 +544,60 @@ def actualizar_reserva(id):
                     return jsonify({'error': 'La reserva ya comenzó. Solo se puede cambiar el estado.'}), 400
                 else:
                     return jsonify({'error': 'La reserva ya comenzó y no está pendiente. Solo se puede cambiar el estado.'}), 400
-            
+
             # Solo actualizar el estado (excluyendo 'activa' que solo se asigna por check-in)
             estados_validos = ['pendiente', 'confirmada', 'cancelada']
             if data['estado'] not in estados_validos:
                 return jsonify({'error': 'Estado de reserva inválido. El estado "activa" solo se asigna mediante check-in.'}), 400
-            
+
             reserva.estado = data['estado']
+            # Si cambia a confirmada y no lo estaba, registrar ingreso
+            if data['estado'] == 'confirmada' and prev_estado != 'confirmada':
+                hab = Habitacion.query.get(reserva.idhabitacion)
+                registrar_ingreso_por_confirmacion(reserva, habitacion=hab)
             db.session.commit()
-            
+
             return jsonify({
                 'mensaje': 'Estado de reserva actualizado exitosamente',
                 'reserva': reserva.to_dict(),
                 'solo_estado': True
             })
-        
+
         # Si se puede editar completamente, validar todos los campos
         required_fields = ['idhabitacion', 'fechainicio', 'fechafin', 'estado']
         for field in required_fields:
             if field not in data:
                 return jsonify({'error': f'Campo requerido: {field}'}), 400
-        
+
         # El usuario nunca se puede cambiar, usar el de la reserva actual
         data['idusuario'] = reserva.idusuario
-        
+
         # Validar que el usuario existe
         usuario = Usuario.query.filter_by(idusuario=data['idusuario']).first()
         if not usuario:
             return jsonify({'error': 'Usuario no encontrado'}), 400
-        
+
         # Validar que la habitación existe
         habitacion = Habitacion.query.filter_by(idhabitacion=data['idhabitacion']).first()
         if not habitacion:
             return jsonify({'error': 'Habitación no encontrada'}), 400
-        
+
         # Validar fechas
         try:
             fecha_inicio = datetime.strptime(data['fechainicio'], '%Y-%m-%d').date()
             fecha_fin = datetime.strptime(data['fechafin'], '%Y-%m-%d').date()
         except ValueError:
             return jsonify({'error': 'Formato de fecha inválido. Use YYYY-MM-DD'}), 400
-        
+
         if fecha_inicio >= fecha_fin:
             return jsonify({'error': 'La fecha de inicio debe ser anterior a la fecha de fin'}), 400
-        
+
         # Validar que la habitación esté disponible para las nuevas fechas
         # (excepto si no cambió la habitación o las fechas)
-        if (reserva.idhabitacion != data['idhabitacion'] or 
-            reserva.fechainicio != fecha_inicio or 
+        if (reserva.idhabitacion != data['idhabitacion'] or
+            reserva.fechainicio != fecha_inicio or
             reserva.fechafin != fecha_fin):
-            
+
             reservas_conflicto = Reserva.query.filter(
                 Reserva.idhabitacion == data['idhabitacion'],
                 Reserva.idreserva != id,  # Excluir la reserva actual
@@ -585,37 +608,40 @@ def actualizar_reserva(id):
                     db.and_(Reserva.fechainicio >= fecha_inicio, Reserva.fechafin <= fecha_fin)
                 )
             ).first()
-            
+
             if reservas_conflicto:
                 return jsonify({'error': 'La habitación no está disponible para las fechas seleccionadas'}), 400
-        
+
         # Validar estado válido (solo los que se pueden crear manualmente)
         estados_validos = ['pendiente', 'confirmada']
         if data['estado'] not in estados_validos:
             return jsonify({'error': 'Estado de reserva inválido. Solo se permiten: pendiente, confirmada'}), 400
-        
+
         # Actualizar la reserva
         reserva.idusuario = data['idusuario']
         reserva.idhabitacion = data['idhabitacion']
         reserva.fechainicio = fecha_inicio
         reserva.fechafin = fecha_fin
         reserva.estado = data['estado']
-        
+
         # Recalcular el total si cambió la habitación o las fechas
-        if (reserva.idhabitacion != data['idhabitacion'] or 
-            reserva.fechainicio != fecha_inicio or 
+        if (reserva.idhabitacion != data['idhabitacion'] or
+            reserva.fechainicio != fecha_inicio or
             reserva.fechafin != fecha_fin):
-            
+
             dias = (fecha_fin - fecha_inicio).days
             reserva.total = habitacion.precio_noche * dias
-        
+
+        # Si cambia a confirmada y no lo estaba, registrar ingreso
+        if data['estado'] == 'confirmada' and prev_estado != 'confirmada':
+            registrar_ingreso_por_confirmacion(reserva, habitacion=habitacion)
         db.session.commit()
-        
+
         return jsonify({
             'mensaje': 'Reserva actualizada exitosamente',
             'reserva': reserva.to_dict()
         })
-        
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al actualizar reserva: {str(e)}'}), 500

@@ -1,16 +1,21 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash
+import os
+import uuid
+import hashlib
 from werkzeug.utils import secure_filename
 from utils.db import db
 from models.habitaciones import Habitacion
 from models.imagenes_habitaciones import ImagenHabitacion
 from sqlalchemy import text
 from models.reserva import Reserva
+from models.movimientos import MovimientoInventario
+from models.producto import Producto
+from models.movimientos import Movimientos
+from models.egreso import Egreso
 from models.usuario import Usuario
+from models.ingreso import Ingreso, registrar_ingreso_por_confirmacion  # nuevo
 from datetime import datetime, date
 from sqlalchemy import and_, or_
-import uuid
-import os
-from werkzeug.security import generate_password_hash
 from utils.auth import role_required, ROL_ADMIN
 
 admin = Blueprint('admin', __name__)
@@ -50,6 +55,11 @@ def verificar_almacenista():
 @role_required(ROL_ADMIN)
 def gestion():
     return render_template('admin/gestion.html')
+
+@admin.route('/reportes-admin')
+@role_required(ROL_ADMIN)
+def reportes_admin():
+    return render_template('admin/reportes.html')
 
 # API para obtener todas las habitaciones
 @admin.route('/api/habitaciones', methods=['GET'])
@@ -482,9 +492,23 @@ def admin_actualizar_estado_reserva(idreserva):
         nuevo_estado = data.get('estado')
         if not nuevo_estado:
             return jsonify({'error': 'Estado requerido'}), 400
+        
+        # Validar estados permitidos
+        if nuevo_estado not in ['pendiente', 'confirmada', 'cancelada', 'activa', 'completada']:
+            return jsonify({'error': 'Estado inválido'}), 400
+        
+        crear_ingreso = (
+            (nuevo_estado in ['confirmada', 'completada']) and (reserva.estado != nuevo_estado)
+        )
+        
         reserva.estado = nuevo_estado
+
+        if crear_ingreso:
+            habitacion = Habitacion.query.get(reserva.idhabitacion)
+            registrar_ingreso_por_confirmacion(reserva, habitacion=habitacion)
+        
         db.session.commit()
-        return jsonify({'message': 'Estado actualizado', 'reserva': _reserva_to_dict_ext(reserva)})
+        return jsonify({'message': 'Estado actualizado', 'reserva': reserva.to_dict()})
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al actualizar estado: {str(e)}'}), 500
@@ -504,6 +528,141 @@ def admin_eliminar_reserva(idreserva):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al eliminar reserva: {str(e)}'}), 500
+
+# ============ REPORTES ADMIN: INGRESOS / EGRESOS ============
+
+def _rango_fechas_default():
+    hoy = date.today()
+    # Últimos 30 días por defecto
+    desde = hoy.replace(day=1) if hoy.day > 30 else (hoy)
+    try:
+        from datetime import timedelta
+        return hoy - timedelta(days=30), hoy
+    except Exception:
+        return hoy, hoy
+
+@admin.route('/api/reportes/admin/ingresos', methods=['GET'])
+def api_reportes_admin_ingresos():
+    error = verificar_admin()
+    if error:
+        return error
+    try:
+        desde_str = request.args.get('desde')
+        hasta_str = request.args.get('hasta')
+        estados_str = request.args.get('estados')  # coma separada: confirmada,completada
+
+        if desde_str and hasta_str:
+            d_desde = _parse_fecha(desde_str)
+            d_hasta = _parse_fecha(hasta_str)
+        else:
+            d_desde, d_hasta = _rango_fechas_default()
+
+        estados = ['confirmada', 'completada']
+        if estados_str:
+            estados = [e.strip() for e in estados_str.split(',') if e.strip()]
+
+        q = Reserva.query.filter(
+            Reserva.estado.in_(estados),
+            Reserva.fechainicio >= d_desde,
+            Reserva.fechafin <= d_hasta
+        ).order_by(Reserva.fechainicio.asc())
+
+        items = []
+        total = 0.0
+        for r in q.all():
+            try:
+                noches = (r.fechafin - r.fechainicio).days
+                precio = float(r.habitacion.precio_noche) if r.habitacion and r.habitacion.precio_noche else 0.0
+                monto = max(noches, 0) * precio
+                total += monto
+                items.append({
+                    'idreserva': r.idreserva,
+                    'fecha_inicio': r.fechainicio.isoformat() if r.fechainicio else None,
+                    'fecha_fin': r.fechafin.isoformat() if r.fechafin else None,
+                    'estado': r.estado,
+                    'habitacion': r.habitacion.to_dict() if r.habitacion else None,
+                    'noches': noches,
+                    'monto': round(monto, 2),
+                })
+            except Exception:
+                continue
+
+        return jsonify({
+            'desde': d_desde.isoformat(),
+            'hasta': d_hasta.isoformat(),
+            'items': items,
+            'total': round(total, 2),
+        })
+    except Exception as e:
+        return jsonify({'error': f'Error al generar reporte de ingresos: {str(e)}'}), 500
+
+@admin.route('/api/reportes/admin/egresos', methods=['GET'])
+def api_reportes_admin_egresos():
+    error = verificar_admin()
+    if error:
+        return error
+    try:
+        desde_str = request.args.get('desde')
+        hasta_str = request.args.get('hasta')
+        if desde_str and hasta_str:
+            d_desde = _parse_fecha(desde_str)
+            d_hasta = _parse_fecha(hasta_str)
+        else:
+            d_desde, d_hasta = _rango_fechas_default()
+
+        q = Egreso.query.filter(
+            Egreso.fechaegreso >= d_desde,
+            Egreso.fechaegreso <= d_hasta
+        ).order_by(Egreso.fechaegreso.asc())
+
+        items = []
+        total = 0.0
+        egresos = q.all()
+        productos_cache = {}
+        mov_cache = {}
+        for e in egresos:
+            try:
+                m = getattr(e, 'movimiento', None)
+                if not m:
+                    m = mov_cache.get(e.idmovimiento)
+                    if not m:
+                        m = Movimientos.query.get(e.idmovimiento)
+                        mov_cache[e.idmovimiento] = m
+                p = None
+                if m and m.idproducto is not None:
+                    p = productos_cache.get(m.idproducto)
+                    if not p:
+                        p = Producto.query.get(m.idproducto)
+                        productos_cache[m.idproducto] = p
+                cantidad = int(m.cantidad or 0) if m else 0
+                costo_unit = 0.0
+                if m and cantidad:
+                    try:
+                        costo_unit = float(m.costototal or 0) / cantidad
+                    except Exception:
+                        costo_unit = 0.0
+                monto = float(e.monto or 0.0)
+                total += monto
+                items.append({
+                    'idegreso': e.idegreso,
+                    'fecha': e.fechaegreso.isoformat() if e.fechaegreso else None,
+                    'producto': p.to_dict() if p else ({'idproducto': m.idproducto} if m and m.idproducto is not None else None),
+                    'tipo': (m.tipo if m else None),
+                    'cantidad': cantidad,
+                    'costo_unitario': round(costo_unit, 2),
+                    'monto': round(monto, 2),
+                })
+            except Exception:
+                continue
+
+        return jsonify({
+            'desde': d_desde.isoformat(),
+            'hasta': d_hasta.isoformat(),
+            'items': items,
+            'total': round(total, 2),
+        })
+    except Exception as e:
+        return jsonify({'error': f'Error al generar reporte de egresos: {str(e)}'}), 500
 
 # ============ RUTAS PARA GESTIÓN DE PERSONAL (ADMIN) ============
 
@@ -542,10 +701,28 @@ def admin_crear_personal():
     if error:
         return error
     try:
-        data = request.get_json() or {}
+        raw = request.get_json() or {}
+        # Normalización básica
+        data = {
+            'nombre': (raw.get('nombre') or '').strip(),
+            'apellidos': (raw.get('apellidos') or '').strip(),
+            'dni': (raw.get('dni') or '').strip(),
+            'correo': (raw.get('correo') or '').strip().lower(),
+            'telefono': (raw.get('telefono') or '').strip() or None,
+            'clave': raw.get('clave') or '',
+            'rol': raw.get('rol')
+        }
+
         requeridos = ['nombre', 'apellidos', 'dni', 'correo', 'clave', 'rol']
-        if not all(k in data and data[k] for k in requeridos):
-            return jsonify({'error': 'Faltan datos requeridos'}), 400
+        faltantes = [k for k in requeridos if not data.get(k)]
+        if faltantes:
+            return jsonify({'error': f'Faltan datos requeridos: {", ".join(faltantes)}'}), 400
+
+        # Validaciones de formato
+        if not data['dni'].isdigit() or len(data['dni']) not in (8, 9):
+            return jsonify({'error': 'DNI inválido'}), 400
+        if '@' not in data['correo'] or '.' not in data['correo'].split('@')[-1]:
+            return jsonify({'error': 'Correo inválido'}), 400
         if not _validar_rol_personal(data['rol']):
             return jsonify({'error': 'Rol inválido'}), 400
 
@@ -561,7 +738,7 @@ def admin_crear_personal():
             dni=data['dni'],
             correo=data['correo'],
             telefono=data.get('telefono'),
-            clave=generate_password_hash(data['clave']),
+            clave=hashlib.md5(data['clave'].encode()).hexdigest(),
             rol=int(data['rol'])
         )
 
@@ -602,7 +779,7 @@ def admin_actualizar_personal(idusuario):
                 return jsonify({'error': 'Rol inválido'}), 400
             usuario.rol = int(data['rol'])
         if 'clave' in data and data['clave']:
-            usuario.clave = generate_password_hash(data['clave'])
+            usuario.clave = hashlib.md5(data['clave'].encode()).hexdigest()
 
         db.session.commit()
         return jsonify({'message': 'Personal actualizado', 'usuario': usuario.to_dict()})

@@ -1,0 +1,349 @@
+/* Inventario Almacenista (estilo moderno coherente) */
+.inventario {
+    padding-top: 8rem
+}
+
+/* Header */
+.content-header {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid rgba(0, 0, 0, .05)
+}
+
+.titulo-seccion {
+    color: #08aca3;
+    font-weight: 600;
+    margin: 0;
+    font-size: 1.4rem
+}
+
+/* Stats */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+    border: 1px solid rgba(0, 0, 0, .05);
+    transition: transform .2s ease
+}
+
+.stat-card:hover {
+    transform: translateY(-2px)
+}
+
+.stat-number {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: .25rem
+}
+
+.stat-label {
+    color: #6b7280;
+    font-size: .85rem;
+    font-weight: 500
+}
+
+/* (Barra de filtros eliminada) */
+
+/* Tabla */
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+    border: 1px solid rgba(0, 0, 0, .05)
+}
+
+.tabla thead th {
+    background: #08aca3;
+    color: #fff;
+    font-weight: 600;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    border: none;
+    padding: 1rem;
+    text-align: center
+}
+
+.tabla tbody tr {
+    transition: background .2s ease
+}
+
+.tabla tbody tr:hover {
+    background: rgba(8, 172, 163, .03)
+}
+
+.tabla td {
+    padding: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, .05);
+    text-align: center;
+    vertical-align: middle
+}
+
+.tabla td.acciones {
+    display: flex;
+    gap: .4rem;
+    justify-content: center;
+    align-items: center
+}
+
+/* Estados */
+.estado-pill {
+    padding: .25rem .6rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+    display: inline-block
+}
+
+.estado-ok {
+    background: #e6fffb;
+    color: #047481
+}
+
+.estado-bajo {
+    background: #fff7ed;
+    color: #b45309
+}
+
+.estado-agotado {
+    background: #fee2e2;
+    color: #b91c1c
+}
+
+/* Botones */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
+    padding: .5rem .9rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: .875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .15s all ease;
+    white-space: nowrap
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 8px
+}
+
+.btn-icon i {
+    font-size: 14px;
+    line-height: 1
+}
+
+.btn-primary {
+    background: #08aca3;
+    color: #fff
+}
+
+.btn-primary:hover {
+    background: #0694a2
+}
+
+.btn-sec {
+    background: #6b7280;
+    color: #fff
+}
+
+.btn-sec:hover {
+    background: #4b5563
+}
+
+.btn-warn {
+    background: #d97706;
+    color: #fff
+}
+
+.btn-warn:hover {
+    background: #b45309
+}
+
+.btn-danger {
+    background: #dc2626;
+    color: #fff
+}
+
+.btn-danger:hover {
+    background: #b91c1c
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, .45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 16px;
+    min-width: 320px;
+    max-width: 560px;
+    width: 95%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+    overflow: hidden
+}
+
+.modal-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center
+}
+
+.modal-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem
+}
+
+.modal-body {
+    padding: 1rem 1.25rem
+}
+
+.modal .close {
+    cursor: pointer;
+    font-size: 1.4rem
+}
+
+/* Botones del modal: consistencia */
+.modal .btn,
+.modal .btn-primary,
+.modal .btn-sec,
+.modal .btn-danger {
+    min-height: 40px;
+    padding: .55rem 1rem;
+    border-radius: 10px;
+    font-weight: 700;
+    border: 1px solid transparent
+}
+
+.modal .btn-primary {
+    background: #08aca3;
+    border-color: #08aca3
+}
+
+.modal .btn-primary:hover {
+    background: #0694a2;
+    border-color: #0694a2
+}
+
+.modal .btn-sec {
+    background: #6b7280;
+    border-color: #6b7280
+}
+
+.modal .btn-sec:hover {
+    background: #4b5563;
+    border-color: #4b5563
+}
+
+.modal .btn-danger {
+    background: #dc2626;
+    border-color: #dc2626
+}
+
+.modal .btn-danger:hover {
+    background: #b91c1c;
+    border-color: #b91c1c
+}
+
+.modal .btn:focus,
+.modal .btn-primary:focus,
+.modal .btn-sec:focus,
+.modal .btn-danger:focus {
+    outline: 0;
+    box-shadow: 0 0 0 .2rem rgba(8, 172, 163, .15)
+}
+
+/* Formulario */
+.form-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem
+}
+
+.form-row label {
+    font-weight: 600;
+    margin-bottom: .4rem;
+    color: #111827
+}
+
+.form-row input,
+.form-row select {
+    padding: .65rem .7rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: .9rem
+}
+
+.form-row input:focus,
+.form-row select:focus {
+    outline: none;
+    border-color: #08aca3;
+    box-shadow: 0 0 0 .2rem rgba(8, 172, 163, .15)
+}
+
+/* Checkbox simple en modal */
+.modal .form-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #08aca3
+}
+
+@media (max-width:768px) {
+    .tabla thead {
+        display: none
+    }
+
+    .tabla tr {
+        display: block;
+        border-bottom: 1px solid rgba(0, 0, 0, .05)
+    }
+
+    .tabla td {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem
+    }
+
+    .tabla td.acciones {
+        justify-content: center;
+        gap: .5rem
+    }
+}

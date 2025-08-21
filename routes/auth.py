@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify, session, render_template, flash, redirect, url_for
-from werkzeug.security import check_password_hash
 from models.usuario import Usuario, db
 import uuid
 import hashlib
@@ -27,7 +26,7 @@ def register():
         
         # Verificar si el usuario ya existe
         existing_user = Usuario.query.filter(
-            (Usuario.correo == data['email']) | 
+            (Usuario.correo == data['email'].lower()) | 
             (Usuario.dni == data['dni'])
         ).first()
         
@@ -40,7 +39,7 @@ def register():
             nombre=data['name'],
             apellidos=data['lastName'],
             dni=data['dni'],
-            correo=data['email'],
+            correo=data['email'].lower(),
             telefono=data['phone'],
             clave=hashed_password,
             rol=1  # Rol 1 = Usuario normal (rol 0 = cuenta eliminada)
@@ -66,30 +65,31 @@ def register():
 @auth.route('/api/login', methods=['POST'])
 def login():
     try:
-        data = request.get_json()
-        
+        data = request.get_json() or {}
         if not data.get('email') or not data.get('password'):
             return jsonify({'error': 'Email y contraseña son requeridos'}), 400
-        
+
         # Buscar usuario por email
-        user = Usuario.query.filter_by(correo=data['email']).first()
-        
-        # Verificar que el usuario existe, la contraseña es correcta Y la cuenta no está eliminada
-        input_password_hash = hashlib.md5(data['password'].encode()).hexdigest()
-        
-        if not user or user.clave != input_password_hash:
+        user = Usuario.query.filter_by(correo=(data.get('email') or '').lower()).first()
+
+        # Verificar credenciales usando MD5
+        if not user:
             return jsonify({'error': 'Credenciales inválidas'}), 401
-            
+        provided = data.get('password') or ''
+        ok = (user.clave == hashlib.md5(provided.encode()).hexdigest())
+        if not ok:
+            return jsonify({'error': 'Credenciales inválidas'}), 401
+
         # Verificar que la cuenta no esté eliminada (rol 0)
         if user.rol == 0:
             return jsonify({'error': 'Esta cuenta ha sido desactivada. Contacte al administrador.'}), 403
-        
+
         # Crear sesión
         session['user_id'] = str(user.idusuario)
         session['user_email'] = user.correo
         session['user_name'] = f"{user.nombre} {user.apellidos}"
         session['user_rol'] = user.rol
-        
+
         return jsonify({
             'message': 'Sesión iniciada exitosamente',
             'user': {
@@ -101,7 +101,6 @@ def login():
                 'rol': user.rol
             }
         }), 200
-        
     except Exception as e:
         return jsonify({'error': f'Error interno del servidor: {str(e)}'}), 500
 
@@ -137,54 +136,4 @@ def check_auth():
             return jsonify({'authenticated': False}), 200
     except Exception as e:
         return jsonify({'error': f'Error interno del servidor: {str(e)}'}), 500
-
-# VERSIÓN TEMPORAL SIN HASH (NO USAR EN PRODUCCIÓN)
-# Solo descomenta esto si necesitas una solución rápida para desarrollo
-
-# @auth.route('/api/register-temp', methods=['POST'])
-# def register_temp():
-#     try:
-#         data = request.get_json()
-#         
-#         # Validar datos requeridos
-#         required_fields = ['name', 'lastName', 'dni', 'email', 'phone', 'password']
-#         for field in required_fields:
-#             if not data.get(field):
-#                 return jsonify({'error': f'El campo {field} es requerido'}), 400
-#         
-#         # Verificar si el usuario ya existe
-#         existing_user = Usuario.query.filter(
-#             (Usuario.correo == data['email']) | 
-#             (Usuario.dni == data['dni'])
-#         ).first()
-#         
-#         if existing_user:
-#             return jsonify({'error': 'El usuario ya existe con ese email o DNI'}), 400
-#         
-#         # Crear nuevo usuario SIN HASH (TEMPORAL)
-#         new_user = Usuario(
-#             nombre=data['name'],
-#             apellidos=data['lastName'],
-#             dni=data['dni'],
-#             correo=data['email'],
-#             telefono=data['phone'],
-#             clave=data['password'],  # SIN HASH
-#             rol=0
-#         )
-#         
-#         db.session.add(new_user)
-#         db.session.commit()
-#         
-#         return jsonify({
-#             'message': 'Usuario registrado exitosamente',
-#             'user': {
-#                 'id': str(new_user.idusuario),
-#                 'nombre': new_user.nombre,
-#                 'apellidos': new_user.apellidos,
-#                 'email': new_user.correo
-#             }
-#         }), 201
-#         
-#     except Exception as e:
-#         db.session.rollback()
-#         return jsonify({'error': f'Error interno del servidor: {str(e)}'}), 500
+    
