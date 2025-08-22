@@ -11,7 +11,6 @@ if (toggle && nav) {
 document.addEventListener('DOMContentLoaded', function() {
     checkAuthStatus();
     
-    // Toggle para el menú de cuenta
     const accountToggle = document.getElementById("account-toggle");
     const accountMenu = document.getElementById("account-menu");
     
@@ -21,12 +20,10 @@ document.addEventListener('DOMContentLoaded', function() {
             accountMenu.classList.toggle("active");
         });
         
-        // Cerrar menú al hacer clic fuera
         document.addEventListener("click", () => {
             accountMenu.classList.remove("active");
         });
         
-        // Prevenir que el menú se cierre al hacer clic dentro
         accountMenu.addEventListener("click", (e) => {
             e.stopPropagation();
         });
@@ -52,7 +49,7 @@ function checkAuthStatus() {
             const userNameSpan = document.getElementById('user-name');
 
             if (data.authenticated && data.user) {
-                // Usuario autenticado - mostrar botón de cuenta
+                // Usuario autenticado 
                 if (sessionBtn) sessionBtn.style.display = 'none';
                 if (userAccount) userAccount.style.display = 'block';
                 if (userNameSpan) {
@@ -64,7 +61,7 @@ function checkAuthStatus() {
                 const mobileMenu = document.getElementById('mobile-menu');
                 
                 if (accountMenu && mobileMenu && data.user.rol >= 4) {
-                    // Administrador (rol 4) - Un único enlace al panel
+                    // Administrador (rol 4)
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
                         <a href="/gestion">Panel de Gestión</a>
@@ -84,7 +81,7 @@ function checkAuthStatus() {
                         <a href="#" onclick="logout()">Cerrar Sesión</a>
                     `;
                 } else if (accountMenu && mobileMenu && data.user.rol === 3) {
-                    // Almacenista (rol 3) - Gestión de inventario y reportes básicos
+                    // Almacenista (rol 3)
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
                         <a href="/inventario">Inventario</a>
@@ -102,7 +99,7 @@ function checkAuthStatus() {
                         <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
                 } else if (accountMenu && mobileMenu && data.user.rol === 2) {
-                    // Recepcionista (rol 2) - Gestión de reservas y huéspedes
+                    // Recepcionista (rol 2)
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
                         <a href="/gestion-reservas">Gestión de Reservas</a>
@@ -124,7 +121,7 @@ function checkAuthStatus() {
                         <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
                 } else if (accountMenu && mobileMenu) {
-                    // Usuario normal (rol 1) - Cliente normal
+                    // Usuario normal (rol 1)
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
             <a href="/user/reservations">Mis Reservas</a>
@@ -145,9 +142,9 @@ function checkAuthStatus() {
                     `;
                 }
             } else {
-                // Usuario no autenticado - mostrar botón de login y opciones por defecto
+                // Usuario no autenticado
                 if (sessionBtn) sessionBtn.style.display = 'block';
-                // Solo ocultar el bloque de cuenta si también existe el botón de sesión
+
                 if (userAccount && sessionBtn) userAccount.style.display = 'none';
 
                 const mobileMenu = document.getElementById('mobile-menu');
@@ -161,7 +158,6 @@ function checkAuthStatus() {
         })
         .catch(err => {
             console.error('Error checking auth status:', err);
-            // En caso de error, mantener el estado renderizado por el servidor
         });
 }
 
@@ -169,7 +165,6 @@ function logout() {
     fetch("/api/logout", { method: "POST" })
     .then(res => res.json())
     .then(() => {
-        // Actualizar la interfaz después del logout
         checkAuthStatus();
         window.location.reload();
     })

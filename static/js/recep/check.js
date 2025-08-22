@@ -1,14 +1,11 @@
-// Variables globales
 let reservasCheck = { checkin: [], checkout: [] };
 
-// Animaciones suaves al cargar
 document.addEventListener('DOMContentLoaded', function() {
   const elements = document.querySelectorAll('.fade-in-up');
   elements.forEach((element, index) => {
     element.style.animationDelay = `${index * 0.1}s`;
   });
   
-  // Cargar datos iniciales
   cargarDatos();
 });
 
@@ -20,7 +17,6 @@ async function cargarDatos() {
       cargarEstadisticasCheck()
     ]);
   } catch (error) {
-    console.error('Error al cargar datos:', error);
     mostrarError('Error al cargar los datos de la aplicación');
   }
 }
@@ -36,7 +32,6 @@ async function cargarReservasCheck() {
     reservasCheck = await response.json();
     actualizarTablaCheck();
   } catch (error) {
-    console.error('Error al cargar reservas check:', error);
     mostrarError('Error al cargar las reservas para check-in/check-out');
   }
 }
@@ -52,7 +47,6 @@ async function cargarEstadisticasCheck() {
     const estadisticas = await response.json();
     actualizarEstadisticasCheck(estadisticas);
   } catch (error) {
-    console.error('Error al cargar estadísticas check:', error);
     mostrarError('Error al cargar las estadísticas');
   }
 }
@@ -237,7 +231,6 @@ async function realizarCheckin(idReserva) {
     cerrarModalActivo();
     await cargarDatos();
   } catch (error) {
-    console.error('Error al realizar check-in:', error);
     mostrarError(error.message);
   }
 }
@@ -264,7 +257,6 @@ async function realizarCheckout(idReserva) {
     cerrarModalActivo();
     await cargarDatos();
   } catch (error) {
-    console.error('Error al realizar check-out:', error);
     mostrarError(error.message);
   }
 }

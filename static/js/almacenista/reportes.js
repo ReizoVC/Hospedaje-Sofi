@@ -1,15 +1,11 @@
-// Reportes de Inventario - Almacenista
-
 async function fetchJSON(url){ const r=await fetch(url); return await r.json(); }
 
 async function cargar(){
-  // Datos de inventario
   const productos = await fetchJSON('/api/productos');
   const bajo = await fetchJSON('/api/productos?bajos=1');
   const vencer = await fetchJSON('/api/productos?por_vencer_dias=15');
   const movs = await fetchJSON('/api/movimientos');
 
-  // KPIs inventario
   const stockTotal = Array.isArray(productos)? productos.reduce((a,p)=> a + (p.cantidad||0), 0): 0;
   document.getElementById('inv-productos').textContent = Array.isArray(productos)? productos.length : '-';
   document.getElementById('inv-bajos').textContent = Array.isArray(bajo)? bajo.length : 0;
@@ -19,7 +15,6 @@ async function cargar(){
   }).length : 0;
   document.getElementById('inv-stock').textContent = stockTotal;
 
-  // Alertas de inventario
   const ul = document.getElementById('alertas');
   const items = [];
   if(Array.isArray(bajo)) bajo.forEach(p=> items.push({
@@ -34,7 +29,6 @@ async function cargar(){
     ? items.map(i=>`<li class="${i.cls}">${i.txt}</li>`).join('')
     : '<li class="muted">Sin alertas</li>';
 
-  // Últimos movimientos
   const tbody = document.getElementById('tbody-movs');
   if(!Array.isArray(movs) || movs.length===0){
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 1rem;">Sin movimientos</td></tr>';

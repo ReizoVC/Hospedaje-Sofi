@@ -1,8 +1,6 @@
-// Variables globales
 let usuarioSeleccionado = null;
 let mostrandoDesactivados = false;
 
-// Función para cargar usuarios (activos o desactivados)
 async function cargarUsuarios() {
   try {
     const endpoint = mostrandoDesactivados ? '/api/usuarios-desactivados' : '/api/usuarios-clientes';
@@ -15,12 +13,10 @@ async function cargarUsuarios() {
       mostrarError(data.error || 'Error al cargar usuarios');
     }
   } catch (error) {
-    console.error('Error:', error);
     mostrarError('Error de conexión');
   }
 }
 
-// Animaciones suaves al cargar
 document.addEventListener('DOMContentLoaded', function() {
   const elements = document.querySelectorAll('.fade-in-up');
   elements.forEach((element, index) => {
@@ -32,11 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
     element.style.animationDelay = `${(index + 2) * 0.1}s`;
   });
 
-  // Cargar datos al iniciar
   cargarUsuarios();
 });
 
-// Función para cargar usuarios clientes desde la API
 async function cargarUsuarios() {
   try {
     const endpoint = mostrandoDesactivados ? '/api/usuarios-desactivados' : '/api/usuarios-clientes';
@@ -49,12 +43,10 @@ async function cargarUsuarios() {
     mostrarUsuarios(usuarios);
     actualizarEstadisticas(usuarios);
   } catch (error) {
-    console.error('Error:', error);
     mostrarError('Error al cargar los usuarios');
   }
 }
 
-// Función para mostrar usuarios en la tabla
 function mostrarUsuarios(usuarios) {
   const tbody = document.getElementById('tabla-usuarios');
   tbody.innerHTML = '';
@@ -119,7 +111,6 @@ function mostrarUsuarios(usuarios) {
   });
 }
 
-// Función para actualizar estadísticas
 function actualizarEstadisticas(usuarios) {
   document.getElementById('total-clientes').textContent = usuarios.length;
   document.getElementById('clientes-registrados').textContent = usuarios.length;
@@ -128,14 +119,12 @@ function actualizarEstadisticas(usuarios) {
   document.getElementById('nuevos-mes').textContent = '0'; // Placeholder
 }
 
-// Función para obtener iniciales
 function obtenerIniciales(nombre, apellidos) {
   const primerNombre = nombre.split(' ')[0];
   const primerApellido = apellidos.split(' ')[0];
   return (primerNombre.charAt(0) + primerApellido.charAt(0)).toUpperCase();
 }
 
-// Función para obtener color del avatar
 function obtenerColorAvatar(id) {
   const colores = [
     'linear-gradient(135deg, #6366f1, #8b5cf6)',
@@ -148,7 +137,6 @@ function obtenerColorAvatar(id) {
   return colores[id.length % colores.length];
 }
 
-// Funciones para modal
 function openModal() {
   usuarioEditando = null;
   limpiarFormulario();
@@ -173,7 +161,6 @@ function limpiarFormulario() {
   document.getElementById('password').value = '';
 }
 
-// Función para editar usuario
 async function editarUsuario(id) {
   try {
     // Buscar el usuario en los datos cargados
@@ -195,12 +182,10 @@ async function editarUsuario(id) {
       openModal();
     }
   } catch (error) {
-    console.error('Error:', error);
     mostrarError('Error al cargar datos del usuario');
   }
 }
 
-// Función para guardar usuario (crear o actualizar)
 async function guardarUsuario() {
   const nombre = document.getElementById('nombre').value;
   const apellidos = document.getElementById('apellidos').value;
@@ -265,12 +250,10 @@ async function guardarUsuario() {
       mostrarError(error.error || 'Error al guardar usuario');
     }
   } catch (error) {
-    console.error('Error:', error);
     mostrarError('Error de conexión');
   }
 }
 
-// Función para desactivar usuario (eliminación lógica)
 async function eliminarUsuario(id) {
   // Crear confirmación personalizada
   const confirmacion = await mostrarConfirmacion(
@@ -296,12 +279,10 @@ async function eliminarUsuario(id) {
       mostrarError(error.error || 'Error al desactivar usuario');
     }
   } catch (error) {
-    console.error('Error:', error);
     mostrarError('Error de conexión');
   }
 }
 
-// Funciones para mostrar mensajes
 function mostrarError(mensaje) {
   showError(mensaje);
 }
@@ -314,7 +295,6 @@ function mostrarInfo(mensaje) {
   showInfo(mensaje);
 }
 
-// Función para alternar entre usuarios activos y desactivados
 function toggleUsuarios() {
   mostrandoDesactivados = !mostrandoDesactivados;
   const btnToggle = document.getElementById('btn-toggle');
@@ -330,7 +310,6 @@ function toggleUsuarios() {
   cargarUsuarios();
 }
 
-// Función para reactivar usuario
 async function reactivarUsuario(id) {
   const confirmacion = await mostrarConfirmacion(
     '¿Está seguro de que desea reactivar este usuario?',
@@ -355,12 +334,10 @@ async function reactivarUsuario(id) {
       mostrarError(error.error || 'Error al reactivar usuario');
     }
   } catch (error) {
-    console.error('Error:', error);
     mostrarError('Error de conexión');
   }
 }
 
-// Cerrar modal al hacer clic fuera de él
 document.addEventListener('click', function(event) {
   const modal = document.getElementById('modalUsuario');
   if (event.target === modal) {
@@ -368,14 +345,12 @@ document.addEventListener('click', function(event) {
   }
 });
 
-// Cerrar modal con tecla Escape
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Escape') {
     closeModal();
   }
 });
 
-// Funciones de validación
 function validarEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
@@ -392,23 +367,19 @@ function validarTelefono(telefono) {
   return regex.test(telefono) && telefono.replace(/[\s\-]/g, '').length >= 9;
 }
 
-// Función para activar el modo de edición inline
 function activarEdicion(id) {
   const fila = document.querySelector(`tr[data-usuario-id="${id}"]`);
   if (!fila) return;
 
-  // Almacenar valores originales como atributos de datos
   const correoOriginal = fila.querySelector('input[name="correo"]').value;
   const telefonoOriginal = fila.querySelector('input[name="telefono"]').value;
   
   fila.setAttribute('data-correo-original', correoOriginal);
   fila.setAttribute('data-telefono-original', telefonoOriginal);
 
-  // Ocultar elementos de display y mostrar elementos de edición
   fila.querySelectorAll('.display-mode').forEach(el => el.style.display = 'none');
   fila.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'inline-block');
   
-  // Agregar event listeners para teclas
   const inputs = fila.querySelectorAll('.edit-mode input');
   inputs.forEach(input => {
     input.addEventListener('keydown', function(e) {
@@ -422,44 +393,35 @@ function activarEdicion(id) {
     });
   });
   
-  // Enfocar el primer input
   const primerInput = fila.querySelector('.edit-mode input');
   if (primerInput) primerInput.focus();
 }
 
-// Función para cancelar la edición inline
 function cancelarEdicion(id) {
   const fila = document.querySelector(`tr[data-usuario-id="${id}"]`);
   if (!fila) return;
 
-  // Mostrar elementos de display y ocultar elementos de edición
   fila.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
   fila.querySelectorAll('.display-mode').forEach(el => el.style.display = '');
   
-  // Limpiar atributos de datos originales
   fila.removeAttribute('data-correo-original');
   fila.removeAttribute('data-telefono-original');
   
-  // Recargar los datos originales para restaurar valores
   cargarUsuarios();
 }
 
-// Función para guardar la edición inline
 async function guardarEdicion(id) {
   const fila = document.querySelector(`tr[data-usuario-id="${id}"]`);
   if (!fila) return;
 
-  // Obtener valores originales almacenados
   const correoOriginal = fila.getAttribute('data-correo-original') || '';
   const telefonoOriginal = fila.getAttribute('data-telefono-original') || '';
 
-  // Recopilar solo los datos editables (correo y teléfono)
   const datos = {
     correo: fila.querySelector('input[name="correo"]').value.trim(),
     telefono: fila.querySelector('input[name="telefono"]').value.trim()
   };
 
-  // Validaciones para campos editables
   if (!datos.correo) {
     mostrarError('El correo electrónico es obligatorio');
     return;
@@ -470,13 +432,11 @@ async function guardarEdicion(id) {
     return;
   }
 
-  // El teléfono es opcional, pero si se proporciona debe ser válido
   if (datos.telefono && !validarTelefono(datos.telefono)) {
     mostrarError('Por favor, ingrese un número de teléfono válido (9 dígitos)');
     return;
   }
 
-  // Verificar si realmente hay cambios
   const hayCambios = datos.correo !== correoOriginal || datos.telefono !== telefonoOriginal;
   
   if (!hayCambios) {
@@ -485,7 +445,6 @@ async function guardarEdicion(id) {
     return;
   }
 
-  // Construir mensaje de confirmación detallado
   let mensajeDetalle = 'Se realizarán los siguientes cambios:\n\n';
   
   if (datos.correo !== correoOriginal) {
@@ -498,7 +457,6 @@ async function guardarEdicion(id) {
     mensajeDetalle += `📱 Teléfono:\n   Anterior: ${originalMostrar}\n   Nuevo: ${telefonoMostrar}\n\n`;
   }
 
-  // Confirmación antes de guardar
   const confirmacion = await mostrarConfirmacion(
     '¿Confirmar actualización de datos de contacto?',
     mensajeDetalle
@@ -521,22 +479,18 @@ async function guardarEdicion(id) {
       const resultado = await response.json();
       mostrarExito('Datos de contacto actualizados correctamente');
       
-      // Volver al modo de visualización
       fila.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
       fila.querySelectorAll('.display-mode').forEach(el => el.style.display = '');
       
-      // Limpiar atributos de datos originales
       fila.removeAttribute('data-correo-original');
       fila.removeAttribute('data-telefono-original');
       
-      // Recargar la tabla para mostrar los cambios
       cargarUsuarios();
     } else {
       const error = await response.json();
       mostrarError(error.error || 'Error al actualizar los datos de contacto');
     }
   } catch (error) {
-    console.error('Error:', error);
     mostrarError('Error de conexión');
   }
 }

@@ -1,10 +1,9 @@
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, render_template
 from utils.db import db
 from models.habitaciones import Habitacion
 from models.imagenes_habitaciones import ImagenHabitacion
 from datetime import date
 from sqlalchemy import func
-import random
 
 inicio = Blueprint('inicio', __name__)
 
@@ -51,8 +50,6 @@ def index():
                              habitaciones_populares=populares_data,
                              habitaciones_lujosas=lujosas_data)
     except Exception as e:
-        print(f"Error al cargar habitaciones destacadas: {str(e)}")
-        # En caso de error, mostrar página con datos vacíos
         return render_template('pages/index.html', 
                              habitaciones_populares=[],
                              habitaciones_lujosas=[])
@@ -84,8 +81,6 @@ def habitaciones():
         
         return render_template('pages/habitaciones.html', habitaciones=habitaciones_data)
     except Exception as e:
-        print(f"Error al cargar habitaciones: {str(e)}")
-        # En caso de error, mostrar página vacía
         return render_template('pages/habitaciones.html', habitaciones=[])
 
 @inicio.route('/nosotros')
@@ -97,12 +92,11 @@ def detalle_habitacion(id):
     try:
         habitacion = Habitacion.query.get_or_404(id)
         
-        # Obtener todas las imágenes de la habitación ordenadas
+
         imagenes = ImagenHabitacion.query.filter_by(
             idhabitacion=id
         ).order_by(ImagenHabitacion.orden).all()
         
-        # Preparar datos
         habitacion_data = habitacion.to_dict()
         habitacion_data['imagenes'] = [
             f"/static/uploads/{img.url}" for img in imagenes
@@ -110,8 +104,7 @@ def detalle_habitacion(id):
         
         return render_template('pages/detalle_habitacion.html', habitacion=habitacion_data)
     except Exception as e:
-        print(f"Error al cargar habitación {id}: {str(e)}")
-    return render_template('errors/error.html', mensaje="Habitación no encontrada"), 404
+        return render_template('errors/error.html', mensaje="Habitación no encontrada"), 404
 
 @inicio.route('/login')
 def login():

@@ -8,11 +8,6 @@
             <a href="/">Inicio</a>
             <a href="/habitaciones">Habitaciones</a>
             <a href="/nosotros">Nosotros</a>
-            {% if session.get('user_rol', 0) >= 3 %}
-            <span class="separator">|</span>
-            <a href="{{ url_for('almacenista.inventario') }}">Almacén</a>
-            <a href="{{ url_for('almacenista.reportes_almacen') }}">Reportes</a>
-            {% endif %}
         </nav> 
     {% if session.get('user_id') %}
     <div class="user-account" id="user-account">

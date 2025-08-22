@@ -1,7 +1,5 @@
-// Variables globales
 let habitaciones = [];
 
-// Configuración de estados
 const ESTADOS_CONFIG = {
   'disponible': {
     icon: 'fas fa-check-circle',
@@ -23,7 +21,6 @@ const ESTADOS_CONFIG = {
   }
 };
 
-// Cargar habitaciones desde la API
 async function cargarHabitaciones() {
   try {
     const response = await fetch('/api/habitaciones-estado');
@@ -35,16 +32,14 @@ async function cargarHabitaciones() {
     const data = await response.json();
     habitaciones = data;
     
-    renderizarHabitaciones();
-    actualizarEstadisticas();
+  renderizarHabitaciones();
+  actualizarEstadisticas();
     
   } catch (error) {
-    console.error('Error al cargar habitaciones:', error);
     mostrarError('Error al cargar las habitaciones. Por favor, intenta de nuevo.');
   }
 }
 
-// Renderizar habitaciones en el DOM
 function renderizarHabitaciones() {
   const grid = document.getElementById('habitaciones-grid');
   
@@ -83,7 +78,6 @@ function renderizarHabitaciones() {
   }).join('');
 }
 
-// Mostrar mensaje de error
 function mostrarError(mensaje) {
   const grid = document.getElementById('habitaciones-grid');
   grid.innerHTML = `
@@ -99,7 +93,6 @@ function mostrarError(mensaje) {
   `;
 }
 
-// Actualizar estadísticas
 function actualizarEstadisticas() {
   const contadores = {
     total: habitaciones.length,
@@ -115,7 +108,6 @@ function actualizarEstadisticas() {
     }
   });
   
-  // Actualizar números en las estadísticas
   const statNumbers = document.querySelectorAll('.stat-number');
   if (statNumbers.length >= 4) {
     statNumbers[0].textContent = contadores.total;
@@ -125,15 +117,12 @@ function actualizarEstadisticas() {
   }
 }
 
-// Inicializar cuando se carga el DOM
 document.addEventListener('DOMContentLoaded', function() {
   cargarHabitaciones();
   
-  // Actualizar cada 30 segundos para reflejar cambios realizados desde otras interfaces
   setInterval(cargarHabitaciones, 30000);
 });
 
-// Función para refrescar manualmente
 function refrescarHabitaciones() {
   const grid = document.getElementById('habitaciones-grid');
   grid.innerHTML = `

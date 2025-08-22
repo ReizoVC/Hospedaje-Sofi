@@ -1,11 +1,4 @@
-/**
- * ============================
- * SISTEMA DE NOTIFICACIONES MODERNAS
- * ============================
- * Sistema personalizado para reemplazar alert() por notificaciones elegantes
- * Autor: Sistema Hospedaje Sofi
- * Versión: 1.0.0
- */
+// Sistema de notificaciones y confirmaciones ligero para la UI
 
 class NotificationSystem {
     constructor() {
@@ -16,17 +9,11 @@ class NotificationSystem {
         this.init();
     }
 
-    /**
-     * Inicializar el sistema
-     */
     init() {
         this.createContainer();
         this.bindEvents();
     }
 
-    /**
-     * Crear el contenedor principal
-     */
     createContainer() {
         if (document.getElementById('notification-container')) {
             this.container = document.getElementById('notification-container');
@@ -39,11 +26,7 @@ class NotificationSystem {
         document.body.appendChild(this.container);
     }
 
-    /**
-     * Vincular eventos globales
-     */
     bindEvents() {
-        // Cerrar notificación con Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.clearAll();
@@ -51,12 +34,6 @@ class NotificationSystem {
         });
     }
 
-    /**
-     * Mostrar notificación
-     * @param {string} message - Mensaje a mostrar
-     * @param {string} type - Tipo: success, error, warning, info
-     * @param {object} options - Opciones adicionales
-     */
     show(message, type = 'info', options = {}) {
         const config = {
             duration: options.duration || this.defaultDuration,
@@ -71,7 +48,6 @@ class NotificationSystem {
             return this.notifications.get(config.id);
         }
 
-        // Limitar número de notificaciones
         if (this.notifications.size >= this.maxNotifications) {
             this.removeOldest();
         }
@@ -80,40 +56,32 @@ class NotificationSystem {
         this.notifications.set(config.id, notification);
         this.container.appendChild(notification.element);
 
-        // Animar entrada
         requestAnimationFrame(() => {
             notification.element.classList.add('slide-in');
         });
 
-        // Auto-eliminación
         if (!config.persistent) {
             notification.timer = setTimeout(() => {
                 this.remove(config.id);
             }, config.duration);
 
-            // Iniciar barra de progreso
             this.startProgress(notification, config.duration);
         }
 
         return notification;
     }
 
-    /**
-     * Crear elemento de notificación
-     */
     createNotification(message, type, config) {
         const element = document.createElement('div');
         element.className = `notification ${type}`;
         element.setAttribute('data-id', config.id);
 
-        // Contenido
         const content = document.createElement('div');
         content.className = 'notification-content';
         content.textContent = message;
 
         element.appendChild(content);
 
-        // Botón de cerrar
         if (config.closable) {
             const closeBtn = document.createElement('button');
             closeBtn.className = 'notification-close';
@@ -126,14 +94,12 @@ class NotificationSystem {
             element.appendChild(closeBtn);
         }
 
-        // Barra de progreso
         if (!config.persistent) {
             const progressBar = document.createElement('div');
             progressBar.className = 'notification-progress';
             element.appendChild(progressBar);
         }
 
-        // Evento click en la notificación
         if (config.onClick) {
             element.style.cursor = 'pointer';
             element.addEventListener('click', () => {
@@ -154,9 +120,6 @@ class NotificationSystem {
         };
     }
 
-    /**
-     * Iniciar barra de progreso
-     */
     startProgress(notification, duration) {
         const progressBar = notification.element.querySelector('.notification-progress');
         if (!progressBar) return;
@@ -170,9 +133,6 @@ class NotificationSystem {
         }, 10);
     }
 
-    /**
-     * Eliminar notificación
-     */
     remove(id) {
         const notification = this.notifications.get(id);
         if (!notification) return;
@@ -185,7 +145,6 @@ class NotificationSystem {
             clearTimeout(notification.progressTimer);
         }
 
-        // Animar salida
         notification.element.classList.remove('slide-in');
         notification.element.classList.add('slide-out');
 
@@ -198,9 +157,6 @@ class NotificationSystem {
         }, 300);
     }
 
-    /**
-     * Eliminar la más antigua
-     */
     removeOldest() {
         const firstKey = this.notifications.keys().next().value;
         if (firstKey) {
@@ -208,18 +164,12 @@ class NotificationSystem {
         }
     }
 
-    /**
-     * Limpiar todas las notificaciones
-     */
     clearAll() {
         for (const id of this.notifications.keys()) {
             this.remove(id);
         }
     }
 
-    /**
-     * Generar ID único
-     */
     generateId() {
         return 'notification_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
@@ -267,7 +217,7 @@ window.showInfo = (message, options = {}) => {
     return window.notifications.info(message, options);
 };
 
-// Sobrescribir alert() global para usar el nuevo sistema
+// Reemplaza alert() por notificaciones
 window.originalAlert = window.alert;
 window.alert = function(message) {
     if (typeof message === 'string' && message.toLowerCase().includes('error')) {
@@ -287,10 +237,9 @@ window.mostrarExito = (mensaje) => window.notifications.success(mensaje);
 window.mostrarAdvertencia = (mensaje) => window.notifications.warning(mensaje);
 window.mostrarInfo = (mensaje) => window.notifications.info(mensaje);
 
-// Función de confirmación personalizada
+// Confirmación personalizada (Promise<boolean>)
 window.mostrarConfirmacion = (mensaje, detalle = '') => {
     return new Promise((resolve) => {
-        // Crear modal de confirmación
         const modal = document.createElement('div');
         modal.className = 'notification-modal';
         modal.innerHTML = `
@@ -311,7 +260,6 @@ window.mostrarConfirmacion = (mensaje, detalle = '') => {
             </div>
         `;
 
-        // Agregar estilos del modal
         if (!document.getElementById('confirmation-styles')) {
             const styles = document.createElement('style');
             styles.id = 'confirmation-styles';
@@ -436,7 +384,6 @@ window.mostrarConfirmacion = (mensaje, detalle = '') => {
 
         document.body.appendChild(modal);
 
-        // Función para cerrar
         window.closeConfirmation = (result) => {
             modal.classList.remove('show');
             setTimeout(() => {
@@ -446,7 +393,6 @@ window.mostrarConfirmacion = (mensaje, detalle = '') => {
             }, 300);
         };
 
-        // Cerrar con Escape o click en overlay
         const handleKeydown = (e) => {
             if (e.key === 'Escape') {
                 window.closeConfirmation(false);
@@ -461,16 +407,9 @@ window.mostrarConfirmacion = (mensaje, detalle = '') => {
 
         document.addEventListener('keydown', handleKeydown);
 
-        // Mostrar modal
         setTimeout(() => modal.classList.add('show'), 10);
     });
 };
-
-// Logging para desarrollo
-if (window.console && window.console.log) {
-    console.log('✅ Sistema de Notificaciones Modernas inicializado correctamente');
-    console.log('📖 Uso: notifications.success("Mensaje"), notifications.error("Error"), etc.');
-}
 
 // Exportar para módulos
 if (typeof module !== 'undefined' && module.exports) {

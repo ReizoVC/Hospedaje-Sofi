@@ -13,41 +13,37 @@ from models.producto import Producto
 from models.movimientos import Movimientos
 from models.egreso import Egreso
 from models.usuario import Usuario
-from models.ingreso import Ingreso, registrar_ingreso_por_confirmacion  # nuevo
+from models.ingreso import Ingreso, registrar_ingreso_por_confirmacion
 from datetime import datetime, date
 from sqlalchemy import and_, or_
 from utils.auth import role_required, ROL_ADMIN
 
 admin = Blueprint('admin', __name__)
 
-# Configuración para subida de archivos
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Middleware para verificar permisos de administrador
 def verificar_admin():
     if 'user_id' not in session:
         return jsonify({'error': 'No autenticado'}), 401
-    if session.get('user_rol', 0) < 4:  # Rol 4 = Administrador
+    if session.get('user_rol', 0) < 4:
         return jsonify({'error': 'Acceso no autorizado - rol insuficiente'}), 403
     return None
 
-# Middleware para verificar permisos de recepcionista o superior
 def verificar_recepcionista():
     if 'user_id' not in session:
         return jsonify({'error': 'No autenticado'}), 401
-    if session.get('user_rol', 0) < 2:  # Rol 2 = Recepcionista o superior
+    if session.get('user_rol', 0) < 2:
         return jsonify({'error': 'Acceso no autorizado - se requiere rol de recepcionista o superior'}), 403
     return None
 
-# Middleware para verificar permisos de almacenista o superior
 def verificar_almacenista():
     if 'user_id' not in session:
         return jsonify({'error': 'No autenticado'}), 401
-    if session.get('user_rol', 0) < 3:  # Rol 3 = Almacenista o superior
+    if session.get('user_rol', 0) < 3:
         return jsonify({'error': 'Acceso no autorizado - se requiere rol de almacenista o superior'}), 403
     return None
 
@@ -61,23 +57,18 @@ def gestion():
 def reportes_admin():
     return render_template('admin/reportes.html')
 
-# API para obtener todas las habitaciones
 @admin.route('/api/habitaciones', methods=['GET'])
 def obtener_habitaciones():
     error = verificar_admin()
     if error:
         return error
-    
     try:
         habitaciones = Habitacion.query.all()
-        
         habitaciones_list = []
         for habitacion in habitaciones:
             try:
-                habitacion_dict = habitacion.to_dict()
-                habitaciones_list.append(habitacion_dict)
-            except Exception as e:
-                # Fallback manual
+                habitaciones_list.append(habitacion.to_dict())
+            except Exception:
                 habitaciones_list.append({
                     'idhabitacion': habitacion.idhabitacion,
                     'numero': habitacion.numero,
@@ -90,39 +81,31 @@ def obtener_habitaciones():
                     'camas': habitacion.camas or '',
                     'servicios': habitacion.servicios or []
                 })
-        
         return jsonify(habitaciones_list)
     except Exception as e:
         return jsonify({'error': f'Error al obtener habitaciones: {str(e)}'}), 500
 
-# API para obtener una habitación específica
 @admin.route('/api/habitaciones/<int:id>', methods=['GET'])
 def obtener_habitacion(id):
     error = verificar_admin()
     if error:
         return error
-    
     try:
         habitacion = Habitacion.query.get_or_404(id)
         return jsonify(habitacion.to_dict())
     except Exception as e:
         return jsonify({'error': f'Error al obtener habitación: {str(e)}'}), 500
 
-# API para crear una nueva habitación
 @admin.route('/api/habitaciones', methods=['POST'])
 def crear_habitacion():
     error = verificar_admin()
     if error:
         return error
-    
     try:
         data = request.get_json()
-        
-        # Validar que el número de habitación no exista
         numero_str = str(data['numero'])
         if Habitacion.query.filter_by(numero=numero_str).first():
             return jsonify({'error': 'Ya existe una habitación con ese número'}), 400
-        
         nueva_habitacion = Habitacion(
             numero=str(data['numero']),
             estado=data['estado'],
@@ -134,34 +117,26 @@ def crear_habitacion():
             camas=data.get('camas'),
             servicios=data.get('servicios', [])
         )
-        
         db.session.add(nueva_habitacion)
         db.session.commit()
-        
         return jsonify({'message': 'Habitación creada exitosamente', 'id': nueva_habitacion.idhabitacion}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al crear habitación: {str(e)}'}), 500
 
-# API para actualizar una habitación
 @admin.route('/api/habitaciones/<int:id>', methods=['PUT'])
 def actualizar_habitacion(id):
     error = verificar_admin()
     if error:
         return error
-    
     try:
         habitacion = Habitacion.query.get_or_404(id)
         data = request.get_json()
-        
-        # Validar que el número de habitación no exista en otra habitación
         if 'numero' in data:
             numero_str = str(data['numero'])
             habitacion_existente = Habitacion.query.filter_by(numero=numero_str).first()
             if habitacion_existente and habitacion_existente.idhabitacion != id:
                 return jsonify({'error': 'Ya existe una habitación con ese número'}), 400
-        
-        # Actualizar campos solo si están presentes en los datos
         if 'numero' in data:
             habitacion.numero = str(data['numero'])
         if 'estado' in data:
@@ -180,147 +155,105 @@ def actualizar_habitacion(id):
             habitacion.camas = data['camas']
         if 'servicios' in data:
             habitacion.servicios = data['servicios']
-        
         db.session.commit()
-        
         return jsonify({'message': 'Habitación actualizada exitosamente'})
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al actualizar habitación: {str(e)}'}), 500
 
-# API para eliminar una habitación
 @admin.route('/api/habitaciones/<int:id>', methods=['DELETE'])
 def eliminar_habitacion(id):
     error = verificar_admin()
     if error:
         return error
-    
     try:
         habitacion = Habitacion.query.get_or_404(id)
-        
-        # Aquí podrías agregar validaciones adicionales
-        # Por ejemplo, verificar si la habitación tiene reservas activas
-        
         db.session.delete(habitacion)
         db.session.commit()
-        
         return jsonify({'message': 'Habitación eliminada exitosamente'})
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# ============ RUTAS PARA GESTIÓN DE IMÁGENES ============
-
-# API para obtener imágenes de una habitación
+# Imágenes habitaciones
 @admin.route('/api/imagenes-habitacion/<int:idhabitacion>', methods=['GET'])
 def obtener_imagenes_habitacion(idhabitacion):
     error = verificar_admin()
     if error:
         return error
-    
     try:
         imagenes = ImagenHabitacion.query.filter_by(idhabitacion=idhabitacion).order_by(ImagenHabitacion.orden).all()
-        imagenes_list = [imagen.to_dict() for imagen in imagenes]
-        return jsonify(imagenes_list)
+        return jsonify([imagen.to_dict() for imagen in imagenes])
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# API para subir una nueva imagen
 @admin.route('/api/imagenes-habitacion', methods=['POST'])
 def subir_imagen_habitacion():
     error = verificar_admin()
     if error:
         return error
-    
     try:
         if 'imagen' not in request.files:
             return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
-        
         file = request.files['imagen']
         idhabitacion = request.form.get('idhabitacion')
         orden = request.form.get('orden', 1)
-        
         if file.filename == '':
             return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
-        
         if not allowed_file(file.filename):
             return jsonify({'error': 'Tipo de archivo no permitido'}), 400
-        
-        # Verificar que la habitación existe
-        habitacion = Habitacion.query.get_or_404(idhabitacion)
-        
-        # Crear directorio si no existe
+        Habitacion.query.get_or_404(idhabitacion)
         upload_path = os.path.join('static', 'uploads')
         os.makedirs(upload_path, exist_ok=True)
-        
-        # Generar nombre único para el archivo
         filename = secure_filename(file.filename)
         unique_filename = f"hab_{idhabitacion}_{len(os.listdir(upload_path))}_{filename}"
         file_path = os.path.join(upload_path, unique_filename)
-        
-        # Guardar archivo
         file.save(file_path)
-        
-        # Crear registro en la base de datos
         nueva_imagen = ImagenHabitacion(
             idhabitacion=idhabitacion,
             url=unique_filename,
             orden=int(orden)
         )
-        
         db.session.add(nueva_imagen)
         db.session.commit()
-        
         return jsonify({'message': 'Imagen subida exitosamente', 'id': nueva_imagen.idimagen}), 201
-    
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# API para actualizar el orden de una imagen
 @admin.route('/api/imagenes-habitacion/<int:idimagen>', methods=['PUT'])
 def actualizar_imagen(idimagen):
     error = verificar_admin()
     if error:
         return error
-    
     try:
         imagen = ImagenHabitacion.query.get_or_404(idimagen)
         data = request.get_json()
-        
         imagen.orden = data.get('orden', imagen.orden)
-        
         db.session.commit()
-        
         return jsonify({'message': 'Imagen actualizada exitosamente'})
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-# API para eliminar una imagen
 @admin.route('/api/imagenes-habitacion/<int:idimagen>', methods=['DELETE'])
 def eliminar_imagen(idimagen):
     error = verificar_admin()
     if error:
         return error
-    
     try:
         imagen = ImagenHabitacion.query.get_or_404(idimagen)
-        
-        # Eliminar archivo físico
         file_path = os.path.join('static', 'uploads', imagen.url)
         if os.path.exists(file_path):
             os.remove(file_path)
-        
-        # Eliminar registro de la base de datos
         db.session.delete(imagen)
         db.session.commit()
-        
         return jsonify({'message': 'Imagen eliminada exitosamente'})
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+# Reservas
 
 def _reserva_to_dict_ext(reserva: Reserva, incluir_relaciones=True):
     data = reserva.to_dict()
@@ -376,7 +309,6 @@ def admin_obtener_reserva(idreserva):
 
 @admin.route('/api/reservas/opciones', methods=['GET'])
 def admin_reservas_opciones():
-    """Opciones para selects: usuarios (clientes activos) y habitaciones"""
     error = verificar_admin()
     if error:
         return error
@@ -417,20 +349,16 @@ def admin_crear_reserva():
         requeridos = ['idusuario', 'idhabitacion', 'fechainicio', 'fechafin']
         if not data or not all(k in data for k in requeridos):
             return jsonify({'error': 'Faltan datos requeridos'}), 400
-
         fechainicio = _parse_fecha(data['fechainicio'])
         fechafin = _parse_fecha(data['fechafin'])
         if fechainicio < date.today():
             return jsonify({'error': 'La fecha de inicio no puede ser en el pasado'}), 400
         if fechafin <= fechainicio:
             return jsonify({'error': 'La fecha de fin debe ser posterior a la fecha de inicio'}), 400
-
         habitacion = Habitacion.query.get_or_404(data['idhabitacion'])
         usuario = Usuario.query.get_or_404(uuid.UUID(str(data['idusuario'])))
-
         if not _validar_disponibilidad(habitacion.idhabitacion, fechainicio, fechafin):
             return jsonify({'error': 'La habitación no está disponible en esas fechas'}), 400
-
         nueva = Reserva(
             idusuario=usuario.idusuario,
             idhabitacion=habitacion.idhabitacion,
@@ -453,7 +381,6 @@ def admin_actualizar_reserva(idreserva):
     try:
         reserva = Reserva.query.get_or_404(idreserva)
         data = request.get_json() or {}
-
         if 'idusuario' in data:
             usuario = Usuario.query.get_or_404(uuid.UUID(str(data['idusuario'])))
             reserva.idusuario = usuario.idusuario
@@ -466,15 +393,10 @@ def admin_actualizar_reserva(idreserva):
             reserva.fechafin = _parse_fecha(data['fechafin'])
         if 'estado' in data:
             reserva.estado = data['estado']
-
-        # Validaciones de fecha
         if reserva.fechainicio >= reserva.fechafin:
             return jsonify({'error': 'La fecha de fin debe ser posterior a la fecha de inicio'}), 400
-
-        # Validar disponibilidad si cambian fechas o habitación
         if not _validar_disponibilidad(reserva.idhabitacion, reserva.fechainicio, reserva.fechafin, ignorar_id=idreserva):
             return jsonify({'error': 'La habitación no está disponible en esas fechas'}), 400
-
         db.session.commit()
         return jsonify({'message': 'Reserva actualizada', 'reserva': _reserva_to_dict_ext(reserva)})
     except Exception as e:
@@ -492,21 +414,15 @@ def admin_actualizar_estado_reserva(idreserva):
         nuevo_estado = data.get('estado')
         if not nuevo_estado:
             return jsonify({'error': 'Estado requerido'}), 400
-        
-        # Validar estados permitidos
         if nuevo_estado not in ['pendiente', 'confirmada', 'cancelada', 'activa', 'completada']:
             return jsonify({'error': 'Estado inválido'}), 400
-        
         crear_ingreso = (
             (nuevo_estado in ['confirmada', 'completada']) and (reserva.estado != nuevo_estado)
         )
-        
         reserva.estado = nuevo_estado
-
         if crear_ingreso:
             habitacion = Habitacion.query.get(reserva.idhabitacion)
             registrar_ingreso_por_confirmacion(reserva, habitacion=habitacion)
-        
         db.session.commit()
         return jsonify({'message': 'Estado actualizado', 'reserva': reserva.to_dict()})
     except Exception as e:
@@ -529,17 +445,12 @@ def admin_eliminar_reserva(idreserva):
         db.session.rollback()
         return jsonify({'error': f'Error al eliminar reserva: {str(e)}'}), 500
 
-# ============ REPORTES ADMIN: INGRESOS / EGRESOS ============
+# Reportes admin: ingresos / egresos
 
 def _rango_fechas_default():
+    from datetime import timedelta
     hoy = date.today()
-    # Últimos 30 días por defecto
-    desde = hoy.replace(day=1) if hoy.day > 30 else (hoy)
-    try:
-        from datetime import timedelta
-        return hoy - timedelta(days=30), hoy
-    except Exception:
-        return hoy, hoy
+    return hoy - timedelta(days=30), hoy
 
 @admin.route('/api/reportes/admin/ingresos', methods=['GET'])
 def api_reportes_admin_ingresos():
@@ -549,24 +460,20 @@ def api_reportes_admin_ingresos():
     try:
         desde_str = request.args.get('desde')
         hasta_str = request.args.get('hasta')
-        estados_str = request.args.get('estados')  # coma separada: confirmada,completada
-
+        estados_str = request.args.get('estados')
         if desde_str and hasta_str:
             d_desde = _parse_fecha(desde_str)
             d_hasta = _parse_fecha(hasta_str)
         else:
             d_desde, d_hasta = _rango_fechas_default()
-
         estados = ['confirmada', 'completada']
         if estados_str:
             estados = [e.strip() for e in estados_str.split(',') if e.strip()]
-
         q = Reserva.query.filter(
             Reserva.estado.in_(estados),
             Reserva.fechainicio >= d_desde,
             Reserva.fechafin <= d_hasta
         ).order_by(Reserva.fechainicio.asc())
-
         items = []
         total = 0.0
         for r in q.all():
@@ -586,7 +493,6 @@ def api_reportes_admin_ingresos():
                 })
             except Exception:
                 continue
-
         return jsonify({
             'desde': d_desde.isoformat(),
             'hasta': d_hasta.isoformat(),
@@ -609,12 +515,10 @@ def api_reportes_admin_egresos():
             d_hasta = _parse_fecha(hasta_str)
         else:
             d_desde, d_hasta = _rango_fechas_default()
-
         q = Egreso.query.filter(
             Egreso.fechaegreso >= d_desde,
             Egreso.fechaegreso <= d_hasta
         ).order_by(Egreso.fechaegreso.asc())
-
         items = []
         total = 0.0
         egresos = q.all()
@@ -622,18 +526,12 @@ def api_reportes_admin_egresos():
         mov_cache = {}
         for e in egresos:
             try:
-                m = getattr(e, 'movimiento', None)
-                if not m:
-                    m = mov_cache.get(e.idmovimiento)
-                    if not m:
-                        m = Movimientos.query.get(e.idmovimiento)
-                        mov_cache[e.idmovimiento] = m
+                m = getattr(e, 'movimiento', None) or mov_cache.get(e.idmovimiento) or Movimientos.query.get(e.idmovimiento)
+                mov_cache[e.idmovimiento] = m
                 p = None
                 if m and m.idproducto is not None:
-                    p = productos_cache.get(m.idproducto)
-                    if not p:
-                        p = Producto.query.get(m.idproducto)
-                        productos_cache[m.idproducto] = p
+                    p = productos_cache.get(m.idproducto) or Producto.query.get(m.idproducto)
+                    productos_cache[m.idproducto] = p
                 cantidad = int(m.cantidad or 0) if m else 0
                 costo_unit = 0.0
                 if m and cantidad:
@@ -654,7 +552,6 @@ def api_reportes_admin_egresos():
                 })
             except Exception:
                 continue
-
         return jsonify({
             'desde': d_desde.isoformat(),
             'hasta': d_hasta.isoformat(),
@@ -664,7 +561,7 @@ def api_reportes_admin_egresos():
     except Exception as e:
         return jsonify({'error': f'Error al generar reporte de egresos: {str(e)}'}), 500
 
-# ============ RUTAS PARA GESTIÓN DE PERSONAL (ADMIN) ============
+# Personal
 
 def _validar_rol_personal(rol: int):
     try:
@@ -702,7 +599,6 @@ def admin_crear_personal():
         return error
     try:
         raw = request.get_json() or {}
-        # Normalización básica
         data = {
             'nombre': (raw.get('nombre') or '').strip(),
             'apellidos': (raw.get('apellidos') or '').strip(),
@@ -712,26 +608,20 @@ def admin_crear_personal():
             'clave': raw.get('clave') or '',
             'rol': raw.get('rol')
         }
-
         requeridos = ['nombre', 'apellidos', 'dni', 'correo', 'clave', 'rol']
         faltantes = [k for k in requeridos if not data.get(k)]
         if faltantes:
             return jsonify({'error': f'Faltan datos requeridos: {", ".join(faltantes)}'}), 400
-
-        # Validaciones de formato
         if not data['dni'].isdigit() or len(data['dni']) not in (8, 9):
             return jsonify({'error': 'DNI inválido'}), 400
         if '@' not in data['correo'] or '.' not in data['correo'].split('@')[-1]:
             return jsonify({'error': 'Correo inválido'}), 400
         if not _validar_rol_personal(data['rol']):
             return jsonify({'error': 'Rol inválido'}), 400
-
-        # Unicidad
         if Usuario.query.filter_by(correo=data['correo']).first():
             return jsonify({'error': 'El correo ya está registrado'}), 400
         if Usuario.query.filter_by(dni=data['dni']).first():
             return jsonify({'error': 'El DNI ya está registrado'}), 400
-
         nuevo = Usuario(
             nombre=data['nombre'],
             apellidos=data['apellidos'],
@@ -741,7 +631,6 @@ def admin_crear_personal():
             clave=hashlib.md5(data['clave'].encode()).hexdigest(),
             rol=int(data['rol'])
         )
-
         db.session.add(nuevo)
         db.session.commit()
         return jsonify({'message': 'Personal creado', 'usuario': nuevo.to_dict()}), 201
@@ -757,8 +646,6 @@ def admin_actualizar_personal(idusuario):
     try:
         usuario = Usuario.query.get_or_404(idusuario)
         data = request.get_json() or {}
-
-        # Unicidad si cambian correo/dni
         if 'correo' in data and data['correo'] != usuario.correo:
             if Usuario.query.filter(Usuario.correo == data['correo'], Usuario.idusuario != usuario.idusuario).first():
                 return jsonify({'error': 'El correo ya está registrado'}), 400
@@ -767,7 +654,6 @@ def admin_actualizar_personal(idusuario):
             if Usuario.query.filter(Usuario.dni == data['dni'], Usuario.idusuario != usuario.idusuario).first():
                 return jsonify({'error': 'El DNI ya está registrado'}), 400
             usuario.dni = data['dni']
-
         if 'nombre' in data:
             usuario.nombre = data['nombre']
         if 'apellidos' in data:
@@ -780,7 +666,6 @@ def admin_actualizar_personal(idusuario):
             usuario.rol = int(data['rol'])
         if 'clave' in data and data['clave']:
             usuario.clave = hashlib.md5(data['clave'].encode()).hexdigest()
-
         db.session.commit()
         return jsonify({'message': 'Personal actualizado', 'usuario': usuario.to_dict()})
     except Exception as e:

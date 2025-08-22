@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btnCerrarModal.addEventListener('click', cerrarModal);
         btnCancelar.addEventListener('click', cerrarModal);
         
-        // Modal de imágenes
+    // Modal de imágenes
         btnCerrarModalImagenes.addEventListener('click', cerrarModalImagenes);
         btnCerrarImagenes.addEventListener('click', cerrarModalImagenes);
         
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Formulario
         form.addEventListener('submit', guardarHabitacion);
 
-        // Modal de reservas
+    // Modal de reservas
         if (btnNuevaReserva) btnNuevaReserva.addEventListener('click', () => abrirModalReserva());
         if (btnCerrarModalReserva) btnCerrarModalReserva.addEventListener('click', cerrarModalReserva);
         if (btnCancelarReserva) btnCancelarReserva.addEventListener('click', cerrarModalReserva);
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (formReserva) formReserva.addEventListener('submit', guardarReserva);
 
-        // Personal
+    // Personal
         if (btnNuevoPersonal) {
             btnNuevoPersonal.addEventListener('click', () => abrirModalPersonal());
         }
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (formPersonal) formPersonal.addEventListener('submit', guardarPersonal);
 
-        // Desactivados
+    // Desactivados
         if (btnRefrescarDesactivados) {
             btnRefrescarDesactivados.addEventListener('click', cargarDesactivados);
         }
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (['habitaciones', 'reservas', 'personal', 'desactivados'].includes(tabId)) {
             history.replaceState(null, '', `#${tabId}`);
         }
-        // Lazy load por pestaña
+    // Lazy load por pestaña
         if (tabId === 'personal') cargarPersonal();
         if (tabId === 'desactivados') cargarDesactivados();
     }
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (['habitaciones', 'reservas', 'personal', 'desactivados'].includes(hash)) {
             cambiarTab(hash);
         }
-        // Cambiar pestaña si el hash cambia dinámicamente
+    // Cambiar pestaña si el hash cambia
         window.addEventListener('hashchange', () => {
             const nuevoHash = window.location.hash.replace('#', '');
             if (['habitaciones', 'reservas', 'personal', 'desactivados'].includes(nuevoHash)) {
@@ -377,21 +377,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     async function cargarHabitaciones() {
         try {
-            console.log('Cargando habitaciones...');
             const response = await fetch('/api/habitaciones');
-            console.log('Response status:', response.status);
             
             if (response.ok) {
                 const habitaciones = await response.json();
-                console.log('Habitaciones recibidas:', habitaciones);
                 renderizarHabitaciones(habitaciones);
             } else {
                 const errorData = await response.json();
-                console.error('Error response:', errorData);
                 mostrarMensaje(`Error al cargar habitaciones: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de red:', error);
             mostrarMensaje('Error de conexión al cargar habitaciones', 'error');
         }
     }
@@ -648,7 +643,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     mostrarMensaje(error.error || 'Error al subir imagen', 'error');
                 }
             } catch (error) {
-                console.error('Error:', error);
                 mostrarMensaje('Error de conexión', 'error');
             }
         }
@@ -711,7 +705,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 mostrarMensaje('Error al actualizar orden', 'error');
             }
         } catch (error) {
-            console.error('Error:', error);
             mostrarMensaje('Error de conexión', 'error');
         }
     };
@@ -726,7 +719,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        try {
+    try {
             const response = await fetch(`/api/imagenes-habitacion/${idimagen}`, {
                 method: 'DELETE'
             });
@@ -739,7 +732,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 mostrarMensaje(result.error || 'Error al eliminar imagen', 'error');
             }
         } catch (error) {
-            console.error('Error:', error);
             mostrarMensaje('Error de conexión', 'error');
         }
     };

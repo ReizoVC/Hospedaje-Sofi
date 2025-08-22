@@ -13,33 +13,27 @@ reservas = Blueprint('reservas', __name__, url_prefix='/reservas')
 def crear_reserva():
     """Crear una nueva reserva"""
     try:
-        # Verificar que el usuario esté logueado
         if 'user_id' not in session:
             return jsonify({'success': False, 'message': 'Debe iniciar sesión para hacer una reserva'}), 401
         
         data = request.get_json()
         
-        # Validar datos requeridos
         if not all(k in data for k in ['idhabitacion', 'fechainicio', 'fechafin']):
             return jsonify({'success': False, 'message': 'Faltan datos requeridos'}), 400
         
-        # Convertir fechas
         fecha_inicio = datetime.strptime(data['fechainicio'], '%Y-%m-%d').date()
         fecha_fin = datetime.strptime(data['fechafin'], '%Y-%m-%d').date()
         
-        # Validar fechas
         if fecha_inicio < date.today():
             return jsonify({'success': False, 'message': 'La fecha de inicio no puede ser en el pasado'}), 400
         
         if fecha_fin <= fecha_inicio:
             return jsonify({'success': False, 'message': 'La fecha de fin debe ser posterior a la fecha de inicio'}), 400
         
-        # Verificar que la habitación existe
         habitacion = Habitacion.query.get(data['idhabitacion'])
         if not habitacion:
             return jsonify({'success': False, 'message': 'Habitación no encontrada'}), 404
         
-        # Verificar disponibilidad (que no haya reservas confirmadas en esas fechas)
         reservas_existentes = Reserva.query.filter(
             Reserva.idhabitacion == data['idhabitacion'],
             Reserva.estado.in_(['pendiente', 'confirmada']),
@@ -53,7 +47,6 @@ def crear_reserva():
         if reservas_existentes:
             return jsonify({'success': False, 'message': 'La habitación no está disponible en esas fechas'}), 400
         
-        # Crear la reserva
         user_uuid = uuid.UUID(session['user_id']) if isinstance(session['user_id'], str) else session['user_id']
         nueva_reserva = Reserva(
             idusuario=user_uuid,
@@ -117,7 +110,6 @@ def verificar_disponibilidad():
         fecha_inicio = datetime.strptime(data['fechainicio'], '%Y-%m-%d').date()
         fecha_fin = datetime.strptime(data['fechafin'], '%Y-%m-%d').date()
         
-        # Verificar disponibilidad
         reservas_existentes = Reserva.query.filter(
             Reserva.idhabitacion == data['idhabitacion'],
             Reserva.estado.in_(['pendiente', 'confirmada']),
@@ -143,11 +135,9 @@ def verificar_disponibilidad():
 def cancelar_reserva(codigo_reserva):
     """Cancelar una reserva"""
     try:
-        # Verificar que el usuario esté logueado
         if 'user_id' not in session:
             return jsonify({'success': False, 'message': 'Debe iniciar sesión'}), 401
         
-        # Buscar la reserva
         user_uuid = uuid.UUID(session['user_id']) if isinstance(session['user_id'], str) else session['user_id']
         reserva = Reserva.query.filter_by(
             codigoreserva=codigo_reserva,
@@ -157,14 +147,12 @@ def cancelar_reserva(codigo_reserva):
         if not reserva:
             return jsonify({'success': False, 'message': 'Reserva no encontrada'}), 404
         
-        # Verificar que se pueda cancelar
         if reserva.estado == 'cancelada':
             return jsonify({'success': False, 'message': 'La reserva ya está cancelada'}), 400
         
         if reserva.estado == 'completada':
             return jsonify({'success': False, 'message': 'No se puede cancelar una reserva completada'}), 400
         
-        # Cancelar la reserva
         reserva.estado = 'cancelada'
         db.session.commit()
         

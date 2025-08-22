@@ -1,20 +1,16 @@
-// Variables globales
 let reservas = [];
 let usuarios = [];
 let habitaciones = [];
 
-// Animaciones suaves al cargar
 document.addEventListener('DOMContentLoaded', function() {
   const elements = document.querySelectorAll('.fade-in-up');
   elements.forEach((element, index) => {
     element.style.animationDelay = `${index * 0.1}s`;
   });
   
-  // Cargar datos iniciales
   cargarDatos();
 });
 
-// Función para cargar todos los datos necesarios
 async function cargarDatos() {
   try {
     await Promise.all([
@@ -24,7 +20,6 @@ async function cargarDatos() {
       cargarHabitaciones()
     ]);
   } catch (error) {
-    console.error('Error al cargar datos:', error);
     mostrarError('Error al cargar los datos de la aplicación');
   }
 }
@@ -44,7 +39,6 @@ async function cargarReservas() {
     
     actualizarTablaReservas();
   } catch (error) {
-    console.error('Error al cargar reservas:', error);
     mostrarError('Error al cargar las reservas');
   }
 }
@@ -60,7 +54,6 @@ async function cargarEstadisticas() {
     const estadisticas = await response.json();
     actualizarEstadisticas(estadisticas);
   } catch (error) {
-    console.error('Error al cargar estadísticas:', error);
     mostrarError('Error al cargar las estadísticas');
   }
 }
@@ -75,7 +68,6 @@ async function cargarUsuarios() {
     
     usuarios = await response.json();
   } catch (error) {
-    console.error('Error al cargar usuarios:', error);
   }
 }
 
@@ -89,7 +81,6 @@ async function cargarHabitaciones() {
     
     habitaciones = await response.json();
   } catch (error) {
-    console.error('Error al cargar habitaciones:', error);
   }
 }
 
@@ -108,7 +99,6 @@ function actualizarTablaReservas() {
   const tbody = document.getElementById('reservasTableBody');
   if (!tbody) return;
   
-  // Limpiar contenido de carga
   tbody.innerHTML = '';
   
   if (reservas.length === 0) {
@@ -126,49 +116,39 @@ function actualizarTablaReservas() {
   reservas.forEach(reserva => {
     const tr = document.createElement('tr');
     
-    // Verificar si ya pasó la fecha de inicio
     const fechaInicio = new Date(reserva.fechainicio);
     const fechaHoy = new Date();
     fechaHoy.setHours(0, 0, 0, 0);
     const yaComenzo = fechaInicio <= fechaHoy;
     const esPendiente = reserva.estado === 'pendiente';
     
-    // Solo se puede editar completamente si es pendiente Y no ha comenzado
     const puedeEditarCompleto = esPendiente && !yaComenzo;
     
-    // Generar avatar con las iniciales del usuario
     const iniciales = `${reserva.usuario.nombre.charAt(0)}${reserva.usuario.apellidos.charAt(0)}`;
     const colorAvatar = generarColorAvatar(reserva.usuario.nombre);
     
-    // Formatear fechas
     const fechaInicioStr = fechaInicio.toLocaleDateString('es-ES');
     const fechaFinStr = new Date(reserva.fechafin).toLocaleDateString('es-ES');
     
-    // Determinar la clase y color del badge según el estado
     const badgeInfo = obtenerBadgeInfo(reserva.estado);
     
-    // Botón de editar con indicador visual según las reglas
     let botonEditar = '';
     
     if (puedeEditarCompleto) {
-      // Botón azul: Edición completa permitida
       botonEditar = `<button class="btn btn-sm btn-outline-primary" title="Editar reserva pendiente" onclick="editarReserva(${reserva.idreserva})">
         <i class="fas fa-edit"></i>
       </button>`;
     } else if (!esPendiente && !yaComenzo) {
-      // Botón morado: No es pendiente pero no ha comenzado
       botonEditar = `<button class="btn btn-sm btn-outline-secondary" title="Solo cambio de estado (no pendiente)" onclick="editarReserva(${reserva.idreserva})">
         <i class="fas fa-edit"></i>
         <i class="fas fa-flag" style="font-size: 0.7em; margin-left: 2px;"></i>
       </button>`;
     } else if (yaComenzo && esPendiente) {
-      // Botón amarillo: Ya comenzó pero es pendiente
       botonEditar = `<button class="btn btn-sm btn-outline-warning" title="Solo cambio de estado (ya comenzó)" onclick="editarReserva(${reserva.idreserva})">
         <i class="fas fa-edit"></i>
         <i class="fas fa-clock" style="font-size: 0.7em; margin-left: 2px;"></i>
       </button>`;
     } else {
-      // Botón rojo: Ya comenzó y no es pendiente
       botonEditar = `<button class="btn btn-sm btn-outline-danger" title="Solo cambio de estado (ya comenzó y confirmada)" onclick="editarReserva(${reserva.idreserva})">
         <i class="fas fa-edit"></i>
         <i class="fas fa-ban" style="font-size: 0.7em; margin-left: 2px;"></i>
@@ -318,7 +298,6 @@ async function actualizarReserva(event, idReserva) {
     await cargarReservas();
     await cargarEstadisticas();
   } catch (error) {
-    console.error('Error al actualizar reserva:', error);
     mostrarError(error.message);
   }
 }
@@ -351,7 +330,6 @@ async function cambiarEstadoReservaModal(event, idReserva) {
     await cargarReservas();
     await cargarEstadisticas();
   } catch (error) {
-    console.error('Error al cambiar estado:', error);
     mostrarError(error.message);
   }
 }
@@ -376,7 +354,6 @@ async function cambiarEstadoReserva(idReserva, nuevoEstado) {
     await cargarReservas();
     await cargarEstadisticas();
   } catch (error) {
-    console.error('Error al cambiar estado:', error);
     mostrarError(error.message);
   }
 }
@@ -389,28 +366,23 @@ function editarReserva(idReserva) {
     return;
   }
   
-  // Verificar si ya pasó la fecha de inicio
   const fechaInicio = new Date(reserva.fechainicio);
   const fechaHoy = new Date();
-  fechaHoy.setHours(0, 0, 0, 0); // Resetear horas para comparar solo fechas
+  fechaHoy.setHours(0, 0, 0, 0);
   
   const yaComenzo = fechaInicio <= fechaHoy;
   const esPendiente = reserva.estado === 'pendiente';
   
-  // Solo se puede editar si es pendiente Y no ha comenzado
   const puedeEditarCompleto = esPendiente && !yaComenzo;
   
-  // Si no se puede editar completamente, solo mostrar opciones de cambio de estado
   if (!puedeEditarCompleto) {
     mostrarModalEstadoSolo(reserva, yaComenzo, esPendiente);
     return;
   }
   
-  // Formatear fechas para los inputs
   const fechaInicioStr = fechaInicio.toISOString().split('T')[0];
   const fechaFin = new Date(reserva.fechafin).toISOString().split('T')[0];
   
-  // Opciones de habitaciones disponibles + la habitación actual
   const habitacionesDisponibles = habitaciones.filter(h => 
     h.estado === 'disponible' || h.idhabitacion === reserva.habitacion.idhabitacion
   );
@@ -419,7 +391,6 @@ function editarReserva(idReserva) {
     `<option value="${h.idhabitacion}" ${h.idhabitacion === reserva.habitacion.idhabitacion ? 'selected' : ''}>${h.numero} - ${h.nombre} ($${h.precio_noche}/noche)</option>`
   ).join('');
   
-  // Estados disponibles según el estado actual
   const estadosDisponibles = obtenerEstadosDisponibles(reserva.estado);
   const opcionesEstados = estadosDisponibles.map(estado => 
     `<option value="${estado.valor}" ${estado.valor === reserva.estado ? 'selected' : ''}>${estado.texto}</option>`
@@ -663,7 +634,6 @@ async function eliminarReserva(idReserva) {
     await cargarReservas();
     await cargarEstadisticas();
   } catch (error) {
-    console.error('Error al eliminar reserva:', error);
     mostrarError(error.message);
   }
 }

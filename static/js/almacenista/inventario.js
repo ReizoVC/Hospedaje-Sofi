@@ -1,21 +1,16 @@
 // Inventario - Almacenista
-
-// Utilidades de selección
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
-// Modales
 function openModal(id){ document.getElementById(id).style.display='flex'; }
 function closeModal(id){ document.getElementById(id).style.display='none'; }
 
-// API
 async function fetchProductos(params={}){
   const q = new URLSearchParams(params).toString();
   const res = await fetch('/api/productos'+(q?`?${q}`:''));
   return await res.json();
 }
 
-// Render tabla productos
 function renderProductos(items){
   const tbody = document.getElementById('tbody-productos');
   if(!Array.isArray(items) || items.length===0){
@@ -52,13 +47,11 @@ function renderProductos(items){
   }).join('');
 }
 
-// Cargar productos
 async function cargar(){
   const data = await fetchProductos();
   renderProductos(data);
 }
 
-// Editar producto
 function abrirEditar(id){
   const row = [...document.querySelectorAll('#tbody-productos tr')].find(tr=> tr.children[0].textContent==id);
   if(!row) return;
@@ -79,7 +72,6 @@ function abrirEditar(id){
   openModal('modalProducto');
 }
 
-// Eliminar producto
 async function eliminarProducto(id){
   if(!confirm('¿Eliminar producto? Esta acción no se puede deshacer.')) return;
   const res = await fetch(`/api/productos/${id}`, {method:'DELETE'});
@@ -88,7 +80,6 @@ async function eliminarProducto(id){
   await cargar();
 }
 
-// Movimiento
 function abrirMovimiento(idproducto){
   $('#mov-idproducto').value = idproducto;
   $('#mov-tipo').value = 'entrada';
@@ -96,7 +87,6 @@ function abrirMovimiento(idproducto){
   openModal('modalMovimiento');
 }
 
-// Stats
 async function cargarStats(){
   const data = await fetchProductos();
   const total = Array.isArray(data)? data.length : 0;
@@ -111,12 +101,9 @@ async function cargarStats(){
   document.getElementById('stat-costototal').textContent = `S/ ${Number(costoTotal).toFixed(0)}`;
 }
 
-// Inicialización de eventos
 function initInventario(){
-  // Cerrar con botones [data-close]
   $$('[data-close]')?.forEach(el=> el.addEventListener('click', e=> closeModal(e.target.getAttribute('data-close'))));
 
-  // Nuevo producto
   $('#btn-nuevo').addEventListener('click', ()=>{
     $('#modalProductoTitulo').textContent='Nuevo producto';
     $('#prod-id').value='';
@@ -130,7 +117,6 @@ function initInventario(){
     openModal('modalProducto');
   });
 
-  // Guardar producto
   $('#btn-guardar-producto').addEventListener('click', async ()=>{
     const id = $('#prod-id').value;
     const body = {
@@ -151,7 +137,6 @@ function initInventario(){
     await cargarStats();
   });
 
-  // Registrar movimiento
   $('#btn-registrar-mov').addEventListener('click', async ()=>{
     const body = {
       idproducto: parseInt($('#mov-idproducto').value,10),
@@ -166,12 +151,10 @@ function initInventario(){
     await cargarStats();
   });
 
-  // Cerrar modales por click en fondo
   window.addEventListener('click', (e)=>{
     if(e.target.classList.contains('modal')) e.target.style.display='none';
   });
 
-  // Toggle sin vencimiento
   document.addEventListener('change', (e)=>{
     if(e.target && e.target.id === 'prod-sin-fv'){
       const cb = e.target;
@@ -185,12 +168,10 @@ function initInventario(){
     }
   });
 
-  // Cargar datos iniciales
   cargar();
   cargarStats();
 }
 
-// Esperar que el DOM esté listo
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initInventario);
 } else {
