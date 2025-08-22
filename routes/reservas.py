@@ -5,6 +5,7 @@ from models.habitaciones import Habitacion
 from models.usuario import Usuario
 from datetime import datetime, date
 import uuid
+from sqlalchemy import and_, or_
 
 reservas = Blueprint('reservas', __name__, url_prefix='/reservas')
 
@@ -42,10 +43,10 @@ def crear_reserva():
         reservas_existentes = Reserva.query.filter(
             Reserva.idhabitacion == data['idhabitacion'],
             Reserva.estado.in_(['pendiente', 'confirmada']),
-            db.or_(
-                db.and_(Reserva.fechainicio <= fecha_inicio, Reserva.fechafin > fecha_inicio),
-                db.and_(Reserva.fechainicio < fecha_fin, Reserva.fechafin >= fecha_fin),
-                db.and_(Reserva.fechainicio >= fecha_inicio, Reserva.fechafin <= fecha_fin)
+            or_(
+                and_(Reserva.fechainicio <= fecha_inicio, Reserva.fechafin > fecha_inicio),
+                and_(Reserva.fechainicio < fecha_fin, Reserva.fechafin >= fecha_fin),
+                and_(Reserva.fechainicio >= fecha_inicio, Reserva.fechafin <= fecha_fin)
             )
         ).first()
         
@@ -81,7 +82,7 @@ def crear_reserva():
 def mis_reservas():
     """Mostrar las reservas del usuario actual"""
     if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
+        return redirect(url_for('auth.login_page'))
     
     try:
         user_uuid = uuid.UUID(session['user_id']) if isinstance(session['user_id'], str) else session['user_id']
@@ -120,10 +121,10 @@ def verificar_disponibilidad():
         reservas_existentes = Reserva.query.filter(
             Reserva.idhabitacion == data['idhabitacion'],
             Reserva.estado.in_(['pendiente', 'confirmada']),
-            db.or_(
-                db.and_(Reserva.fechainicio <= fecha_inicio, Reserva.fechafin > fecha_inicio),
-                db.and_(Reserva.fechainicio < fecha_fin, Reserva.fechafin >= fecha_fin),
-                db.and_(Reserva.fechainicio >= fecha_inicio, Reserva.fechafin <= fecha_fin)
+            or_(
+                and_(Reserva.fechainicio <= fecha_inicio, Reserva.fechafin > fecha_inicio),
+                and_(Reserva.fechainicio < fecha_fin, Reserva.fechafin >= fecha_fin),
+                and_(Reserva.fechainicio >= fecha_inicio, Reserva.fechafin <= fecha_fin)
             )
         ).first()
         

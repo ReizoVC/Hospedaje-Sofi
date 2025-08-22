@@ -14,37 +14,44 @@
             <a href="{{ url_for('almacenista.reportes_almacen') }}">Reportes</a>
             {% endif %}
         </nav> 
-        <div class="session" id="session-btn">
-            <a href="/login" class="btn-session">Iniciar Sesión</a>
-        </div>
-
-        <div class="user-account" id="user-account" style="display: none;">
+    {% if session.get('user_id') %}
+    <div class="user-account" id="user-account">
             <button id="account-toggle" class="account-btn">
                 <img src="{{ url_for('static', filename='svg/index/user.svg') }}" alt="Cuenta">
-                <span id="user-name">Usuario</span>
+                <span id="user-name">{{ session.get('user_name', 'Usuario') }}</span>
             </button>
             <div id="account-menu" class="account-menu">
-                <a href="#perfil">Mi Perfil</a>
-                <a href="#reservas">Mis Reservas</a>
-                <a href="#configuracion">Configuración</a>
+        <a href="{{ url_for('user.profile') }}">Mi Perfil</a>
+        <a href="{{ url_for('user.reservations') }}">Mis Reservas</a>
+        <a href="{{ url_for('user.reservations') }}#historial">Historial</a>
+        <a href="{{ url_for('user.settings') }}">Configuración</a>
                 <hr>
-                <a href="#" onclick="logout()">Cerrar Sesión</a>
+        <a href="{{ url_for('auth.logout_user') }}">Cerrar Sesión</a>
             </div>
         </div>
+    {% else %}
+    <div class="session" id="session-btn">
+        <a href="/login" class="btn-session">Iniciar Sesión</a>
+    </div>
+    {% endif %}
 
         <button id="menu-toggle" class="menu-icon">
             <img src="{{ url_for('static', filename='svg/index/bgmenu.svg') }}" alt="Menú">
         </button>
 
         <div id="mobile-menu" class="mobile-menu">
-            <a href="#">Inicio</a>
-            <a href="#habitaciones">Habitaciones</a>
-            <a href="#nosotros">Nosotros</a>
-            {% if session.get('user_rol', 0) >= 3 %}
-            <a href="{{ url_for('almacenista.inventario') }}">Almacén</a>
-            <a href="{{ url_for('almacenista.reportes_almacen') }}">Reportes</a>
-            {% endif %}
+            <a href="/">Inicio</a>
+            <a href="/habitaciones">Habitaciones</a>
+            <a href="/nosotros">Nosotros</a>
+            {% if session.get('user_id') %}
+            <a href="{{ url_for('user.profile') }}">Mi Perfil</a>
+            <a href="{{ url_for('user.reservations') }}">Mis Reservas</a>
+            <a href="{{ url_for('user.reservations') }}#historial">Historial</a>
+            <a href="{{ url_for('user.settings') }}">Configuración</a>
+            <a href="{{ url_for('auth.logout_user') }}">Cerrar Sesión</a>
+            {% else %}
             <a href="/login">Iniciar Sesión</a>
+            {% endif %}
         </div>
     </header>
 

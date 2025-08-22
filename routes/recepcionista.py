@@ -5,7 +5,6 @@ from models.usuario import Usuario
 from models.reserva import Reserva
 from models.checkinout import CheckInOut
 from models.ingreso import registrar_ingreso_por_confirmacion
-from models.ingreso import registrar_ingreso_por_confirmacion  # nuevo
 import hashlib
 from datetime import datetime, date
 from sqlalchemy import and_, or_
@@ -602,10 +601,10 @@ def actualizar_reserva(id):
                 Reserva.idhabitacion == data['idhabitacion'],
                 Reserva.idreserva != id,  # Excluir la reserva actual
                 Reserva.estado.in_(['confirmada', 'activa']),
-                db.or_(
-                    db.and_(Reserva.fechainicio <= fecha_inicio, Reserva.fechafin > fecha_inicio),
-                    db.and_(Reserva.fechainicio < fecha_fin, Reserva.fechafin >= fecha_fin),
-                    db.and_(Reserva.fechainicio >= fecha_inicio, Reserva.fechafin <= fecha_fin)
+                or_(
+                    and_(Reserva.fechainicio <= fecha_inicio, Reserva.fechafin > fecha_inicio),
+                    and_(Reserva.fechainicio < fecha_fin, Reserva.fechafin >= fecha_fin),
+                    and_(Reserva.fechainicio >= fecha_inicio, Reserva.fechafin <= fecha_fin)
                 )
             ).first()
 

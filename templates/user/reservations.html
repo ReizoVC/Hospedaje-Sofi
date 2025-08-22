@@ -32,7 +32,7 @@
         <p class="text-muted">Aún no tienes reservas activas.</p>
     {% endif %}
 
-    <h2>Historial de Reservas</h2>
+    <h2 id="historial">Historial de Reservas</h2>
     {% if reservas_historial and reservas_historial|length > 0 %}
         {% for r in reservas_historial %}
         <div class="reserva-card past-reserva">

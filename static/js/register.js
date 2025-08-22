@@ -47,12 +47,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const data = await response.json();
             
-            if (response.ok) {
+        if (response.ok) {
                 showMessage('¡Usuario registrado exitosamente!', 'success');
-                // Pequeña pausa para mostrar la notificación antes de redirigir
+                // Si el backend ya inició sesión, redirige al inicio
+                const target = (data && data.authenticated) ? '/' : '/login';
+                // Pausa breve para mostrar la notificación antes de redirigir
                 setTimeout(() => {
-                    window.location.href = '/login';
-                }, 1500);
+                    window.location.href = target;
+                }, 800);
             } else {
                 showMessage(data.error || 'Error al registrar usuario', 'error');
             }

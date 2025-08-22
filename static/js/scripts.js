@@ -1,9 +1,11 @@
 const toggle = document.getElementById("menu-toggle");
 const nav = document.getElementById("mobile-menu");
 
-toggle.addEventListener("click", () => {
-    nav.classList.toggle("active");
-});
+if (toggle && nav) {
+    toggle.addEventListener("click", () => {
+        nav.classList.toggle("active");
+    });
+}
 
 // Verificar si el usuario está autenticado al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
@@ -51,15 +53,17 @@ function checkAuthStatus() {
 
             if (data.authenticated && data.user) {
                 // Usuario autenticado - mostrar botón de cuenta
-                sessionBtn.style.display = 'none';
-                userAccount.style.display = 'block';
-                userNameSpan.textContent = data.user.name;
+                if (sessionBtn) sessionBtn.style.display = 'none';
+                if (userAccount) userAccount.style.display = 'block';
+                if (userNameSpan) {
+                    userNameSpan.textContent = data.user.name || userNameSpan.textContent;
+                }
 
                 // Actualizar opciones de menú según rol de usuario
                 const accountMenu = document.getElementById('account-menu');
                 const mobileMenu = document.getElementById('mobile-menu');
                 
-                if (data.user.rol >= 4) {
+                if (accountMenu && mobileMenu && data.user.rol >= 4) {
                     // Administrador (rol 4) - Un único enlace al panel
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
@@ -79,7 +83,7 @@ function checkAuthStatus() {
                         <a href="/inventario">Inventario</a>
                         <a href="#" onclick="logout()">Cerrar Sesión</a>
                     `;
-                } else if (data.user.rol === 3) {
+                } else if (accountMenu && mobileMenu && data.user.rol === 3) {
                     // Almacenista (rol 3) - Gestión de inventario y reportes básicos
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
@@ -97,7 +101,7 @@ function checkAuthStatus() {
                         <a href="/reportes-almacen">Reportes de Almacén</a>
                         <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
-                } else if (data.user.rol === 2) {
+                } else if (accountMenu && mobileMenu && data.user.rol === 2) {
                     // Recepcionista (rol 2) - Gestión de reservas y huéspedes
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
@@ -119,34 +123,35 @@ function checkAuthStatus() {
                         <a href="/estado-habitaciones">Estado Habitaciones</a>
                         <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
-                } else {
+                } else if (accountMenu && mobileMenu) {
                     // Usuario normal (rol 1) - Cliente normal
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
-                        <a href="/user/reservations">Mis Reservas</a>
-                        <a href="/user/history">Historial de Estadías</a>
-                        <a href="/user/settings">Configuración</a>
+            <a href="/user/reservations">Mis Reservas</a>
+            <a href="/user/reservations#historial">Historial</a>
+            <a href="/user/settings">Configuración</a>
                         <hr>
-                        <a href="" onclick="logout()">Cerrar Sesión</a>
+            <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
                     mobileMenu.innerHTML = `
                         <a href="/">Inicio</a>
                         <a href="/habitaciones">Habitaciones</a>
                         <a href="/nosotros">Nosotros</a>
                         <a href="/user/profile">Mi Perfil</a>
-                        <a href="/user/reservations">Mis Reservas</a>
-                        <a href="/user/history">Historial de Estadías</a>
-                        <a href="/user/settings">Configuración</a>
+            <a href="/user/reservations">Mis Reservas</a>
+            <a href="/user/reservations#historial">Historial</a>
+            <a href="/user/settings">Configuración</a>
                         <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
                 }
             } else {
                 // Usuario no autenticado - mostrar botón de login y opciones por defecto
-                sessionBtn.style.display = 'block';
-                userAccount.style.display = 'none';
+                if (sessionBtn) sessionBtn.style.display = 'block';
+                // Solo ocultar el bloque de cuenta si también existe el botón de sesión
+                if (userAccount && sessionBtn) userAccount.style.display = 'none';
 
                 const mobileMenu = document.getElementById('mobile-menu');
-                mobileMenu.innerHTML = `
+                if (mobileMenu) mobileMenu.innerHTML = `
                     <a href=\"/\">Inicio</a>
                     <a href=\"/habitaciones\">Habitaciones</a>
                     <a href=\"/nosotros\">Nosotros</a>
@@ -156,9 +161,7 @@ function checkAuthStatus() {
         })
         .catch(err => {
             console.error('Error checking auth status:', err);
-            // En caso de error, mostrar botón de login
-            document.getElementById('session-btn').style.display = 'block';
-            document.getElementById('user-account').style.display = 'none';
+            // En caso de error, mantener el estado renderizado por el servidor
         });
 }
 

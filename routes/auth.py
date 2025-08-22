@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, session, render_template, flash, redirect, url_for
-from models.usuario import Usuario, db
+from models.usuario import Usuario
+from utils.db import db
 import uuid
 import hashlib
 
@@ -16,25 +17,26 @@ def register_page():
 @auth.route('/api/register', methods=['POST'])
 def register():
     try:
-        data = request.get_json()
-        
+        data = request.get_json() or {}
+
         # Validar datos requeridos
         required_fields = ['name', 'lastName', 'dni', 'email', 'phone', 'password']
         for field in required_fields:
             if not data.get(field):
                 return jsonify({'error': f'El campo {field} es requerido'}), 400
-        
+
         # Verificar si el usuario ya existe
         existing_user = Usuario.query.filter(
-            (Usuario.correo == data['email'].lower()) | 
+            (Usuario.correo == data['email'].lower()) |
             (Usuario.dni == data['dni'])
         ).first()
-        
+
         if existing_user:
             return jsonify({'error': 'El usuario ya existe con ese email o DNI'}), 400
-        
+
         # Crear nuevo usuario con hash MD5 (32 caracteres)
         hashed_password = hashlib.md5(data['password'].encode()).hexdigest()
+
         new_user = Usuario(
             nombre=data['name'],
             apellidos=data['lastName'],
@@ -44,20 +46,28 @@ def register():
             clave=hashed_password,
             rol=1  # Rol 1 = Usuario normal (rol 0 = cuenta eliminada)
         )
-        
+
         db.session.add(new_user)
         db.session.commit()
-        
+
+        # Iniciar sesión automáticamente tras registro exitoso
+        session['user_id'] = str(new_user.idusuario)
+        session['user_email'] = new_user.correo
+        session['user_name'] = f"{new_user.nombre} {new_user.apellidos}"
+        session['user_rol'] = new_user.rol
+
         return jsonify({
             'message': 'Usuario registrado exitosamente',
+            'authenticated': True,
             'user': {
                 'id': str(new_user.idusuario),
                 'nombre': new_user.nombre,
                 'apellidos': new_user.apellidos,
-                'email': new_user.correo
+                'email': new_user.correo,
+                'rol': new_user.rol
             }
         }), 201
-        
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error interno del servidor: {str(e)}'}), 500
