@@ -36,7 +36,7 @@ def register():
             correo=data['email'].lower(),
             telefono=data['phone'],
             clave=hashed_password,
-            rol=1  # Rol 1 = Usuario normal (rol 0 = cuenta eliminada)
+            rol=1 
         )
         db.session.add(new_user)
         db.session.commit()

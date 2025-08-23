@@ -15,23 +15,19 @@ def fecha_minima():
 @inicio.route('/')
 def index():
     try:
-        # Obtener 3 habitaciones aleatorias para "Más Populares"
+
         habitaciones_populares = db.session.query(Habitacion).order_by(func.random()).limit(3).all()
         
-        # Obtener las 3 habitaciones más lujosas (por precio más alto)
         habitaciones_lujosas = db.session.query(Habitacion).order_by(Habitacion.precio_noche.desc()).limit(3).all()
-        
-        # Función para preparar datos de habitaciones con imágenes
+
         def preparar_habitaciones(habitaciones):
             habitaciones_data = []
             for habitacion in habitaciones:
-                # Buscar imagen con orden 1 (imagen principal)
                 imagen_principal = ImagenHabitacion.query.filter_by(
                     idhabitacion=habitacion.idhabitacion, 
                     orden=1
                 ).first()
-                
-                # Si no hay imagen con orden 1, tomar la primera disponible
+
                 if not imagen_principal:
                     imagen_principal = ImagenHabitacion.query.filter_by(
                         idhabitacion=habitacion.idhabitacion
@@ -42,34 +38,29 @@ def index():
                 habitaciones_data.append(habitacion_dict)
             return habitaciones_data
         
-        # Preparar datos para ambas categorías
         populares_data = preparar_habitaciones(habitaciones_populares)
         lujosas_data = preparar_habitaciones(habitaciones_lujosas)
         
         return render_template('pages/index.html', 
-                             habitaciones_populares=populares_data,
-                             habitaciones_lujosas=lujosas_data)
+                            habitaciones_populares=populares_data,
+                            habitaciones_lujosas=lujosas_data)
     except Exception as e:
         return render_template('pages/index.html', 
-                             habitaciones_populares=[],
-                             habitaciones_lujosas=[])
+                            habitaciones_populares=[],
+                            habitaciones_lujosas=[])
 
 @inicio.route('/habitaciones')
 def habitaciones():
     try:
-        # Obtener todas las habitaciones
         habitaciones = Habitacion.query.all()
         
-        # Preparar datos con imágenes
         habitaciones_data = []
         for habitacion in habitaciones:
-            # Buscar imagen con orden 1 (imagen principal)
             imagen_principal = ImagenHabitacion.query.filter_by(
                 idhabitacion=habitacion.idhabitacion, 
                 orden=1
             ).first()
             
-            # Si no hay imagen con orden 1, tomar la primera disponible
             if not imagen_principal:
                 imagen_principal = ImagenHabitacion.query.filter_by(
                     idhabitacion=habitacion.idhabitacion
