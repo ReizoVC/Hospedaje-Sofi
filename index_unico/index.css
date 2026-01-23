@@ -1,0 +1,164 @@
+/* Reset y base */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;line-height:1.5;color:#1a1a1a;background:#f8f9fa}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
+.container{max-width:1200px;margin:0 auto;padding:0 1rem}
+
+/* === HEADER (copiado de styles.css) === */
+header{position:absolute;width:100%;top:0;left:0;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.3);z-index:10}
+.logo img{height:60px;width:auto;object-fit:contain}
+nav{display:flex;gap:2rem}
+nav a{color:#fff;font-weight:600;font-size:1rem}
+nav a:hover{color:#ffc107}
+.session{margin-left:1rem}
+.btn-session{background:#ffc107;color:#000;padding:.5rem 1rem;border-radius:6px;font-weight:700}
+.btn-session:hover{background:#e0a800}
+.user-account{position:relative;margin-left:1rem}
+.account-btn{background:#ffc107;color:#000;padding:.5rem 1rem;border-radius:6px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;gap:.5rem}
+.account-btn:hover{background:#e0a800}
+.account-btn img{width:20px;height:20px}
+.account-menu{position:absolute;top:100%;right:0;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);min-width:180px;padding:.5rem 0;z-index:1000;display:none}
+.account-menu.active{display:block}
+.account-menu a{display:block;padding:.75rem 1rem;color:#333;text-decoration:none;transition:background-color .2s}
+.account-menu a:hover{background:#f5f5f5}
+.account-menu hr{margin:.5rem 0;border:none;border-top:1px solid #eee}
+.menu-icon{background:none;border:none;cursor:pointer;display:none;z-index:20}
+.menu-icon img{width:30px;height:30px}
+.mobile-menu{display:none;position:absolute;top:70px;right:1.5rem;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);padding:1rem 1.5rem;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.5);flex-direction:column;gap:.8rem;animation:fadeIn .3s ease-in-out;z-index:30}
+.mobile-menu a{color:#fff;font-weight:600;font-size:1rem}
+.mobile-menu.active{display:flex}
+
+/* === HERO (copiado de styles.css) === */
+.hero{position:relative;width:100%;height:100vh;background:url('../static/images/index/banner.png') center/cover no-repeat;display:flex;align-items:center;justify-content:flex-start;padding:2rem 4rem;text-align:left}
+.hero .overlay{position:absolute;top:0;left:0;height:100%;width:100%;background:linear-gradient(to bottom, rgba(0,0,0,.4), rgba(0,0,0,.7));z-index:1}
+.hero-content{position:relative;z-index:2;color:#fff;max-width:700px;transition:all .4s ease-in-out}
+.hero-content h2{font-size:2rem;font-weight:400;margin-bottom:.5rem}
+.hero-content h1{font-size:3rem;font-weight:800;margin-bottom:1rem}
+.hero-content h1 span{color:#ffc107}
+.hero-content p{font-size:1.1rem;margin-bottom:2rem;line-height:1.6}
+.buttons{display:flex;gap:1rem;flex-wrap:wrap}
+.btn{padding:.8rem 1.5rem;border-radius:6px;font-weight:600;cursor:pointer;border:none}
+.btn.primary{background:#ffc107;color:#000}
+.btn.primary:hover{background:#e0a800}
+.btn.secondary{background:transparent;color:#fff;border:2px solid #fff}
+.btn.secondary:hover{background:#fff;color:#000}
+
+/* Animación */
+@keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+
+/* === HABITACIONES DESTACADAS (de styles.css) === */
+.habitaciones-destacadas{background:#f8f9fa;padding:4rem 2rem}
+.habitaciones-destacadas h2{text-align:center;font-size:2.5rem;margin-bottom:3rem;color:#343a40}
+.habitaciones-grupo{display:flex;flex-direction:column;gap:4rem}
+.grupo h3{font-size:1.8rem;margin-bottom:2rem;color:#495057;text-align:center}
+.habitaciones-destacadas .grid-habitaciones{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;max-width:1200px;margin:0 auto}
+.habitaciones-destacadas .hab-card{max-width:350px;margin:0 auto}
+
+/* Cards y grillas compatibles (ya basadas en styles.css) */
+.grid-habitaciones{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.hab-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.15);transition:transform .25s ease,box-shadow .25s ease;border:1px solid #f0f0f0}
+.hab-card:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(0,0,0,.18)}
+.hab-image{position:relative;width:100%;height:240px;overflow:hidden}
+.hab-image img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
+.hab-card:hover .hab-image img{transform:scale(1.02)}
+.estado-badge{position:absolute;top:12px;right:12px;padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700;text-transform:uppercase;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2)}
+.estado-disponible{background:#d4edda;color:#155724}
+.estado-ocupada{background:#f8d7da;color:#721c24}
+.estado-mantenimiento{background:#fff3cd;color:#856404}
+.hab-content{padding:24px}
+.hab-nombre{font-size:1.4rem;font-weight:800;color:#1a1a1a;margin:0 0 16px 0;line-height:1.3;height:3.9rem;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hab-servicios-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.hab-servicio-pill{background:#f9b600;color:#1a1a1a;padding:6px 14px;border-radius:20px;font-size:.8rem;font-weight:700;border:none;transition:.2s}
+.hab-servicio-pill:hover{background:#e6a500;transform:translateY(-1px)}
+.hab-servicio-pill.more{background:#6c757d;color:#fff}
+.hab-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+.hab-precio-info{display:flex;flex-direction:column;gap:2px}
+.hab-precio-valor{font-size:1.6rem;font-weight:800;color:#1a1a1a;line-height:1}
+.hab-precio-texto{font-size:.85rem;color:#6c757d;font-weight:600}
+.hab-btn-action{background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:800;font-size:.9rem;transition:.3s;border:2px solid #1a1a1a}
+.hab-btn-action:hover{background:#f9b600;color:#1a1a1a;border-color:#f9b600;transform:translateY(-2px)}
+
+/* Servicios */
+.servicios{padding:4rem 0;background:#fff}
+.servicios h2{text-align:center;font-size:2rem;margin-bottom:2rem}
+.grid-servicios{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem}
+.srv{background:#fff;border-radius:1rem;padding:1.25rem;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.07)}
+.srv i{font-size:1.75rem;color:#ffc107;margin-bottom:.5rem}
+.srv h3{margin:.25rem 0 .5rem}
+.srv p{color:#6c757d;font-size:.95rem}
+
+/* Habitaciones */
+.habitaciones-index{padding:4rem 0;background:#fdfdfd}
+.habitaciones-index h2{text-align:center;font-size:2rem;margin-bottom:2rem}
+.grupo-hab{margin-top:2rem}
+.grupo-hab h3{text-align:center;color:#495057;margin-bottom:1rem}
+.grid-habitaciones{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.hab-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.15);transition:transform .25s ease,box-shadow .25s ease;border:1px solid #f0f0f0}
+.hab-card:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(0,0,0,.18)}
+.hab-image{position:relative;width:100%;height:240px;overflow:hidden}
+.hab-image img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
+.hab-card:hover .hab-image img{transform:scale(1.02)}
+.estado-badge{position:absolute;top:12px;right:12px;padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700;text-transform:uppercase;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2)}
+.estado-disponible{background:#d4edda;color:#155724}
+.estado-ocupada{background:#f8d7da;color:#721c24}
+.estado-mantenimiento{background:#fff3cd;color:#856404}
+.hab-content{padding:24px}
+.hab-nombre{font-size:1.4rem;font-weight:800;color:#1a1a1a;margin:0 0 16px 0;line-height:1.3;height:3.9rem;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hab-servicios-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.hab-servicio-pill{background:#f9b600;color:#1a1a1a;padding:6px 14px;border-radius:20px;font-size:.8rem;font-weight:700;border:none;transition:.2s}
+.hab-servicio-pill:hover{background:#e6a500;transform:translateY(-1px)}
+.hab-servicio-pill.more{background:#6c757d;color:#fff}
+.hab-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+.hab-precio-info{display:flex;flex-direction:column;gap:2px}
+.hab-precio-valor{font-size:1.6rem;font-weight:800;color:#1a1a1a;line-height:1}
+.hab-precio-texto{font-size:.85rem;color:#6c757d;font-weight:600}
+.hab-btn-action{background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:800;font-size:.9rem;transition:.3s;border:2px solid #1a1a1a}
+.hab-btn-action:hover{background:#f9b600;color:#1a1a1a;border-color:#f9b600;transform:translateY(-2px)}
+
+/* (Se han omitido estilos de galería/testimonios/CTA por no usarse en este index) */
+
+/* Mapa (de styles.css) */
+.ubicacion-mapa{padding:4rem 1rem;background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%)}
+.ubicacion-mapa h2{text-align:center;font-size:2rem;margin-bottom:1rem;color:#333;font-weight:800}
+.descripcion-ubicacion{text-align:center;font-size:1.05rem;color:#666;margin-bottom:2rem;max-width:600px;margin-left:auto;margin-right:auto}
+.mapa-container{max-width:1000px;margin:0 auto;border-radius:15px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.15);border:3px solid #fff;background:#fff;padding:8px;transition:transform .3s ease,box-shadow .3s ease}
+.mapa-container:hover{transform:translateY(-5px);box-shadow:0 12px 40px rgba(0,0,0,.2)}
+.mapa-container iframe{width:100%;height:450px;border:none;border-radius:12px;filter:saturate(1.1) contrast(1.05)}
+@media (max-width:1024px){.mapa-container iframe{height:400px}}
+@media (max-width:768px){.ubicacion-mapa{padding:3rem 1rem}.mapa-container{margin:0 1rem;border-width:2px;padding:4px}.mapa-container iframe{height:320px}}
+@media (max-width:480px){.mapa-container iframe{height:260px}}
+
+/* Contacto (mínimo; sólo ancla visible) */
+.contacto{padding:1rem 0}
+
+/* === FOOTER (copiado de styles.css) === */
+.footer{margin-top:4rem;background:#f4f4f4;padding:40px 20px 20px;color:#333;box-shadow:0 -2px 8px rgba(0,0,0,.1)}
+.footer-container{display:flex;flex-wrap:wrap;justify-content:space-between;max-width:1200px;margin:auto;gap:20px}
+.footer-col{flex:1 1 200px;min-width:200px}
+.logo-col{max-width:250px}
+.footer-logo{width:200px;margin-bottom:10px}
+.footer-col h4{font-size:16px;margin-bottom:10px;font-weight:700}
+.footer-col ul{list-style:none;padding:0}
+.footer-col ul li{margin-bottom:8px}
+.footer-col ul li a{text-decoration:none;color:#333;font-size:14px}
+.footer-col ul li a:hover{text-decoration:underline}
+.footer-col p{font-size:14px;line-height:1.5}
+.social-icons a{margin-right:10px;font-size:20px;text-decoration:none;color:#333}
+.social-icons a:hover{color:#555}
+.footer-bottom{border-top:1px solid #ddd;margin-top:30px;padding-top:10px;text-align:center;font-size:13px;color:#666}
+
+/* Responsive header/footer */
+@media (max-width:768px){
+	nav,.session,.user-account{display:none !important}
+	.menu-icon{display:block;margin-left:auto}
+	header{flex-direction:row}
+	.hero{align-items:center;justify-content:center;text-align:center;padding:2rem}
+	.hero-content h1{font-size:2.2rem}
+	.hero-content h2{font-size:1.4rem}
+	.hero-content p{font-size:1rem}
+	.buttons{justify-content:center}
+	.footer-container{flex-direction:column;align-items:center;text-align:center}
+	.footer-col{width:100%;margin-bottom:30px}
+}

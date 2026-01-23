@@ -1,0 +1,51 @@
+<aside class="staff-sidebar">
+    <div class="staff-sidebar-header">
+        <a href="{{ url_for('inicio.index') }}" class="staff-sidebar-brand">Hospedaje Sofi</a>
+        <p class="staff-sidebar-subtitle">Panel de trabajo</p>
+    </div>
+
+    <nav class="staff-sidebar-nav">
+        <ul>
+            {% set r = session.get('user_rol', 0) %}
+
+            {% if r == 2 or r >= 4 %}
+                <li class="staff-nav-section">Recepción</li>
+                <li><a href="{{ url_for('recepcionista.estado_habitaciones') }}"><i class="fas fa-bed"></i> Estado habitaciones</a></li>
+                <li><a href="{{ url_for('recepcionista.gestion_reservas') }}"><i class="fas fa-calendar-check"></i> Gestión reservas</a></li>
+                <li><a href="{{ url_for('recepcionista.check_in_out') }}"><i class="fas fa-right-left"></i> Check-in / Check-out</a></li>
+                <li><a href="{{ url_for('recepcionista.gestion_usuarios') }}"><i class="fas fa-users"></i> Gestión usuarios</a></li>
+            {% endif %}
+
+            {% if r == 3 or r >= 4 %}
+                <li class="staff-nav-section">Almacén</li>
+                <li><a href="{{ url_for('almacenista.inventario') }}"><i class="fas fa-boxes-stacked"></i> Inventario</a></li>
+                <li><a href="{{ url_for('almacenista.reportes_almacen') }}"><i class="fas fa-chart-line"></i> Reportes almacén</a></li>
+            {% endif %}
+
+            {% if r >= 4 %}
+                <li class="staff-nav-section">Administración</li>
+                <li><a href="{{ url_for('admin.gestion') }}"><i class="fas fa-screwdriver-wrench"></i> Gestión</a></li>
+                <li><a href="{{ url_for('admin.reportes_admin') }}"><i class="fas fa-chart-pie"></i> Reportes admin</a></li>
+            {% endif %}
+
+            <li class="staff-nav-section">Cuenta</li>
+            <li><a href="{{ url_for('auth.logout_user') }}"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a></li>
+        </ul>
+    </nav>
+
+    <div class="staff-sidebar-user">
+        <div class="staff-user-avatar">
+            {% if session.get('user_name') %}
+                {{ session.get('user_name')[0]|upper }}
+            {% else %}
+                <i class="fas fa-user"></i>
+            {% endif %}
+        </div>
+        <div class="staff-user-info">
+            <p class="staff-user-name">{{ session.get('user_name', 'Personal') }}</p>
+            <p class="staff-user-role">
+                {% if r >= 4 %}Administrador{% elif r >= 3 %}Almacenista{% elif r >= 2 %}Recepcionista{% else %}Usuario{% endif %}
+            </p>
+        </div>
+    </div>
+</aside>

@@ -23,7 +23,7 @@ const ESTADOS_CONFIG = {
 
 async function cargarHabitaciones() {
   try {
-    const response = await fetch('/api/habitaciones-estado');
+    const response = await fetch('api/habitaciones-estado');
     
     if (!response.ok) {
       throw new Error(`Error ${response.status}: ${response.statusText}`);

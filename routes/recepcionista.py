@@ -14,15 +14,17 @@ recepcionista = Blueprint('recepcionista', __name__)
 def verificar_recepcionista():
     if 'user_id' not in session:
         return jsonify({'error': 'No autenticado'}), 401
-    if session.get('user_rol', 0) < 1:
-        return jsonify({'error': 'Acceso no autorizado - se requiere rol de recepcionista o superior'}), 403
+    rol = session.get('user_rol', 0)
+    if rol != 2 and rol < 4:
+        return jsonify({'error': 'Acceso no autorizado - se requiere rol de recepcionista'}), 403
     return None
 
 @recepcionista.route('/estado-habitaciones')
 def estado_habitaciones():
     if 'user_id' not in session:
         return redirect(url_for('auth.login_page'))
-    if session.get('user_rol', 0) < 1:
+    rol = session.get('user_rol', 0)
+    if rol != 2 and rol < 4:
         return redirect(url_for('auth.login_page'))
     return render_template('recepcionista/estado-hab.html')
 

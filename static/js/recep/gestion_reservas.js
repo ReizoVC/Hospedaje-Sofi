@@ -27,7 +27,7 @@ async function cargarDatos() {
 // Función para cargar reservas
 async function cargarReservas() {
   try {
-  const response = await fetch('/recep/api/reservas');
+  const response = await fetch('recep/api/reservas');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -46,7 +46,7 @@ async function cargarReservas() {
 // Función para cargar estadísticas
 async function cargarEstadisticas() {
   try {
-  const response = await fetch('/recep/api/reservas/estadisticas');
+  const response = await fetch('recep/api/reservas/estadisticas');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -61,7 +61,7 @@ async function cargarEstadisticas() {
 // Función para cargar usuarios
 async function cargarUsuarios() {
   try {
-    const response = await fetch('/api/usuarios-clientes');
+    const response = await fetch('api/usuarios-clientes');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -74,7 +74,7 @@ async function cargarUsuarios() {
 // Función para cargar habitaciones
 async function cargarHabitaciones() {
   try {
-    const response = await fetch('/api/habitaciones-estado');
+    const response = await fetch('api/habitaciones-estado');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -278,7 +278,7 @@ async function actualizarReserva(event, idReserva) {
   }
   
   try {
-  const response = await fetch(`/recep/api/reservas/${idReserva}`, {
+  const response = await fetch(`recep/api/reservas/${idReserva}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
@@ -310,7 +310,7 @@ async function cambiarEstadoReservaModal(event, idReserva) {
   const nuevoEstado = formData.get('estado');
   
   try {
-  const response = await fetch(`/recep/api/reservas/${idReserva}/estado`, {
+  const response = await fetch(`recep/api/reservas/${idReserva}/estado`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
@@ -337,7 +337,7 @@ async function cambiarEstadoReservaModal(event, idReserva) {
 // Función para cambiar el estado de una reserva
 async function cambiarEstadoReserva(idReserva, nuevoEstado) {
   try {
-  const response = await fetch(`/recep/api/reservas/${idReserva}/estado`, {
+  const response = await fetch(`recep/api/reservas/${idReserva}/estado`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
@@ -621,7 +621,7 @@ async function eliminarReserva(idReserva) {
   }
   
   try {
-  const response = await fetch(`/recep/api/reservas/${idReserva}`, {
+  const response = await fetch(`recep/api/reservas/${idReserva}`, {
       method: 'DELETE'
     });
     
@@ -782,7 +782,7 @@ async function crearReserva(event) {
   }
   
   try {
-  const response = await fetch('/recep/api/reservas', {
+  const response = await fetch('recep/api/reservas', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash
+from utils.auth import redirect_staff_to_dashboard
 from utils.db import db
 from models.reserva import Reserva
 from models.habitaciones import Habitacion
@@ -8,6 +9,18 @@ import uuid
 from sqlalchemy import and_, or_
 
 reservas = Blueprint('reservas', __name__, url_prefix='/reservas')
+
+
+@reservas.before_request
+def _bloquear_trabajadores_en_reservas():
+    rol = session.get('user_rol')
+    if rol in (2, 3, 4):
+        # Para endpoints tipo API/POST devolvemos JSON 403
+        if request.method != 'GET' or request.is_json:
+            return jsonify({'success': False, 'message': 'Acceso no autorizado para trabajadores'}), 403
+        flash('Acceso no autorizado para trabajadores.', 'error')
+        resp = redirect_staff_to_dashboard()
+        return resp if resp is not None else redirect('/trabajadores')
 
 @reservas.route('/crear', methods=['POST'])
 def crear_reserva():

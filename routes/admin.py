@@ -22,6 +22,7 @@ admin = Blueprint('admin', __name__)
 
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+ALLOWED_ESTADOS_HAB = {'disponible', 'ocupada', 'mantenimiento'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -103,12 +104,15 @@ def crear_habitacion():
         return error
     try:
         data = request.get_json()
+        estado = str(data.get('estado', '')).strip().lower()
+        if estado not in ALLOWED_ESTADOS_HAB:
+            return jsonify({'error': 'Estado inválido. Permitidos: disponible, ocupada, mantenimiento'}), 400
         numero_str = str(data['numero'])
         if Habitacion.query.filter_by(numero=numero_str).first():
             return jsonify({'error': 'Ya existe una habitación con ese número'}), 400
         nueva_habitacion = Habitacion(
             numero=str(data['numero']),
-            estado=data['estado'],
+            estado=estado,
             nombre=data['nombre'],
             descripcion=data.get('descripcion'),
             capacidad=data['capacidad'],
@@ -140,7 +144,10 @@ def actualizar_habitacion(id):
         if 'numero' in data:
             habitacion.numero = str(data['numero'])
         if 'estado' in data:
-            habitacion.estado = data['estado']
+            estado = str(data.get('estado', '')).strip().lower()
+            if estado not in ALLOWED_ESTADOS_HAB:
+                return jsonify({'error': 'Estado inválido. Permitidos: disponible, ocupada, mantenimiento'}), 400
+            habitacion.estado = estado
         if 'nombre' in data:
             habitacion.nombre = data['nombre']
         if 'descripcion' in data:
@@ -381,6 +388,21 @@ def admin_actualizar_reserva(idreserva):
     try:
         reserva = Reserva.query.get_or_404(idreserva)
         data = request.get_json() or {}
+        
+        # Validar primero datos antes de modificar
+        id_hab_nuevo = data.get('idhabitacion', reserva.idhabitacion)
+        fecha_inicio_nuevo = _parse_fecha(data['fechainicio']) if 'fechainicio' in data else reserva.fechainicio
+        fecha_fin_nuevo = _parse_fecha(data['fechafin']) if 'fechafin' in data else reserva.fechafin
+        
+        # Validación de fechas
+        if fecha_inicio_nuevo >= fecha_fin_nuevo:
+            return jsonify({'error': 'La fecha de fin debe ser posterior a la fecha de inicio'}), 400
+        
+        # Validación de disponibilidad (antes de modificar)
+        if not _validar_disponibilidad(id_hab_nuevo, fecha_inicio_nuevo, fecha_fin_nuevo, ignorar_id=idreserva):
+            return jsonify({'error': 'La habitación no está disponible en esas fechas'}), 400
+        
+        # Aplicar cambios
         if 'idusuario' in data:
             usuario = Usuario.query.get_or_404(uuid.UUID(str(data['idusuario'])))
             reserva.idusuario = usuario.idusuario
@@ -388,17 +410,18 @@ def admin_actualizar_reserva(idreserva):
             habitacion = Habitacion.query.get_or_404(data['idhabitacion'])
             reserva.idhabitacion = habitacion.idhabitacion
         if 'fechainicio' in data:
-            reserva.fechainicio = _parse_fecha(data['fechainicio'])
+            reserva.fechainicio = fecha_inicio_nuevo
         if 'fechafin' in data:
-            reserva.fechafin = _parse_fecha(data['fechafin'])
+            reserva.fechafin = fecha_fin_nuevo
         if 'estado' in data:
-            reserva.estado = data['estado']
-        if reserva.fechainicio >= reserva.fechafin:
-            return jsonify({'error': 'La fecha de fin debe ser posterior a la fecha de inicio'}), 400
-        if not _validar_disponibilidad(reserva.idhabitacion, reserva.fechainicio, reserva.fechafin, ignorar_id=idreserva):
-            return jsonify({'error': 'La habitación no está disponible en esas fechas'}), 400
+            estado_nuevo = str(data.get('estado', '')).strip().lower()
+            reserva.estado = estado_nuevo
+        
         db.session.commit()
         return jsonify({'message': 'Reserva actualizada', 'reserva': _reserva_to_dict_ext(reserva)})
+    except ValueError as ve:
+        db.session.rollback()
+        return jsonify({'error': f'Error al parsear fecha: {str(ve)}'}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al actualizar reserva: {str(e)}'}), 500

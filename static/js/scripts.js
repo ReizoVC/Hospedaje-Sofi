@@ -64,9 +64,9 @@ function checkAuthStatus() {
                     // Administrador (rol 4)
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
-                        <a href="/gestion">Panel de Gestión</a>
-                        <a href="/reportes-admin">Reportes</a>
-                        <a href="/inventario">Inventario</a>
+                        <a href="/trabajadores/gestion">Panel de Gestión</a>
+                        <a href="/trabajadores/reportes-admin">Reportes</a>
+                        <a href="/trabajadores/inventario">Inventario</a>
                         <hr>
                         <a href="#" onclick="logout()">Cerrar Sesión</a>
                     `;
@@ -75,17 +75,17 @@ function checkAuthStatus() {
                         <a href="/habitaciones">Habitaciones</a>
                         <a href="/nosotros">Nosotros</a>
                         <a href="/user/profile">Mi Perfil</a>
-                        <a href="/gestion">Panel de Gestión</a>
-                        <a href="/reportes-admin">Reportes</a>
-                        <a href="/inventario">Inventario</a>
+                        <a href="/trabajadores/gestion">Panel de Gestión</a>
+                        <a href="/trabajadores/reportes-admin">Reportes</a>
+                        <a href="/trabajadores/inventario">Inventario</a>
                         <a href="#" onclick="logout()">Cerrar Sesión</a>
                     `;
                 } else if (accountMenu && mobileMenu && data.user.rol === 3) {
                     // Almacenista (rol 3)
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
-                        <a href="/inventario">Inventario</a>
-                        <a href="/reportes-almacen">Reportes de Almacén</a>
+                        <a href="/trabajadores/inventario">Inventario</a>
+                        <a href="/trabajadores/reportes-almacen">Reportes de Almacén</a>
                         <hr>
                         <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
@@ -94,18 +94,18 @@ function checkAuthStatus() {
                         <a href="/habitaciones">Habitaciones</a>
                         <a href="/nosotros">Nosotros</a>
                         <a href="/user/profile">Mi Perfil</a>
-                        <a href="/inventario">Inventario</a>
-                        <a href="/reportes-almacen">Reportes de Almacén</a>
+                        <a href="/trabajadores/inventario">Inventario</a>
+                        <a href="/trabajadores/reportes-almacen">Reportes de Almacén</a>
                         <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
                 } else if (accountMenu && mobileMenu && data.user.rol === 2) {
                     // Recepcionista (rol 2)
                     accountMenu.innerHTML = `
                         <a href="/user/profile">Mi Perfil</a>
-                        <a href="/gestion-reservas">Gestión de Reservas</a>
-                        <a href="/check">Check-in / Check-out</a>
-                        <a href="/gestion-usuario">Gestión de Huéspedes</a>
-                        <a href="/estado-habitaciones">Estado Habitaciones</a>
+                        <a href="/trabajadores/gestion-reservas">Gestión de Reservas</a>
+                        <a href="/trabajadores/check">Check-in / Check-out</a>
+                        <a href="/trabajadores/gestion-usuario">Gestión de Huéspedes</a>
+                        <a href="/trabajadores/estado-habitaciones">Estado Habitaciones</a>
                         <hr>
                         <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
@@ -114,10 +114,10 @@ function checkAuthStatus() {
                         <a href="/habitaciones">Habitaciones</a>
                         <a href="/nosotros">Nosotros</a>
                         <a href="/user/profile">Mi Perfil</a>
-                        <a href="/gestion-reservas">Gestión de Reservas</a>
-                        <a href="/check">Check-in / Check-out</a>
-                        <a href="/gestion-usuario">Gestión de Huéspedes</a>
-                        <a href="/estado-habitaciones">Estado Habitaciones</a>
+                        <a href="/trabajadores/gestion-reservas">Gestión de Reservas</a>
+                        <a href="/trabajadores/check">Check-in / Check-out</a>
+                        <a href="/trabajadores/gestion-usuario">Gestión de Huéspedes</a>
+                        <a href="/trabajadores/estado-habitaciones">Estado Habitaciones</a>
                         <a href="" onclick="logout()">Cerrar Sesión</a>
                     `;
                 } else if (accountMenu && mobileMenu) {

@@ -17,7 +17,8 @@ def verificar_almacenista():
 
 @almacenista.before_request
 def _proteger_rutas_almacenista():
-    is_api = request.path.startswith('/api/')
+    # Con prefijo /trabajadores, las APIs quedan como /trabajadores/api/...
+    is_api = '/api/' in (request.path or '')
     if 'user_id' not in session:
         if is_api:
             return jsonify({'error': 'No autenticado'}), 401

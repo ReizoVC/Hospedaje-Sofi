@@ -7,7 +7,7 @@ function closeModal(id){ document.getElementById(id).style.display='none'; }
 
 async function fetchProductos(params={}){
   const q = new URLSearchParams(params).toString();
-  const res = await fetch('/api/productos'+(q?`?${q}`:''));
+  const res = await fetch('api/productos'+(q?`?${q}`:''));
   return await res.json();
 }
 
@@ -74,7 +74,7 @@ function abrirEditar(id){
 
 async function eliminarProducto(id){
   if(!confirm('¿Eliminar producto? Esta acción no se puede deshacer.')) return;
-  const res = await fetch(`/api/productos/${id}`, {method:'DELETE'});
+  const res = await fetch(`api/productos/${id}`, {method:'DELETE'});
   const data = await res.json();
   if(!res.ok){ alert(data.error||'No se pudo eliminar'); return; }
   await cargar();
@@ -127,7 +127,7 @@ function initInventario(){
     };
     if(!id){ body.cantidad = parseInt($('#prod-cantidad').value||'0',10); }
 
-    const url = id? `/api/productos/${id}`: '/api/productos';
+    const url = id? `api/productos/${id}`: 'api/productos';
     const method = id? 'PUT': 'POST';
     const res = await fetch(url, {method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
     const data = await res.json();
@@ -143,7 +143,7 @@ function initInventario(){
       tipo: $('#mov-tipo').value,
       cantidad: parseInt($('#mov-cantidad').value||'0',10)
     };
-    const res = await fetch('/api/movimientos', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const res = await fetch('api/movimientos', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
     const data = await res.json();
     if(!res.ok){ alert(data.error||'Error registrando movimiento'); return; }
     closeModal('modalMovimiento');

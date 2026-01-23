@@ -13,7 +13,7 @@
 	}
 
 	async function cargarIngresos(){
-		const res = await fetch(`/api/reportes/admin/ingresos`);
+		const res = await fetch(`api/reportes/admin/ingresos`);
 		const data = await res.json();
 		const tb = document.getElementById('tbody-ingresos');
 		if (!tb) return;
@@ -35,7 +35,7 @@
 	}
 
 	async function cargarEgresos(){
-		const res = await fetch(`/api/reportes/admin/egresos`);
+		const res = await fetch(`api/reportes/admin/egresos`);
 		const data = await res.json();
 		const tb = document.getElementById('tbody-egresos');
 		if (!tb) return;

@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request, jsonify
+from utils.auth import redirect_staff_to_dashboard
 from utils.db import db
 from models.usuario import Usuario
 from models.reserva import Reserva
@@ -7,10 +8,24 @@ import hashlib
 
 user = Blueprint('user', __name__, url_prefix='/user')
 
+
+@user.before_request
+def _bloquear_trabajadores_en_user():
+    return redirect_staff_to_dashboard()
+
 def login_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             flash('Debes iniciar sesión para acceder a esta página', 'error')
+            return redirect(url_for('inicio.index'))
+        # Solo clientes (rol=1)
+        rol = session.get('user_rol')
+        if rol in (2, 3, 4):
+            flash('Acceso solo para clientes. Redirigiendo a tu panel de trabajador.', 'error')
+            resp = redirect_staff_to_dashboard()
+            return resp if resp is not None else redirect('/trabajadores')
+        if rol != 1:
+            flash('Acceso no autorizado.', 'error')
             return redirect(url_for('inicio.index'))
         return f(*args, **kwargs)
     decorated_function.__name__ = f.__name__

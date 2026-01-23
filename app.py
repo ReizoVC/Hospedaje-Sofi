@@ -11,14 +11,17 @@ from models.producto import Producto
 from models.movimientos import Movimientos
 from models.egreso import Egreso
 from models.ingreso import Ingreso 
+from models.valoracion import Valoracion
 
 from routes.inicio import inicio
 from routes.auth import auth
 from routes.admin import admin
 from routes.recepcionista import recepcionista
 from routes.almacenista import almacenista
+from routes.trabajadores import trabajadores
 from routes.user import user
 from routes.reservas import reservas
+from routes.valoraciones import valoraciones
 from dotenv import load_dotenv
 import os
 
@@ -53,18 +56,21 @@ def inject_user():
         user = {
             'id': session['user_id'],
             'email': session['user_email'],
-            'name': session['user_name'],
+            'name': session['user_name'],   
             'rol': session['user_rol']
-        }
+        }   
     return {'user': user}
 
-app.register_blueprint(inicio)
+# Registro de blueprints (auth antes que inicio)
 app.register_blueprint(auth)
-app.register_blueprint(admin)
-app.register_blueprint(recepcionista)
-app.register_blueprint(almacenista)
+app.register_blueprint(inicio)
+app.register_blueprint(trabajadores, url_prefix='/trabajadores')
+app.register_blueprint(admin, url_prefix='/trabajadores')
+app.register_blueprint(recepcionista, url_prefix='/trabajadores')
+app.register_blueprint(almacenista, url_prefix='/trabajadores')
 app.register_blueprint(user)
 app.register_blueprint(reservas)
+app.register_blueprint(valoraciones)
 
 if os.environ.get('AUTO_CREATE_TABLES') == '1':
     with app.app_context():

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hospedaje Sofi | Inicio</title>
+  <link rel="shortcut icon" href="../static/images/icon.png" type="image/x-icon" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="index.css" />
+  <script>
+    // Toggle menú móvil y menú de cuenta (comportamiento simple sin dependencias)
+    document.addEventListener('DOMContentLoaded', function(){
+      var menuToggle = document.getElementById('menu-toggle');
+      var mobileMenu = document.getElementById('mobile-menu');
+      if(menuToggle && mobileMenu){
+        menuToggle.addEventListener('click', function(){
+          mobileMenu.classList.toggle('active');
+        });
+      }
+      var accountToggle = document.getElementById('account-toggle');
+      var accountMenu = document.getElementById('account-menu');
+      if(accountToggle && accountMenu){
+        accountToggle.addEventListener('click', function(){
+          accountMenu.classList.toggle('active');
+        });
+      }
+    });
+  </script>
+  
+</head>
+<body>
+  <!-- Header (basado en templates/partials/_header.html) -->
+  <header>
+    <a href="/" class="logo">
+      <img src="../static/images/logo.png" alt="Logo Sofi Hospedaje">
+    </a>
+
+    <nav id="nav-links">
+      <a href="/">Inicio</a>
+      <a href="/habitaciones">Habitaciones</a>
+      <a href="/nosotros">Nosotros</a>
+    </nav> 
+
+    <div class="session" id="session-btn">
+      <a href="/login" class="btn-session">Iniciar Sesión</a>
+    </div>
+
+    <button id="menu-toggle" class="menu-icon" aria-label="Abrir menú">
+      <img src="../static/svg/index/bgmenu.svg" alt="Menú">
+    </button>
+
+    <div id="mobile-menu" class="mobile-menu">
+      <a href="/">Inicio</a>
+      <a href="/habitaciones">Habitaciones</a>
+      <a href="/nosotros">Nosotros</a>
+      <a href="/login">Iniciar Sesión</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- Contenido de templates/pages/index.html (sin agregar secciones nuevas) -->
+    <section class="hero">
+      <div class="overlay"></div>
+      <div class="hero-content">
+        <h2>Bienvenidos a</h2>
+        <h1>Hospedaje <span>Sofi</span><br> Loreto</h1>
+        <p>
+          Un servicio diferente en el corazón de la Amazonía. Vive la calidez, comodidad y belleza natural de
+          Loreto en nuestro hospedaje familiar.
+        </p>
+        <div class="buttons">
+          <a href="#contacto" class="btn primary">Reservar ahora</a>
+          <a href="#nosotros" class="btn secondary">Explorar más</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="habitaciones-destacadas" id="habitaciones">
+      <div class="container">
+        <h2>Habitaciones Destacadas</h2>
+
+        <div class="habitaciones-grupo">
+          <div class="grupo">
+            <h3>Más Populares</h3>
+            <div class="grid-habitaciones">
+              <!-- Ejemplos estáticos basados en tus imágenes -->
+              <div class="hab-card">
+                <div class="hab-image">
+                  <img src="../static/uploads/hab_2_1_suit-andina-deluxe.jpg" alt="Suite Andina Deluxe">
+                  <span class="estado-badge estado-disponible">Disponible</span>
+                </div>
+                <div class="hab-content">
+                  <h3 class="hab-nombre">Suite Andina Deluxe</h3>
+                  <div class="hab-servicios-pills">
+                    <span class="hab-servicio-pill">A/C</span>
+                    <span class="hab-servicio-pill">TV</span>
+                    <span class="hab-servicio-pill">Wi‑Fi</span>
+                    <span class="hab-servicio-pill more">+2</span>
+                  </div>
+                  <div class="hab-footer">
+                    <div class="hab-precio-info">
+                      <span class="hab-precio-valor">S/ 180</span>
+                      <span class="hab-precio-texto">por noche</span>
+                    </div>
+                    <a href="#contacto" class="hab-btn-action">Ver Habitación</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hab-card">
+                <div class="hab-image">
+                  <img src="../static/uploads/hab_8_12_suite-colonial-patio-interior.jpg" alt="Suite Colonial Patio">
+                  <span class="estado-badge estado-ocupada">Ocupada</span>
+                </div>
+                <div class="hab-content">
+                  <h3 class="hab-nombre">Suite Colonial Patio</h3>
+                  <div class="hab-servicios-pills">
+                    <span class="hab-servicio-pill">Ventilador</span>
+                    <span class="hab-servicio-pill">TV</span>
+                    <span class="hab-servicio-pill">Baño Privado</span>
+                  </div>
+                  <div class="hab-footer">
+                    <div class="hab-precio-info">
+                      <span class="hab-precio-valor">S/ 150</span>
+                      <span class="hab-precio-texto">por noche</span>
+                    </div>
+                    <a href="#contacto" class="hab-btn-action">Ver Habitación</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hab-card">
+                <div class="hab-image">
+                  <img src="../static/uploads/hab_3_2_habitacion-familiar-costa-azul8.jpg" alt="Familiar Costa Azul">
+                  <span class="estado-badge estado-disponible">Disponible</span>
+                </div>
+                <div class="hab-content">
+                  <h3 class="hab-nombre">Familiar Costa Azul</h3>
+                  <div class="hab-servicios-pills">
+                    <span class="hab-servicio-pill">3 Camas</span>
+                    <span class="hab-servicio-pill">A/C</span>
+                    <span class="hab-servicio-pill">Wi‑Fi</span>
+                  </div>
+                  <div class="hab-footer">
+                    <div class="hab-precio-info">
+                      <span class="hab-precio-valor">S/ 220</span>
+                      <span class="hab-precio-texto">por noche</span>
+                    </div>
+                    <a href="#contacto" class="hab-btn-action">Ver Habitación</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grupo">
+            <h3>Más Lujosas</h3>
+            <div class="grid-habitaciones">
+              <div class="hab-card">
+                <div class="hab-image">
+                  <img src="../static/uploads/hab_8_15_suite-colonial-patio-interior4.jpg" alt="Suite Colonial Patio Deluxe">
+                  <span class="estado-badge estado-disponible">Disponible</span>
+                </div>
+                <div class="hab-content">
+                  <h3 class="hab-nombre">Suite Colonial Patio Deluxe</h3>
+                  <div class="hab-servicios-pills">
+                    <span class="hab-servicio-pill">King</span>
+                    <span class="hab-servicio-pill">A/C</span>
+                    <span class="hab-servicio-pill">Smart TV</span>
+                    <span class="hab-servicio-pill more">+3</span>
+                  </div>
+                  <div class="hab-footer">
+                    <div class="hab-precio-info">
+                      <span class="hab-precio-valor">S/ 280</span>
+                      <span class="hab-precio-texto">por noche</span>
+                    </div>
+                    <a href="#contacto" class="hab-btn-action">Ver Habitación</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hab-card">
+                <div class="hab-image">
+                  <img src="../static/uploads/hab_4_19_minimalista.jpg" alt="Minimalista Premium">
+                  <span class="estado-badge estado-mantenimiento">Mantenimiento</span>
+                </div>
+                <div class="hab-content">
+                  <h3 class="hab-nombre">Minimalista Premium</h3>
+                  <div class="hab-servicios-pills">
+                    <span class="hab-servicio-pill">Queen</span>
+                    <span class="hab-servicio-pill">A/C</span>
+                    <span class="hab-servicio-pill">Vista</span>
+                  </div>
+                  <div class="hab-footer">
+                    <div class="hab-precio-info">
+                      <span class="hab-precio-valor">S/ 240</span>
+                      <span class="hab-precio-texto">por noche</span>
+                    </div>
+                    <a href="#contacto" class="hab-btn-action">Ver Habitación</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección del Mapa -->
+    <section class="ubicacion-mapa">
+      <div class="container">
+        <h2>Nuestra Ubicación</h2>
+        <p class="descripcion-ubicacion">Encuéntranos en el corazón de Loreto, Amazonas peruano</p>
+        <div class="mapa-container">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63684.59392884949!2d-70.51364709577028!3d-3.961150571150118!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91ed8be342f863e1%3A0xe8733324db0b169e!2sHospedaje%20SOFI!5e0!3m2!1ses-419!2spe!4v1754555628265!5m2!1ses-419!2spe" 
+            allowfullscreen="" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contacto mínimo (ancla usada por botones) -->
+    <section id="contacto" style="padding: 1rem 0;">
+      <div class="container">
+        <p style="text-align:center;color:#666">Contáctanos por los medios disponibles en el pie de página.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (basado en templates/partials/_footer.html) -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-col logo-col">
+        <img src="../static/images/logo.png" alt="Logo Sofi" class="footer-logo">
+        <p>Un servicio diferente...<br>En Hospedaje Sofi ofrecemos comodidad, limpieza y atención personalizada para que tu estadía sea única e inolvidable.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>SOBRE NOSOTROS</h4>
+        <ul>
+          <li><a href="/nosotros">Nosotros</a></li>
+          <li><a href="#">Información Legal</a></li>
+          <li><a href="#contacto">Contáctanos</a></li>
+          <li><a href="#">Blogs</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>CENTRO DE AYUDA</h4>
+        <ul>
+          <li><a href="/habitaciones">Buscar una Habitación</a></li>
+          <li><a href="#">¿Cómo ser Anfitrión?</a></li>
+          <li><a href="#">¿Porqué Elegirnos?</a></li>
+          <li><a href="#">Preguntas Frecuentes</a></li>
+          <li><a href="#">Guías de Alquiler</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>INFORMACIÓN DE CONTACTO</h4>
+        <p>Teléfono: +51 938996477</p>
+        <p>Email: marcopolo_877@hotmail.com</p>
+        <p>Dirección: Calle Ramón Castilla 6ta. cdra. Caballococha, Loreto, Perú</p>
+        <div class="social-icons">
+          <a href="#"><i class="fa-brands fa-facebook"></i></a>
+          <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2025 Grupo Lab 3 | Todos los derechos reservados</p>
+      <p>Creado por : Reizo, Edson , Gino</p>
+    </div>
+  </footer>
+
+  <!-- JS existentes -->
+  <script src="../static/js/notifications.js"></script>
+  <script src="../static/js/scripts.js"></script>
+</body>
+</html>

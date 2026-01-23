@@ -1,10 +1,10 @@
 async function fetchJSON(url){ const r=await fetch(url); return await r.json(); }
 
 async function cargar(){
-  const productos = await fetchJSON('/api/productos');
-  const bajo = await fetchJSON('/api/productos?bajos=1');
-  const vencer = await fetchJSON('/api/productos?por_vencer_dias=15');
-  const movs = await fetchJSON('/api/movimientos');
+  const productos = await fetchJSON('api/productos');
+  const bajo = await fetchJSON('api/productos?bajos=1');
+  const vencer = await fetchJSON('api/productos?por_vencer_dias=15');
+  const movs = await fetchJSON('api/movimientos');
 
   const stockTotal = Array.isArray(productos)? productos.reduce((a,p)=> a + (p.cantidad||0), 0): 0;
   document.getElementById('inv-productos').textContent = Array.isArray(productos)? productos.length : '-';

@@ -9,6 +9,28 @@ ROL_ALMACENISTA = 3
 ROL_ADMIN = 4
 
 
+def staff_dashboard_endpoint(rol: int | None) -> str:
+    """Retorna el endpoint del dashboard para trabajadores según su rol."""
+    if rol == ROL_RECEPCIONISTA:
+        return 'recepcionista.estado_habitaciones'
+    if rol == ROL_ALMACENISTA:
+        return 'almacenista.inventario'
+    if rol is not None and rol >= ROL_ADMIN:
+        return 'admin.gestion'
+    return 'trabajadores.inicio_trabajadores'
+
+
+def redirect_staff_to_dashboard():
+    """Redirige al dashboard correspondiente si la sesión es de trabajador."""
+    rol = session.get('user_rol')
+    if rol in (ROL_RECEPCIONISTA, ROL_ALMACENISTA, ROL_ADMIN):
+        try:
+            return redirect(url_for(staff_dashboard_endpoint(rol)))
+        except Exception:
+            return redirect('/trabajadores')
+    return None
+
+
 def _wants_json_response() -> bool:
     try:
         if request.path.startswith('/api'):

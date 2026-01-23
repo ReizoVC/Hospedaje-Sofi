@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for, session
+from utils.auth import redirect_staff_to_dashboard
 from utils.db import db
 from models.habitaciones import Habitacion
 from models.imagenes_habitaciones import ImagenHabitacion
@@ -6,6 +7,11 @@ from datetime import date
 from sqlalchemy import func
 
 inicio = Blueprint('inicio', __name__)
+
+
+@inicio.before_request
+def _bloquear_trabajadores_en_publico():
+    return redirect_staff_to_dashboard()
 
 @inicio.app_template_global()
 def fecha_minima():
@@ -97,10 +103,10 @@ def detalle_habitacion(id):
     except Exception as e:
         return render_template('errors/error.html', mensaje="Habitación no encontrada"), 404
 
-@inicio.route('/login')
+@inicio.route('/_legacy/login')
 def login():
-    return render_template('auth/login.html')
+    return redirect(url_for('auth.login_page'))
 
-@inicio.route('/register')
+@inicio.route('/_legacy/register')
 def register():
-    return render_template('auth/register.html')
+    return redirect(url_for('auth.register_page'))

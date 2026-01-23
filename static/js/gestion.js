@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let habitacionActual = null;
     let habitacionImagenActual = null;
     let reservaActual = null;
+    // Prefijo base dinámico según la ruta actual (p.ej. /trabajadores)
+    const BASE = '/' + (window.location.pathname.split('/')[1] || '');
     
     // Elementos del DOM
     const tabBtns = document.querySelectorAll('.tab-btn');
@@ -124,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function cargarDesactivados(){
         if (!desactivadosTbody) return;
         try {
-            const res = await fetch('/api/personal/desactivados');
+            const res = await fetch(`${BASE}/api/personal/desactivados`);
             const data = await res.json();
             if (res.ok) {
                 const filtrado = Array.isArray(data) ? data.filter(p => p.rol !== 4) : [];
@@ -153,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const rol = parseInt(prompt('Asignar rol (2=Recep, 3=Almacenista, 4=Admin):', 2));
         if (![2,3,4].includes(rol)) { showWarning('Rol inválido'); return; }
         try {
-            const res = await fetch(`/api/personal/${id}/reactivar`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ rol }) });
+            const res = await fetch(`${BASE}/api/personal/${id}/reactivar`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ rol }) });
             const data = await res.json();
             if (res.ok) { showSuccess('Personal reactivado'); cargarDesactivados(); cargarPersonal(); }
             else showError(data.error || 'No se pudo reactivar');
@@ -176,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function cargarPersonal(){
         if (!personalTbody) return;
         try {
-            const res = await fetch('/api/personal');
+            const res = await fetch(`${BASE}/api/personal`);
             const data = await res.json();
             if (res.ok) {
                 const filtrado = Array.isArray(data) ? data.filter(p => p.rol !== 4) : [];
@@ -216,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.editarPersonal = async function(id){
         try {
-            const res = await fetch('/api/personal');
+            const res = await fetch(`${BASE}/api/personal`);
             const lista = await res.json();
             const actual = Array.isArray(lista) ? lista.find(u => u.idusuario === id) : null;
             if (!actual) { showError('Personal no encontrado'); return; }
@@ -228,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const ok = await mostrarConfirmacion('¿Desactivar personal?', 'Podrás reactivarlo luego');
         if (!ok) return;
         try {
-            const r = await fetch(`/api/personal/${id}`, { method: 'DELETE' });
+            const r = await fetch(`${BASE}/api/personal/${id}`, { method: 'DELETE' });
             const d = await r.json();
             if (r.ok) { showSuccess('Personal desactivado'); cargarPersonal(); }
             else showError(d.error || 'No se pudo desactivar');
@@ -264,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             if (!personalActual){
                 if (!payload.clave){ showWarning('Ingrese una clave'); return; }
-                const res = await fetch('/api/personal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const res = await fetch(`${BASE}/api/personal`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const raw = await res.text();
                 let data; try { data = JSON.parse(raw); } catch { data = { raw } }
                 if (res.ok){ showSuccess('Personal creado'); cerrarModalPersonal(); cargarPersonal(); }
@@ -274,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     showError((data && data.error) || 'No se pudo crear');
                 }
             } else {
-                const res = await fetch(`/api/personal/${personalActual.idusuario}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const res = await fetch(`${BASE}/api/personal/${personalActual.idusuario}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const raw = await res.text();
                 let data; try { data = JSON.parse(raw); } catch { data = { raw } }
                 if (res.ok){ showSuccess('Personal actualizado'); cerrarModalPersonal(); cargarPersonal(); }
@@ -348,8 +350,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             const url = habitacionActual ? 
-                `/api/habitaciones/${habitacionActual.idhabitacion}` : 
-                '/api/habitaciones';
+                `${BASE}/api/habitaciones/${habitacionActual.idhabitacion}` : 
+                `${BASE}/api/habitaciones`;
             const method = habitacionActual ? 'PUT' : 'POST';
             
             const response = await fetch(url, {
@@ -377,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     async function cargarHabitaciones() {
         try {
-            const response = await fetch('/api/habitaciones');
+            const response = await fetch(`${BASE}/api/habitaciones`);
             
             if (response.ok) {
                 const habitaciones = await response.json();
@@ -443,7 +445,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function cargarOpcionesReserva() {
         try {
-            const res = await fetch('/api/reservas/opciones');
+            const res = await fetch(`${BASE}/api/reservas/opciones`);
             if (!res.ok) throw new Error('No se pudo cargar opciones');
             const data = await res.json();
             const selUsuario = document.getElementById('res-usuario');
@@ -480,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const fd = new FormData(formReserva);
         const data = Object.fromEntries(fd.entries());
         try {
-            const url = reservaActual ? `/api/reservas/${reservaActual.idreserva}` : '/api/reservas';
+            const url = reservaActual ? `${BASE}/api/reservas/${reservaActual.idreserva}` : `${BASE}/api/reservas`;
             const method = reservaActual ? 'PUT' : 'POST';
             const resp = await fetch(url, {
                 method,
@@ -503,7 +505,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function cargarReservas() {
         if (!reservasTbody) return;
         try {
-            const res = await fetch('/api/reservas');
+            const res = await fetch(`${BASE}/api/reservas`);
             const data = await res.json();
             if (res.ok) {
                 renderizarReservas(data);
@@ -538,7 +540,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.editarReserva = async function(id) {
         try {
-            const res = await fetch(`/api/reservas/${id}`);
+            const res = await fetch(`${BASE}/api/reservas/${id}`);
             const data = await res.json();
             if (res.ok) {
                 abrirModalReserva(data);
@@ -554,7 +556,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const ok = await mostrarConfirmacion('¿Eliminar reserva?', 'Esta acción no se puede deshacer');
         if (!ok) return;
         try {
-            const res = await fetch(`/api/reservas/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${BASE}/api/reservas/${id}`, { method: 'DELETE' });
             const data = await res.json();
             if (res.ok) {
                 mostrarMensaje('Reserva eliminada', 'success');
@@ -570,7 +572,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Funciones globales
     window.editarHabitacion = async function(id) {
         try {
-            const response = await fetch(`/api/habitaciones/${id}`);
+            const response = await fetch(`${BASE}/api/habitaciones/${id}`);
             const habitacion = await response.json();
             
             if (response.ok) {
@@ -595,7 +597,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-            const response = await fetch(`/api/habitaciones/${id}`, {
+            const response = await fetch(`${BASE}/api/habitaciones/${id}`, {
                 method: 'DELETE'
             });
             
@@ -633,7 +635,7 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('orden', i + 1);
             
             try {
-                const response = await fetch('/api/imagenes-habitacion', {
+                const response = await fetch(`${BASE}/api/imagenes-habitacion`, {
                     method: 'POST',
                     body: formData
                 });
@@ -654,7 +656,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     async function cargarImagenesHabitacion(idhabitacion) {
         try {
-            const response = await fetch(`/api/imagenes-habitacion/${idhabitacion}`);
+            const response = await fetch(`${BASE}/api/imagenes-habitacion/${idhabitacion}`);
             const imagenes = await response.json();
             
             if (response.ok) {
@@ -691,7 +693,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     window.actualizarOrden = async function(idimagen, nuevoOrden) {
         try {
-            const response = await fetch(`/api/imagenes-habitacion/${idimagen}`, {
+            const response = await fetch(`${BASE}/api/imagenes-habitacion/${idimagen}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -720,7 +722,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
     try {
-            const response = await fetch(`/api/imagenes-habitacion/${idimagen}`, {
+            const response = await fetch(`${BASE}/api/imagenes-habitacion/${idimagen}`, {
                 method: 'DELETE'
             });
             

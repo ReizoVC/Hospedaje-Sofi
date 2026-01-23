@@ -3,7 +3,7 @@ let mostrandoDesactivados = false;
 
 async function cargarUsuarios() {
   try {
-    const endpoint = mostrandoDesactivados ? '/api/usuarios-desactivados' : '/api/usuarios-clientes';
+    const endpoint = mostrandoDesactivados ? 'api/usuarios-desactivados' : 'api/usuarios-clientes';
     const response = await fetch(endpoint);
     const data = await response.json();
 
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function cargarUsuarios() {
   try {
-    const endpoint = mostrandoDesactivados ? '/api/usuarios-desactivados' : '/api/usuarios-clientes';
+    const endpoint = mostrandoDesactivados ? 'api/usuarios-desactivados' : 'api/usuarios-clientes';
     const response = await fetch(endpoint);
     if (!response.ok) {
       throw new Error('Error al cargar usuarios');
@@ -164,7 +164,7 @@ function limpiarFormulario() {
 async function editarUsuario(id) {
   try {
     // Buscar el usuario en los datos cargados
-    const response = await fetch('/api/usuarios-clientes');
+    const response = await fetch('api/usuarios-clientes');
     const usuarios = await response.json();
     const usuario = usuarios.find(u => u.idusuario === id);
     
@@ -221,7 +221,7 @@ async function guardarUsuario() {
     let response;
     if (usuarioEditando) {
       // Actualizar usuario existente
-      response = await fetch(`/api/usuarios-clientes/${usuarioEditando.idusuario}`, {
+      response = await fetch(`api/usuarios-clientes/${usuarioEditando.idusuario}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -231,7 +231,7 @@ async function guardarUsuario() {
     } else {
       // Crear nuevo usuario
       datos.clave = password; // Asegurar que la contraseña esté incluida
-      response = await fetch('/api/usuarios-clientes', {
+      response = await fetch('api/usuarios-clientes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -266,7 +266,7 @@ async function eliminarUsuario(id) {
   }
 
   try {
-    const response = await fetch(`/api/usuarios-clientes/${id}`, {
+    const response = await fetch(`api/usuarios-clientes/${id}`, {
       method: 'DELETE'
     });
 
@@ -321,7 +321,7 @@ async function reactivarUsuario(id) {
   }
 
   try {
-    const response = await fetch(`/api/usuarios-clientes/${id}/reactivar`, {
+    const response = await fetch(`api/usuarios-clientes/${id}/reactivar`, {
       method: 'PUT'
     });
 
@@ -467,7 +467,7 @@ async function guardarEdicion(id) {
   }
 
   try {
-    const response = await fetch(`/api/usuarios-clientes/${id}`, {
+    const response = await fetch(`api/usuarios-clientes/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'

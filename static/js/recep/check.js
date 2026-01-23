@@ -24,7 +24,7 @@ async function cargarDatos() {
 // Función para cargar reservas para check-in/check-out
 async function cargarReservasCheck() {
   try {
-    const response = await fetch('/api/check/reservas');
+    const response = await fetch('api/check/reservas');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -39,7 +39,7 @@ async function cargarReservasCheck() {
 // Función para cargar estadísticas de check
 async function cargarEstadisticasCheck() {
   try {
-    const response = await fetch('/api/check/estadisticas');
+    const response = await fetch('api/check/estadisticas');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -212,7 +212,7 @@ function confirmarCheckout(idReserva) {
 // Función para realizar check-in
 async function realizarCheckin(idReserva) {
   try {
-    const response = await fetch(`/api/check/checkin/${idReserva}`, {
+    const response = await fetch(`api/check/checkin/${idReserva}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -238,7 +238,7 @@ async function realizarCheckin(idReserva) {
 // Función para realizar check-out
 async function realizarCheckout(idReserva) {
   try {
-    const response = await fetch(`/api/check/checkout/${idReserva}`, {
+    const response = await fetch(`api/check/checkout/${idReserva}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
