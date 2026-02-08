@@ -717,52 +717,96 @@ function abrirModalNuevaReserva() {
   
   const hoy = new Date().toISOString().split('T')[0];
   
-  const formulario = `
-    <h5>Nueva Reserva</h5>
+  const modalHTML = `
+    <div class="modal-edit-header">
+      <div class="modal-edit-icon">
+        <i class="fas fa-plus-circle"></i>
+      </div>
+      <div>
+        <h4 class="modal-edit-title">Nueva Reserva</h4>
+        <p class="modal-edit-subtitle">Registra una nueva reserva en el sistema</p>
+      </div>
+    </div>
+    
     <form id="formNuevaReserva" onsubmit="crearReserva(event)">
-      <div class="mb-3">
-        <label for="selectUsuario" class="form-label">Usuario:</label>
-        <select id="selectUsuario" name="idusuario" class="form-control" required>
-          <option value="">Seleccione un usuario</option>
-          ${opcionesUsuarios}
-        </select>
-      </div>
-      
-      <div class="mb-3">
-        <label for="selectHabitacion" class="form-label">Habitación:</label>
-        <select id="selectHabitacion" name="idhabitacion" class="form-control" required>
-          <option value="">Seleccione una habitación</option>
-          ${opcionesHabitaciones}
-        </select>
-      </div>
-      
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label for="fechaInicio" class="form-label">Fecha de Inicio:</label>
-          <input type="date" id="fechaInicio" name="fechainicio" class="form-control" min="${hoy}" required>
+      <div class="modal-edit-content">
+        
+        <div class="form-grid">
+          <div class="form-group form-group-full">
+            <label for="selectUsuario" class="form-label">
+              <i class="fas fa-user"></i>
+              Usuario
+            </label>
+            <select id="selectUsuario" name="idusuario" class="form-control" required>
+              <option value="">Seleccione un usuario</option>
+              ${opcionesUsuarios}
+            </select>
+            <small class="form-text text-muted">
+              Selecciona el cliente que realizará la reserva
+            </small>
+          </div>
+          
+          <div class="form-group form-group-full">
+            <label for="selectHabitacion" class="form-label">
+              <i class="fas fa-door-open"></i>
+              Habitación
+            </label>
+            <select id="selectHabitacion" name="idhabitacion" class="form-control" required>
+              <option value="">Seleccione una habitación</option>
+              ${opcionesHabitaciones}
+            </select>
+            <small class="form-text text-muted">
+              Solo se muestran las habitaciones disponibles
+            </small>
+          </div>
+          
+          <div class="form-group">
+            <label for="fechaInicio" class="form-label">
+              <i class="fas fa-calendar-check"></i>
+              Fecha de Inicio
+            </label>
+            <input type="date" id="fechaInicio" name="fechainicio" class="form-control" min="${hoy}" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="fechaFin" class="form-label">
+              <i class="fas fa-calendar-times"></i>
+              Fecha de Fin
+            </label>
+            <input type="date" id="fechaFin" name="fechafin" class="form-control" min="${hoy}" required>
+          </div>
+          
+          <div class="form-group form-group-full">
+            <label for="selectEstado" class="form-label">
+              <i class="fas fa-flag"></i>
+              Estado Inicial
+            </label>
+            <select id="selectEstado" name="estado" class="form-control" required>
+              <option value="pendiente">Pendiente</option>
+              <option value="confirmada">Confirmada</option>
+            </select>
+            <small class="form-text text-muted">
+              Define el estado inicial de la reserva
+            </small>
+          </div>
         </div>
-        <div class="col-md-6 mb-3">
-          <label for="fechaFin" class="form-label">Fecha de Fin:</label>
-          <input type="date" id="fechaFin" name="fechafin" class="form-control" min="${hoy}" required>
-        </div>
+        
       </div>
       
-      <div class="mb-3">
-        <label for="selectEstado" class="form-label">Estado:</label>
-        <select id="selectEstado" name="estado" class="form-control" required>
-          <option value="pendiente">Pendiente</option>
-          <option value="confirmada">Confirmada</option>
-        </select>
-      </div>
-      
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-success">Crear Reserva</button>
-        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancelar</button>
+      <div class="modal-edit-footer">
+        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-success">
+          <i class="fas fa-check"></i>
+          Crear Reserva
+        </button>
       </div>
     </form>
   `;
   
-  mostrarModal(formulario);
+  mostrarModalMejorado(modalHTML);
 }
 
 // Función para crear una nueva reserva

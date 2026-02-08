@@ -329,13 +329,21 @@ def actualizar_estado_reserva(id):
 
 @recepcionista.route('/recep/api/reservas/<int:id>', methods=['DELETE'])
 def eliminar_reserva(id):
+    from models.ingreso import Ingreso
     error = verificar_recepcionista()
     if error:
         return error
     try:
         reserva = Reserva.query.get_or_404(id)
-        if reserva.estado in ['confirmada', 'completada']:
-            return jsonify({'error': 'No se pueden eliminar reservas confirmadas o completadas'}), 400
+        # No se pueden eliminar reservas activas o completadas
+        if reserva.estado in ['activa', 'completada']:
+            return jsonify({'error': 'No se pueden eliminar reservas activas o completadas'}), 400
+        
+        # Verificar si existen ingresos asociados a esta reserva
+        ingreso_existente = Ingreso.query.filter_by(idreserva=id).first()
+        if ingreso_existente:
+            return jsonify({'error': 'No se puede eliminar una reserva que tiene ingresos registrados. Contacte al administrador.'}), 400
+        
         db.session.delete(reserva)
         db.session.commit()
         return jsonify({'message': 'Reserva eliminada exitosamente'})

@@ -977,7 +977,12 @@ nav a:hover {
     margin-top: 0.25rem;
 }
 
+.formulario-reserva {
+    margin-bottom: 1rem;
+}
+
 .btn-reservar {
+    display: block;
     width: 100%;
     background-color: #ffc107;
     color: #000;
@@ -988,7 +993,8 @@ nav a:hover {
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-bottom: 1rem;
+    text-align: center;
+    text-decoration: none;
 }
 
 .btn-reservar:hover {
@@ -1004,6 +1010,7 @@ nav a:hover {
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s ease;
+    margin-top: 0.5rem;
 }
 
 .btn-volver:hover {
