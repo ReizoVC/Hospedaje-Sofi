@@ -1,0 +1,156 @@
+{% extends "layout.html" %}
+
+{% block title %}Reserva | Plan de Pago{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reserva_fechas.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="reserva-fechas">
+    <div class="container reserva-wrap">
+        <div class="reserva-top">
+            <div class="reserva-title">
+                <p class="eyebrow">Paso 2 de 3</p>
+                <h1>Elige tu plan de pago</h1>
+                <p>Selecciona si prefieres separar la habitacion o pagar el total.</p>
+            </div>
+            <div class="reserva-steps" aria-hidden="true">
+                <span class="step is-complete">1</span>
+                <span class="step-line"></span>
+                <span class="step is-active">2</span>
+                <span class="step-line"></span>
+                <span class="step">3</span>
+            </div>
+        </div>
+
+        <div class="reserva-grid">
+            <aside class="reserva-card habitacion-card">
+                <img class="habitacion-cover" src="{{ habitacion.imagenes[0] if habitacion.imagenes else '/static/images/index/hab1.avif' }}" alt="{{ habitacion.nombre }}">
+                <div class="habitacion-body">
+                    <h2>{{ habitacion.nombre }}</h2>
+                    <p class="habitacion-precio">S/ {{ "%.0f"|format(habitacion.precio_noche) }} <span>por noche</span></p>
+                </div>
+            </aside>
+
+            <div class="reserva-card picker-card">
+                <div class="picker-header">
+                    <h2>Resumen de reserva</h2>
+                    <p>Define como quieres pagar tu estadia.</p>
+                </div>
+
+                {% if error %}
+                <div class="disponibilidad error">{{ error }}</div>
+                {% endif %}
+
+                <div class="resumen-panel">
+                    <div class="resumen-row">
+                        <span>Llegada</span>
+                        <strong>{{ fechainicio or '--' }}</strong>
+                    </div>
+                    <div class="resumen-row">
+                        <span>Salida</span>
+                        <strong>{{ fechafin or '--' }}</strong>
+                    </div>
+                    <div class="resumen-row">
+                        <span>Noches</span>
+                        <strong>{{ noches if noches is not none else 0 }}</strong>
+                    </div>
+                    <div class="resumen-row total">
+                        <span>Total</span>
+                        <strong>S/ {{ total if total is not none else 0 }}</strong>
+                    </div>
+                    <div class="resumen-row">
+                        <span>Paga hoy</span>
+                        <strong>S/ <span id="montoHoy">{{ total if total is not none else 0 }}</span></strong>
+                    </div>
+                    <div class="resumen-row" id="saldoRow">
+                        <span>Saldo restante</span>
+                        <strong>S/ <span id="montoSaldo">{{ saldo if saldo is not none else 0 }}</span></strong>
+                    </div>
+                </div>
+
+                <form class="plan-form" method="get" action="{{ url_for('reservas.reserva_paso3', idhabitacion=habitacion.idhabitacion) }}"
+                    data-total="{{ total if total is not none else 0 }}"
+                    data-parcial="{{ monto_parcial if monto_parcial is not none else 0 }}"
+                    data-saldo="{{ saldo if saldo is not none else 0 }}">
+                    <input type="hidden" name="inicio" value="{{ fechainicio or '' }}">
+                    <input type="hidden" name="fin" value="{{ fechafin or '' }}">
+
+                    <div class="plan-options">
+                        <label class="plan-card card-option">
+                            <input type="radio" name="plan" value="parcial">
+                            <div>
+                                <h3>Separar con 60%</h3>
+                            </div>
+                        </label>
+                        <label class="plan-card card-option">
+                            <input type="radio" name="plan" value="total" checked>
+                            <div>
+                                <h3>Pagar el 100%</h3>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div id="payment-summary-detail" class="payment-detail is-hidden">
+                        <div class="payment-detail-text">
+                            El saldo restante de S/ <span id="saldoDetalle">{{ saldo if saldo is not none else 0 }}</span> debe liquidarse a mas tardar el
+                            <span id="fechaLimite" class="deadline">--</span>. El incumplimiento anulara la reserva sin derecho a devolucion.
+                        </div>
+                    </div>
+
+                    <div class="acciones">
+                        <button class="btn-primario" type="submit" {% if error %}disabled{% endif %}>Continuar al pago</button>
+                        <a class="btn-secundario" href="{{ url_for('reservas.reserva_paso1', idhabitacion=habitacion.idhabitacion) }}">Volver a fechas</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function(){
+        const radios = document.querySelectorAll('input[name="plan"]');
+        const form = document.querySelector('.plan-form');
+        const montoHoy = document.getElementById('montoHoy');
+        const montoSaldo = document.getElementById('montoSaldo');
+        const saldoRow = document.getElementById('saldoRow');
+        const detail = document.getElementById('payment-summary-detail');
+        const saldoDetalle = document.getElementById('saldoDetalle');
+        const fechaLimite = document.getElementById('fechaLimite');
+        if (!form || !radios.length) return;
+
+        const llegada = form.querySelector('input[name="inicio"]')?.value || '';
+        const limitePago = (dateStr) => {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return '';
+            const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            date.setDate(date.getDate() - 2);
+            return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'long' });
+        };
+
+        const toggleWarning = () => {
+            const selected = document.querySelector('input[name="plan"]:checked');
+            if (selected && selected.value === 'parcial') {
+                if (detail) detail.classList.remove('is-hidden');
+                if (form && montoHoy) montoHoy.textContent = form.dataset.parcial || '0';
+                if (saldoRow) saldoRow.classList.remove('is-hidden');
+                if (form && montoSaldo) montoSaldo.textContent = form.dataset.saldo || '0';
+                if (form && saldoDetalle) saldoDetalle.textContent = form.dataset.saldo || '0';
+                if (fechaLimite) fechaLimite.textContent = limitePago(llegada) || '--';
+            } else {
+                if (detail) detail.classList.add('is-hidden');
+                if (form && montoHoy) montoHoy.textContent = form.dataset.total || '0';
+                if (saldoRow) saldoRow.classList.add('is-hidden');
+            }
+        };
+
+        radios.forEach(radio => radio.addEventListener('change', toggleWarning));
+        toggleWarning();
+    })();
+</script>
+{% endblock %}

@@ -180,6 +180,43 @@ nav a:hover {
     display: flex;
 }
 
+/* === REPORTES ADMIN (FILTROS INGRESOS) === */
+.reportes-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1rem 0 1.2rem;
+}
+
+.reportes-filtros .filtro-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.reportes-filtros label {
+    font-weight: 600;
+}
+
+.reportes-filtros select {
+    min-width: 220px;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.reportes-filtros .btn-total {
+    min-width: 220px;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid #111827;
+    border-radius: 6px;
+    background: #111827;
+    color: #fff;
+    font-weight: 700;
+    cursor: default;
+}
+
 /* === HERO SECTION === */
 .hero {
     position: relative;

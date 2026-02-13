@@ -15,6 +15,30 @@
     
 
     <div class="tab-content active" id="ingresos">
+      <div class="reportes-filtros">
+        <div class="filtro-item">
+          <label for="ingresos-dia">Dia</label>
+          <select id="ingresos-dia">
+            <option value="">Selecciona un dia</option>
+          </select>
+        </div>
+        <div class="filtro-item">
+          <label for="ingresos-semana">Semana</label>
+          <select id="ingresos-semana">
+            <option value="">Selecciona una semana</option>
+          </select>
+        </div>
+        <div class="filtro-item">
+          <label for="ingresos-mes">Mes</label>
+          <select id="ingresos-mes">
+            <option value="">Selecciona un mes</option>
+          </select>
+        </div>
+        <div class="filtro-item">
+          <label for="btn-total-ingresos">Total ingresos</label>
+          <button id="btn-total-ingresos" class="btn-total" type="button">S/ 0.00</button>
+        </div>
+      </div>
       <div class="table-container">
         <table class="crud-table">
           <thead>

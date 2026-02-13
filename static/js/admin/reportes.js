@@ -12,8 +12,16 @@
 		return new Intl.NumberFormat('es-PE', { style:'currency', currency:'PEN' }).format(n||0);
 	}
 
-	async function cargarIngresos(){
-		const res = await fetch(`api/reportes/admin/ingresos`);
+	async function cargarIngresos(desde, hasta){
+		const params = new URLSearchParams();
+		if (desde && hasta){
+			params.set('desde', desde);
+			params.set('hasta', hasta);
+		}
+		const url = params.toString()
+			? `api/reportes/admin/ingresos?${params.toString()}`
+			: 'api/reportes/admin/ingresos';
+		const res = await fetch(url);
 		const data = await res.json();
 		const tb = document.getElementById('tbody-ingresos');
 		if (!tb) return;
@@ -32,6 +40,59 @@
 		});
 		const total = document.getElementById('total-ingresos');
 		if (total) total.textContent = fmt(data.total||0);
+		const totalBtn = document.getElementById('btn-total-ingresos');
+		if (totalBtn) totalBtn.textContent = fmt(data.total||0);
+	}
+
+	function llenarSelect(select, items, placeholder){
+		if (!select) return;
+		select.innerHTML = '';
+		const base = document.createElement('option');
+		base.value = '';
+		base.textContent = placeholder;
+		select.appendChild(base);
+		(items||[]).forEach(it=>{
+			const opt = document.createElement('option');
+			opt.value = it.value || '';
+			opt.textContent = it.label || it.value || '';
+			if (it.desde) opt.dataset.desde = it.desde;
+			if (it.hasta) opt.dataset.hasta = it.hasta;
+			select.appendChild(opt);
+		});
+	}
+
+	function aplicarFiltro(select, otros){
+		if (!select) return;
+		const opt = select.selectedOptions && select.selectedOptions[0];
+		if (!select.value || !opt){
+			cargarIngresos();
+			return;
+		}
+		(otros||[]).forEach(o=>{ if (o) o.value = ''; });
+		cargarIngresos(opt.dataset.desde, opt.dataset.hasta);
+	}
+
+	async function cargarPeriodosIngresos(){
+		const selDia = document.getElementById('ingresos-dia');
+		const selSemana = document.getElementById('ingresos-semana');
+		const selMes = document.getElementById('ingresos-mes');
+		if (!selDia && !selSemana && !selMes) return;
+		const res = await fetch('api/reportes/admin/ingresos/periodos');
+		if (!res.ok) return;
+		const data = await res.json();
+		llenarSelect(selDia, data.dias, 'Selecciona un dia');
+		llenarSelect(selSemana, data.semanas, 'Selecciona una semana');
+		llenarSelect(selMes, data.meses, 'Selecciona un mes');
+
+		if (selDia){
+			selDia.addEventListener('change', ()=>aplicarFiltro(selDia, [selSemana, selMes]));
+		}
+		if (selSemana){
+			selSemana.addEventListener('change', ()=>aplicarFiltro(selSemana, [selDia, selMes]));
+		}
+		if (selMes){
+			selMes.addEventListener('change', ()=>aplicarFiltro(selMes, [selDia, selSemana]));
+		}
 	}
 
 	async function cargarEgresos(){
@@ -58,5 +119,6 @@
 
 	cargarIngresos();
 	cargarEgresos();
+	cargarPeriodosIngresos();
 })();
 

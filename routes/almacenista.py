@@ -17,7 +17,6 @@ def verificar_almacenista():
 
 @almacenista.before_request
 def _proteger_rutas_almacenista():
-    # Con prefijo /trabajadores, las APIs quedan como /trabajadores/api/...
     is_api = '/api/' in (request.path or '')
     if 'user_id' not in session:
         if is_api:

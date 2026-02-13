@@ -70,7 +70,7 @@
                     <!-- Botón de reserva -->
                     <div class="formulario-reserva">
                         {% if user %}
-                        <button class="btn-reservar" onclick="abrirModalReserva()">Reservar Ahora</button>
+                        <a class="btn-reservar" href="{{ url_for('reservas.reserva_paso1', idhabitacion=habitacion.idhabitacion) }}">Reservar Ahora</a>
                         {% else %}
                         <a href="/login" class="btn-reservar">Iniciar Sesión para Reservar</a>
                         {% endif %}
@@ -125,67 +125,8 @@
     </div>
 </section>
 
-<!-- Modal de Reserva -->
-<div id="modalReserva" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Reservar {{ habitacion.nombre }}</h2>
-            <span class="close" onclick="cerrarModalReserva()">&times;</span>
-        </div>
-        
-        <div class="modal-body">
-            <div class="habitacion-resumen">
-                <img src="{{ habitacion.imagenes[0] if habitacion.imagenes else '/static/images/index/hab1.avif' }}" alt="{{ habitacion.nombre }}" class="habitacion-imagen">
-                <div class="habitacion-info">
-                    <h3>{{ habitacion.nombre }}</h3>
-                    <p class="precio-noche">S/ {{ "%.0f"|format(habitacion.precio_noche) }} por noche</p>
-                    <p class="capacidad">Capacidad: {{ habitacion.capacidad }} persona{% if habitacion.capacidad != 1 %}s{% endif %}</p>
-                </div>
-            </div>
-            
-            <form id="formReserva" class="form-reserva">
-                <div class="fechas-container">
-                    <div class="fecha-grupo">
-                        <label for="modal-fecha-inicio">Fecha de llegada:</label>
-                        <input type="date" id="modal-fecha-inicio" name="fecha-inicio" min="{{ fecha_minima() }}" required>
-                    </div>
-                    <div class="fecha-grupo">
-                        <label for="modal-fecha-fin">Fecha de salida:</label>
-                        <input type="date" id="modal-fecha-fin" name="fecha-fin" min="{{ fecha_minima() }}" required>
-                    </div>
-                </div>
-                
-                <div class="resumen-reserva" id="resumenReserva" style="display: none;">
-                    <div class="resumen-item">
-                        <span class="label">Noches:</span>
-                        <span id="cantidadNoches">0</span>
-                    </div>
-                    <div class="resumen-item">
-                        <span class="label">Precio por noche:</span>
-                        <span>S/ {{ "%.0f"|format(habitacion.precio_noche) }}</span>
-                    </div>
-                    <div class="resumen-item total">
-                        <span class="label">Total:</span>
-                        <span class="precio-total-modal">S/ <span id="precioTotalModal">0</span></span>
-                    </div>
-                </div>
-                
-                <div class="disponibilidad-mensaje" id="disponibilidadMensaje"></div>
-            </form>
-        </div>
-        
-        <div class="modal-footer">
-            <button type="button" class="btn-cancelar-modal" onclick="cerrarModalReserva()">Cancelar</button>
-            <button type="button" id="btnConfirmarReserva" class="btn-confirmar-reserva" onclick="confirmarReserva()" disabled>
-                Confirmar Reserva
-            </button>
-        </div>
-    </div>
-
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/pages/detalle_habitacion.js') }}"
-    data-precio-noche="{{ habitacion.precio_noche }}"
-    data-idhabitacion="{{ habitacion.idhabitacion }}"></script>
+<script src="{{ url_for('static', filename='js/pages/detalle_habitacion.js') }}"></script>
 {% endblock %}

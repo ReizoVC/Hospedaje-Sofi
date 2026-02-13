@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, session
 from utils.auth import redirect_staff_to_dashboard
 from utils.db import db
 from models.habitaciones import Habitacion
+from models.valoracion import Valoracion
 from models.imagenes_habitaciones import ImagenHabitacion
 from datetime import date
 from sqlalchemy import func
@@ -22,7 +23,16 @@ def fecha_minima():
 def index():
     try:
 
-        habitaciones_populares = db.session.query(Habitacion).order_by(func.random()).limit(3).all()
+        promedio_puntuacion = func.coalesce(func.avg(Valoracion.puntuacion), 0)
+        total_valoraciones = func.count(Valoracion.idvaloracion)
+        habitaciones_populares = (
+            db.session.query(Habitacion)
+            .outerjoin(Valoracion, Valoracion.idhabitacion == Habitacion.idhabitacion)
+            .group_by(Habitacion.idhabitacion)
+            .order_by(promedio_puntuacion.desc(), total_valoraciones.desc())
+            .limit(3)
+            .all()
+        )
         
         habitaciones_lujosas = db.session.query(Habitacion).order_by(Habitacion.precio_noche.desc()).limit(3).all()
 

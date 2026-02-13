@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+
+{% block title %}Reserva | Pago{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reserva_fechas.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/pages/reserva_pago.js') }}"
+    data-idhabitacion="{{ habitacion.idhabitacion }}"
+    data-fechainicio="{{ fechainicio or '' }}"
+    data-fechafin="{{ fechafin or '' }}"
+    data-plan="{{ plan or 'total' }}"></script>
+{% endblock %}
+
+{% block content %}
+<section class="reserva-fechas">
+    <div class="container reserva-wrap">
+        <div class="reserva-top">
+            <div class="reserva-title">
+                <p class="eyebrow">Paso 3 de 3</p>
+                <h1>Finaliza tu pago</h1>
+                <p>Revisa el resumen y continua con el pago.</p>
+            </div>
+            <div class="reserva-steps" aria-hidden="true">
+                <span class="step is-complete">1</span>
+                <span class="step-line"></span>
+                <span class="step is-complete">2</span>
+                <span class="step-line"></span>
+                <span class="step is-active">3</span>
+            </div>
+        </div>
+
+        <div class="reserva-grid">
+            <aside class="reserva-card habitacion-card">
+                <img class="habitacion-cover" src="{{ habitacion.imagenes[0] if habitacion.imagenes else '/static/images/index/hab1.avif' }}" alt="{{ habitacion.nombre }}">
+                <div class="habitacion-body">
+                    <h2>{{ habitacion.nombre }}</h2>
+                    <p class="habitacion-precio">S/ {{ "%.0f"|format(habitacion.precio_noche) }} <span>por noche</span></p>
+                </div>
+            </aside>
+
+            <div class="reserva-card picker-card">
+                <div class="picker-header">
+                    <h2>Resumen de reserva</h2>
+                    <p>Confirma los detalles antes de pagar.</p>
+                </div>
+
+                {% if error %}
+                <div class="disponibilidad error">{{ error }}</div>
+                {% endif %}
+
+                <div class="resumen-panel">
+                    <div class="resumen-row">
+                        <span>Llegada</span>
+                        <strong>{{ fechainicio or '--' }}</strong>
+                    </div>
+                    <div class="resumen-row">
+                        <span>Salida</span>
+                        <strong>{{ fechafin or '--' }}</strong>
+                    </div>
+                    <div class="resumen-row">
+                        <span>Noches</span>
+                        <strong>{{ noches if noches is not none else 0 }}</strong>
+                    </div>
+                    <div class="resumen-row total">
+                        <span>Total</span>
+                        <strong>S/ {{ total if total is not none else 0 }}</strong>
+                    </div>
+                    {% if plan == 'parcial' %}
+                    <div class="resumen-row">
+                        <span>Paga hoy (60%)</span>
+                        <strong>S/ {{ monto_parcial if monto_parcial is not none else 0 }}</strong>
+                    </div>
+                    <div class="resumen-row">
+                        <span>Saldo restante</span>
+                        <strong>S/ {{ saldo if saldo is not none else 0 }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="plan-resumen">
+                    <span>Plan seleccionado</span>
+                    <strong>{% if plan == 'parcial' %}Separar con 60%{% else %}Pago completo{% endif %}</strong>
+                </div>
+
+                <form id="formPago" class="pago-form">
+                    <div class="pago-grid">
+                        <label class="pago-field">
+                            <span>Nombre en la tarjeta</span>
+                            <input type="text" id="cardName" name="cardName" placeholder="Nombre Apellido" value="{{ session.get('user_name', '') }}" required>
+                        </label>
+                        <label class="pago-field">
+                            <span>Numero de tarjeta</span>
+                            <input type="text" id="cardNumber" name="cardNumber" placeholder="0000 0000 0000 0000" inputmode="numeric" maxlength="19" required>
+                        </label>
+                        <label class="pago-field">
+                            <span>Vencimiento</span>
+                            <input type="text" id="cardExpiry" name="cardExpiry" placeholder="MM/AA" inputmode="numeric" maxlength="5" required>
+                        </label>
+                        <label class="pago-field">
+                            <span>CVV</span>
+                            <input type="password" id="cardCvv" name="cardCvv" placeholder="000" inputmode="numeric" maxlength="3" required>
+                        </label>
+                    </div>
+                    <p class="pago-hint">Proyecto escolar: los datos de la tarjeta son ficticios.</p>
+
+                    <div class="acciones">
+                        <button class="btn-primario" type="submit" {% if error %}disabled{% endif %}>Pagar ahora</button>
+                        <a class="btn-secundario" href="{{ url_for('reservas.reserva_paso2', idhabitacion=habitacion.idhabitacion, inicio=fechainicio, fin=fechafin) }}">Volver a plan</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

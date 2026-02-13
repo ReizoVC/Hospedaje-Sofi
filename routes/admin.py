@@ -15,6 +15,7 @@ from models.egreso import Egreso
 from models.usuario import Usuario
 from models.ingreso import Ingreso, registrar_ingreso_por_confirmacion
 from datetime import datetime, date
+import calendar
 from sqlalchemy import and_, or_
 from utils.auth import role_required, ROL_ADMIN
 
@@ -495,7 +496,7 @@ def api_reportes_admin_ingresos():
         q = Reserva.query.filter(
             Reserva.estado.in_(estados),
             Reserva.fechainicio >= d_desde,
-            Reserva.fechafin <= d_hasta
+            Reserva.fechainicio <= d_hasta
         ).order_by(Reserva.fechainicio.asc())
         items = []
         total = 0.0
@@ -524,6 +525,80 @@ def api_reportes_admin_ingresos():
         })
     except Exception as e:
         return jsonify({'error': f'Error al generar reporte de ingresos: {str(e)}'}), 500
+
+@admin.route('/api/reportes/admin/ingresos/periodos', methods=['GET'])
+def api_reportes_admin_ingresos_periodos():
+    error = verificar_admin()
+    if error:
+        return error
+    try:
+        estados_str = request.args.get('estados')
+        estados = ['confirmada', 'completada']
+        if estados_str:
+            estados = [e.strip() for e in estados_str.split(',') if e.strip()]
+
+        fechas = (Reserva.query
+            .filter(
+                Reserva.estado.in_(estados),
+                Reserva.fechainicio.isnot(None)
+            )
+            .with_entities(Reserva.fechainicio)
+            .all())
+
+        dias_set = set()
+        semanas_set = set()
+        meses_set = set()
+        for (fecha,) in fechas:
+            if not fecha:
+                continue
+            dias_set.add(fecha)
+            iso = fecha.isocalendar()
+            semanas_set.add((iso[0], iso[1]))
+            meses_set.add((fecha.year, fecha.month))
+
+        dias = sorted(dias_set, reverse=True)
+        semanas = sorted(semanas_set, reverse=True)
+        meses = sorted(meses_set, reverse=True)
+
+        dias_payload = [
+            {
+                'value': d.isoformat(),
+                'label': d.isoformat(),
+                'desde': d.isoformat(),
+                'hasta': d.isoformat()
+            }
+            for d in dias
+        ]
+
+        semanas_payload = []
+        for y, w in semanas:
+            inicio = date.fromisocalendar(y, w, 1)
+            fin = date.fromisocalendar(y, w, 7)
+            semanas_payload.append({
+                'value': f'{y}-W{w:02d}',
+                'label': f'{y} Semana {w:02d} ({inicio.isoformat()} - {fin.isoformat()})',
+                'desde': inicio.isoformat(),
+                'hasta': fin.isoformat()
+            })
+
+        meses_payload = []
+        for y, m in meses:
+            inicio = date(y, m, 1)
+            fin = date(y, m, calendar.monthrange(y, m)[1])
+            meses_payload.append({
+                'value': f'{y}-{m:02d}',
+                'label': f'{y}-{m:02d}',
+                'desde': inicio.isoformat(),
+                'hasta': fin.isoformat()
+            })
+
+        return jsonify({
+            'dias': dias_payload,
+            'semanas': semanas_payload,
+            'meses': meses_payload
+        })
+    except Exception as e:
+        return jsonify({'error': f'Error al cargar periodos de ingresos: {str(e)}'}), 500
 
 @admin.route('/api/reportes/admin/egresos', methods=['GET'])
 def api_reportes_admin_egresos():

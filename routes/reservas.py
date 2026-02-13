@@ -3,12 +3,25 @@ from utils.auth import redirect_staff_to_dashboard
 from utils.db import db
 from models.reserva import Reserva
 from models.habitaciones import Habitacion
+from models.imagenes_habitaciones import ImagenHabitacion
 from models.usuario import Usuario
 from datetime import datetime, date
 import uuid
 from sqlalchemy import and_, or_
 
 reservas = Blueprint('reservas', __name__, url_prefix='/reservas')
+
+
+def _cargar_habitacion_con_imagenes(idhabitacion):
+    habitacion = Habitacion.query.get_or_404(idhabitacion)
+    imagenes = ImagenHabitacion.query.filter_by(
+        idhabitacion=idhabitacion
+    ).order_by(ImagenHabitacion.orden).all()
+    habitacion_data = habitacion.to_dict()
+    habitacion_data['imagenes'] = [
+        f"/static/uploads/{img.url}" for img in imagenes
+    ] if imagenes else ["/static/images/index/hab1.avif"]
+    return habitacion_data
 
 
 @reservas.before_request
@@ -33,6 +46,10 @@ def crear_reserva():
         
         if not all(k in data for k in ['idhabitacion', 'fechainicio', 'fechafin']):
             return jsonify({'success': False, 'message': 'Faltan datos requeridos'}), 400
+
+        plan = data.get('plan', 'total')
+        if plan not in ('parcial', 'total'):
+            plan = 'total'
         
         fecha_inicio = datetime.strptime(data['fechainicio'], '%Y-%m-%d').date()
         fecha_fin = datetime.strptime(data['fechafin'], '%Y-%m-%d').date()
@@ -61,12 +78,13 @@ def crear_reserva():
             return jsonify({'success': False, 'message': 'La habitación no está disponible en esas fechas'}), 400
         
         user_uuid = uuid.UUID(session['user_id']) if isinstance(session['user_id'], str) else session['user_id']
+        estado_reserva = 'pendiente' if plan == 'parcial' else 'confirmada'
         nueva_reserva = Reserva(
             idusuario=user_uuid,
             idhabitacion=data['idhabitacion'],
             fechainicio=fecha_inicio,
             fechafin=fecha_fin,
-            estado='pendiente'
+            estado=estado_reserva
         )
         
         db.session.add(nueva_reserva)
@@ -83,6 +101,108 @@ def crear_reserva():
         db.session.rollback()
         print(f"Error al crear reserva: {str(e)}")
         return jsonify({'success': False, 'message': 'Error interno del servidor'}), 500
+
+
+@reservas.route('/paso-1/<int:idhabitacion>')
+def reserva_paso1(idhabitacion):
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login_page'))
+
+    habitacion_data = _cargar_habitacion_con_imagenes(idhabitacion)
+    return render_template('pages/reserva_fechas.html', habitacion=habitacion_data)
+
+
+@reservas.route('/paso-2/<int:idhabitacion>')
+def reserva_paso2(idhabitacion):
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login_page'))
+
+    habitacion_data = _cargar_habitacion_con_imagenes(idhabitacion)
+    fechainicio = request.args.get('inicio')
+    fechafin = request.args.get('fin')
+    noches = None
+    total = None
+    monto_parcial = None
+    saldo = None
+    error = None
+
+    if fechainicio and fechafin:
+        try:
+            inicio = datetime.strptime(fechainicio, '%Y-%m-%d').date()
+            fin = datetime.strptime(fechafin, '%Y-%m-%d').date()
+            if fin <= inicio:
+                error = 'La fecha de salida debe ser posterior a la fecha de llegada'
+            else:
+                noches = (fin - inicio).days
+                total = int(noches * (habitacion_data.get('precio_noche') or 0))
+                monto_parcial = int(round(total * 0.6))
+                saldo = total - monto_parcial
+        except ValueError:
+            error = 'Fechas invalidas. Vuelve al paso anterior.'
+    else:
+        error = 'Faltan fechas. Vuelve al paso anterior.'
+
+    monto_parcial = int(round((total or 0) * 0.6)) if total is not None else None
+    saldo = (total - monto_parcial) if total is not None else None
+
+    return render_template(
+        'pages/reserva_plan.html',
+        habitacion=habitacion_data,
+        fechainicio=fechainicio,
+        fechafin=fechafin,
+        noches=noches,
+        total=total,
+        monto_parcial=monto_parcial,
+        saldo=saldo,
+        error=error
+    )
+
+
+@reservas.route('/paso-3/<int:idhabitacion>')
+def reserva_paso3(idhabitacion):
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login_page'))
+
+    habitacion_data = _cargar_habitacion_con_imagenes(idhabitacion)
+    fechainicio = request.args.get('inicio')
+    fechafin = request.args.get('fin')
+    plan = request.args.get('plan', 'total')
+    if plan not in ('parcial', 'total'):
+        plan = 'total'
+    noches = None
+    total = None
+    monto_parcial = None
+    saldo = None
+    error = None
+
+    if fechainicio and fechafin:
+        try:
+            inicio = datetime.strptime(fechainicio, '%Y-%m-%d').date()
+            fin = datetime.strptime(fechafin, '%Y-%m-%d').date()
+            if fin <= inicio:
+                error = 'La fecha de salida debe ser posterior a la fecha de llegada'
+            else:
+                noches = (fin - inicio).days
+                total = int(noches * (habitacion_data.get('precio_noche') or 0))
+                monto_parcial = int(round(total * 0.6))
+                saldo = total - monto_parcial
+        except ValueError:
+            error = 'Fechas invalidas. Vuelve al paso anterior.'
+    else:
+        error = 'Faltan fechas. Vuelve al paso anterior.'
+
+    return render_template(
+        'pages/reserva_pago.html',
+        habitacion=habitacion_data,
+        fechainicio=fechainicio,
+        fechafin=fechafin,
+        noches=noches,
+        total=total,
+        monto_parcial=monto_parcial,
+        saldo=saldo,
+        plan=plan,
+        error=error
+    )
 
 @reservas.route('/mis-reservas')
 def mis_reservas():
@@ -143,6 +263,31 @@ def verificar_disponibilidad():
     except Exception as e:
         print(f"Error al verificar disponibilidad: {str(e)}")
         return jsonify({'disponible': False, 'message': 'Error al verificar disponibilidad'}), 500
+
+
+@reservas.route('/bloqueadas/<int:idhabitacion>')
+def fechas_bloqueadas(idhabitacion):
+    """Fechas bloqueadas (reservadas) para una habitacion"""
+    try:
+        hoy = date.today()
+        reservas_bloqueadas = Reserva.query.filter(
+            Reserva.idhabitacion == idhabitacion,
+            Reserva.estado.in_(['pendiente', 'confirmada', 'activa']),
+            Reserva.fechafin >= hoy
+        ).all()
+
+        rangos = [
+            {
+                'inicio': r.fechainicio.isoformat(),
+                'fin': r.fechafin.isoformat()
+            }
+            for r in reservas_bloqueadas
+        ]
+
+        return jsonify({'rangos': rangos})
+    except Exception as e:
+        print(f"Error al obtener fechas bloqueadas: {str(e)}")
+        return jsonify({'rangos': []}), 500
 
 @reservas.route('/cancelar/<codigo_reserva>', methods=['POST'])
 def cancelar_reserva(codigo_reserva):

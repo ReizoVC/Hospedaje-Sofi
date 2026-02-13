@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+
+{% block title %}Reserva | Seleccion de Fechas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reserva_fechas.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="reserva-fechas">
+    <div class="container reserva-wrap">
+        <div class="reserva-top">
+            <div class="reserva-title">
+                <p class="eyebrow">Paso 1 de 3</p>
+                <h1>Selecciona tus fechas</h1>
+                <p>Elige el rango de tu estadia y confirma que las fechas son correctas.</p>
+            </div>
+            <div class="reserva-steps" aria-hidden="true">
+                <span class="step is-active">1</span>
+                <span class="step-line"></span>
+                <span class="step">2</span>
+                <span class="step-line"></span>
+                <span class="step">3</span>
+            </div>
+        </div>
+
+        <div class="reserva-grid">
+            <aside class="reserva-card habitacion-card">
+                <img class="habitacion-cover" src="{{ habitacion.imagenes[0] if habitacion.imagenes else '/static/images/index/hab1.avif' }}" alt="{{ habitacion.nombre }}">
+                <div class="habitacion-body">
+                    <h2>{{ habitacion.nombre }}</h2>
+                    <p class="habitacion-precio">S/ {{ "%.0f"|format(habitacion.precio_noche) }} <span>por noche</span></p>
+                    <div class="habitacion-meta">
+                        <span><i class="fas fa-users"></i> {{ habitacion.capacidad }} persona{% if habitacion.capacidad != 1 %}s{% endif %}</span>
+                        {% if habitacion.camas %}
+                        <span><i class="fas fa-bed"></i> {{ habitacion.camas }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </aside>
+
+            <div class="reserva-card picker-card">
+                <div class="picker-header">
+                    <h2>Rango de estadia</h2>
+                    <p>Selecciona fecha de llegada y salida en el calendario.</p>
+                </div>
+
+                <div class="date-picker" id="datePicker">
+                    <div class="dp-header">
+                        <button class="dp-nav" type="button" data-dir="-1" aria-label="Mes anterior">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="dp-month" id="dpMonthLabel"></div>
+                        <button class="dp-nav" type="button" data-dir="1" aria-label="Mes siguiente">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="dp-weekdays" aria-hidden="true">
+                        <span>Lun</span>
+                        <span>Mar</span>
+                        <span>Mie</span>
+                        <span>Jue</span>
+                        <span>Vie</span>
+                        <span>Sab</span>
+                        <span>Dom</span>
+                    </div>
+                    <div class="dp-grid" id="dpGrid"></div>
+                </div>
+
+                <div class="resumen-panel">
+                    <div class="resumen-row">
+                        <span>Llegada</span>
+                        <strong id="fechaInicioTxt">--</strong>
+                    </div>
+                    <div class="resumen-row">
+                        <span>Salida</span>
+                        <strong id="fechaFinTxt">--</strong>
+                    </div>
+                    <div class="resumen-row">
+                        <span>Noches</span>
+                        <strong id="nochesTxt">0</strong>
+                    </div>
+                    <div class="resumen-row total">
+                        <span>Total</span>
+                        <strong>S/ <span id="totalTxt">0</span></strong>
+                    </div>
+                </div>
+
+                <div id="disponibilidadMensaje" class="disponibilidad"></div>
+
+                <div class="acciones">
+                    <button id="btnContinuar" class="btn-primario" type="button" disabled>Continuar</button>
+                    <a class="btn-secundario" href="/habitacion/{{ habitacion.idhabitacion }}">Volver al detalle</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/pages/reserva_fechas.js') }}"
+    data-idhabitacion="{{ habitacion.idhabitacion }}"
+    data-precio-noche="{{ habitacion.precio_noche }}"
+    data-min-date="{{ fecha_minima() }}"></script>
+{% endblock %}
