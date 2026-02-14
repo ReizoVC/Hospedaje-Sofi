@@ -2,11 +2,56 @@ from flask import Blueprint, render_template, request, jsonify, session, redirec
 from utils.db import db
 from models.producto import Producto
 from models.movimientos import Movimientos
+from models.lote import Lote
 from models.egreso import Egreso
 from datetime import datetime, date
+from sqlalchemy import func, case, or_, and_
+from sqlalchemy.sql import expression
 import uuid
 
 almacenista = Blueprint('almacenista', __name__)
+
+
+def _producto_to_dict(producto: Producto, stock_total=None, costo_total=None, fv=None):
+    if stock_total is None or costo_total is None:
+        hoy = date.today()
+        vigente = or_(Lote.fecha_vencimiento.is_(None), Lote.fecha_vencimiento >= hoy)
+        row = (
+            db.session.query(
+                func.coalesce(func.sum(case((vigente, Lote.cantidad_actual), else_=0)), 0),
+                func.coalesce(func.sum(case((vigente, Lote.cantidad_actual * Lote.costo_unitario), else_=0)), 0),
+                func.min(case((and_(vigente, Lote.cantidad_actual > 0), Lote.fecha_vencimiento))),
+            )
+            .filter(Lote.idproducto == producto.idproducto)
+            .one()
+        )
+        stock_total = int(row[0] or 0)
+        costo_total = int(row[1] or 0)
+        fv = row[2]
+    else:
+        stock_total = int(stock_total or 0)
+        costo_total = int(costo_total or 0)
+
+    costo_unit = int(round(costo_total / stock_total)) if stock_total > 0 else 0
+    dias = None
+    if fv:
+        try:
+            dias = (fv - date.today()).days
+        except Exception:
+            dias = None
+
+    return {
+        'idproducto': producto.idproducto,
+        'nombre': producto.nombre,
+        'cantidad': stock_total,
+        'umbralminimo': int(producto.umbralminimo or 0),
+        'costo': costo_unit,
+        'costo_total': int(costo_total or 0),
+        'fecha_vencimiento': fv.isoformat() if fv else None,
+        'agotado': stock_total <= 0,
+        'bajo_stock': stock_total <= int(producto.umbralminimo or 0),
+        'dias_para_vencer': dias,
+    }
 
 def verificar_almacenista():
     if 'user_id' not in session:
@@ -48,14 +93,38 @@ def listar_productos():
     if error:
         return error
     try:
-        q = Producto.query
         nombre = request.args.get('q')
         bajos = request.args.get('bajos')
         por_vencer_dias = request.args.get('por_vencer_dias')
+
+        hoy = date.today()
+        vigente = or_(Lote.fecha_vencimiento.is_(None), Lote.fecha_vencimiento >= hoy)
+        lotes_subq = (
+            db.session.query(
+                Lote.idproducto.label('idproducto'),
+                func.coalesce(func.sum(case((vigente, Lote.cantidad_actual), else_=0)), 0).label('stock_total'),
+                func.coalesce(func.sum(case((vigente, Lote.cantidad_actual * Lote.costo_unitario), else_=0)), 0).label('costo_total'),
+                func.min(case((and_(vigente, Lote.cantidad_actual > 0), Lote.fecha_vencimiento))).label('fecha_vencimiento'),
+            )
+            .group_by(Lote.idproducto)
+            .subquery()
+        )
+
+        q = db.session.query(
+            Producto,
+            lotes_subq.c.stock_total,
+            lotes_subq.c.costo_total,
+            lotes_subq.c.fecha_vencimiento,
+        ).outerjoin(lotes_subq, Producto.idproducto == lotes_subq.c.idproducto)
+
         if nombre:
             q = q.filter(Producto.nombre.ilike(f"%{nombre}%"))
+
         productos = q.all()
-        data = [p.to_dict() for p in productos]
+        data = [
+            _producto_to_dict(p, stock_total, costo_total, fv)
+            for (p, stock_total, costo_total, fv) in productos
+        ]
         if bajos == '1':
             data = [d for d in data if d['bajo_stock']]
         if por_vencer_dias and por_vencer_dias.isdigit():
@@ -82,17 +151,28 @@ def crear_producto():
         costo = int(data.get('costo') or 0)
         fv = data.get('fecha_vencimiento')
         fv_date = datetime.strptime(fv, '%Y-%m-%d').date() if fv else None
-        p = Producto(nombre=nombre, cantidad=cantidad, umbralminimo=umbral, costo=costo, fecha_vencimiento=fv_date)
+        p = Producto(nombre=nombre, umbralminimo=umbral)
         db.session.add(p)
         db.session.flush()
         if cantidad and cantidad > 0:
+            lote = Lote(
+                idproducto=p.idproducto,
+                cantidad_actual=cantidad,
+                cantidad_inicial=cantidad,
+                fecha_vencimiento=fv_date,
+                costo_unitario=costo,
+            )
+            db.session.add(lote)
+            db.session.flush()
             sid = session.get('user_id')
             user_uuid = uuid.UUID(sid) if isinstance(sid, str) else sid
             mov = Movimientos(
                 idproducto=p.idproducto,
+                idlote=lote.idlote,
                 idusuario=user_uuid,
                 tipo='entrada',
                 cantidad=cantidad,
+                costototal=int(cantidad) * int(costo or 0),
                 fecha=datetime.utcnow(),
             )
             db.session.add(mov)
@@ -106,7 +186,7 @@ def crear_producto():
                 )
                 db.session.add(eg)
         db.session.commit()
-        return jsonify({'message': 'Producto creado', 'producto': p.to_dict()}), 201
+        return jsonify({'message': 'Producto creado', 'producto': _producto_to_dict(p)}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al crear producto: {str(e)}'}), 500
@@ -126,16 +206,10 @@ def actualizar_producto(idproducto):
             p.nombre = nombre
         if 'umbralminimo' in data:
             p.umbralminimo = int(data['umbralminimo'] or 0)
-        if 'fecha_vencimiento' in data:
-            fv = data.get('fecha_vencimiento')
-            p.fecha_vencimiento = datetime.strptime(fv, '%Y-%m-%d').date() if fv else None
-        if 'costo' in data:
-            try:
-                p.costo = int(data.get('costo') or 0)
-            except Exception:
-                return jsonify({'error': 'Costo inválido'}), 400
+        if 'fecha_vencimiento' in data or 'costo' in data:
+            pass
         db.session.commit()
-        return jsonify({'message': 'Producto actualizado', 'producto': p.to_dict()})
+        return jsonify({'message': 'Producto actualizado', 'producto': _producto_to_dict(p)})
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al actualizar producto: {str(e)}'}), 500
@@ -176,20 +250,35 @@ def listar_movimientos():
         return jsonify({'error': f'Error al listar movimientos: {str(e)}'}), 500
 
 
-def _aplicar_movimiento_stock(producto: Producto, tipo: str, cantidad: int):
-    if cantidad <= 0:
-        raise ValueError('La cantidad debe ser mayor a 0')
-    if tipo == 'entrada':
-        producto.cantidad = int(producto.cantidad or 0) + cantidad
-    elif tipo == 'salida':
-        disponible = int(producto.cantidad or 0)
-        if cantidad > disponible:
-            raise ValueError('Stock insuficiente')
-        producto.cantidad = disponible - cantidad
-    elif tipo == 'ajuste':
-        producto.cantidad = int(producto.cantidad or 0) + cantidad
-    else:
-        raise ValueError('Tipo de movimiento no válido')
+@almacenista.route('/api/lotes/vencidos', methods=['GET'])
+def listar_lotes_vencidos():
+    error = verificar_almacenista()
+    if error:
+        return error
+    try:
+        hoy = date.today()
+        q = (
+            db.session.query(Lote, Producto.nombre.label('producto_nombre'))
+            .join(Producto, Producto.idproducto == Lote.idproducto)
+            .filter(Lote.fecha_vencimiento.isnot(None), Lote.fecha_vencimiento < hoy)
+            .order_by(Lote.fecha_vencimiento.asc())
+        )
+        items = []
+        for lote, producto_nombre in q.all():
+            items.append({
+                'idlote': lote.idlote,
+                'idproducto': lote.idproducto,
+                'producto': producto_nombre,
+                'cantidad_actual': int(lote.cantidad_actual or 0),
+                'cantidad_inicial': int(lote.cantidad_inicial or 0),
+                'fecha_vencimiento': lote.fecha_vencimiento.isoformat() if lote.fecha_vencimiento else None,
+                'costo_unitario': int(lote.costo_unitario or 0),
+                'fecha_ingreso': lote.fecha_ingreso.isoformat() if lote.fecha_ingreso else None,
+            })
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': f'Error al listar lotes vencidos: {str(e)}'}), 500
+
 
 @almacenista.route('/api/movimientos', methods=['POST'])
 def crear_movimiento():
@@ -206,28 +295,105 @@ def crear_movimiento():
         if tipo not in ('entrada', 'salida', 'ajuste'):
             return jsonify({'error': 'Tipo inválido'}), 400
         producto = Producto.query.get_or_404(idproducto)
-        _aplicar_movimiento_stock(producto, tipo, cantidad)
         sid = session.get('user_id')
         user_uuid = uuid.UUID(sid) if isinstance(sid, str) else sid
-        mov = Movimientos(
-            idproducto=producto.idproducto,
-            idusuario=user_uuid,
-            tipo=tipo,
-            cantidad=cantidad,
-            fecha=datetime.utcnow(),
-        )
-        db.session.add(mov)
-        db.session.flush()
-        if tipo == 'entrada' and (mov.costototal or 0) > 0:
-            eg = Egreso(
-                idmovimiento=mov.idmovimiento,
-                descripcion=f"Entrada de stock producto {producto.nombre}",
-                monto=float(mov.costototal or 0),
-                fechaegreso=mov.fecha.date() if hasattr(mov.fecha, 'date') else date.today(),
+
+        if tipo in ('entrada', 'ajuste'):
+            costo_unitario = data.get('costo_unitario')
+            try:
+                costo_unitario = int(costo_unitario)
+            except Exception:
+                return jsonify({'error': 'Costo unitario inválido'}), 400
+
+            fv = data.get('fecha_vencimiento')
+            fv_date = None
+            if fv:
+                try:
+                    fv_date = datetime.strptime(fv, '%Y-%m-%d').date()
+                except Exception:
+                    return jsonify({'error': 'Fecha de vencimiento inválida'}), 400
+
+            lote = Lote(
+                idproducto=producto.idproducto,
+                cantidad_actual=cantidad,
+                cantidad_inicial=cantidad,
+                fecha_vencimiento=fv_date,
+                costo_unitario=costo_unitario,
             )
-            db.session.add(eg)
+            db.session.add(lote)
+            db.session.flush()
+
+            mov = Movimientos(
+                idproducto=producto.idproducto,
+                idlote=lote.idlote,
+                idusuario=user_uuid,
+                tipo=tipo,
+                cantidad=cantidad,
+                costototal=int(cantidad) * int(costo_unitario or 0),
+                fecha=datetime.utcnow(),
+            )
+            db.session.add(mov)
+            db.session.flush()
+
+            if tipo == 'entrada' and (mov.costototal or 0) > 0:
+                eg = Egreso(
+                    idmovimiento=mov.idmovimiento,
+                    descripcion=f"Entrada de stock producto {producto.nombre}",
+                    monto=float(mov.costototal or 0),
+                    fechaegreso=mov.fecha.date() if hasattr(mov.fecha, 'date') else date.today(),
+                )
+                db.session.add(eg)
+
+            db.session.commit()
+            return jsonify({
+                'message': 'Movimiento registrado',
+                'producto': _producto_to_dict(producto),
+                'movimiento': mov.to_dict(),
+            }), 201
+
+        lotes = (
+            Lote.query
+            .filter(Lote.idproducto == producto.idproducto, Lote.cantidad_actual > 0)
+            .order_by(
+                expression.nulls_last(Lote.fecha_vencimiento.asc()),
+                Lote.fecha_ingreso.asc(),
+            )
+            .all()
+        )
+        restante = cantidad
+        movimientos_creados = []
+
+        for lote in lotes:
+            if restante <= 0:
+                break
+            disponible = int(lote.cantidad_actual or 0)
+            if disponible <= 0:
+                continue
+            tomar = disponible if disponible < restante else restante
+            lote.cantidad_actual = disponible - tomar
+            mov = Movimientos(
+                idproducto=producto.idproducto,
+                idlote=lote.idlote,
+                idusuario=user_uuid,
+                tipo='salida',
+                cantidad=tomar,
+                costototal=int(tomar) * int(lote.costo_unitario or 0),
+                fecha=datetime.utcnow(),
+            )
+            db.session.add(mov)
+            movimientos_creados.append(mov)
+            restante -= tomar
+
+        if restante > 0:
+            db.session.rollback()
+            return jsonify({'error': 'Stock insuficiente'}), 400
+
         db.session.commit()
-        return jsonify({'message': 'Movimiento registrado', 'producto': producto.to_dict(), 'movimiento': mov.to_dict()}), 201
+        return jsonify({
+            'message': 'Movimiento registrado',
+            'producto': _producto_to_dict(producto),
+            'movimientos': [m.to_dict() for m in movimientos_creados],
+        }), 201
     except ValueError as ve:
         db.session.rollback()
         return jsonify({'error': str(ve)}), 400

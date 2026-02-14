@@ -12,9 +12,6 @@
     <div class="content-header fade-in-up">
       <h3 class="titulo-seccion">Gestión de Reservas</h3>
       <div style="display: flex; gap: 1rem; align-items: center;">
-        <small style="color: var(--secondary-color); font-style: italic;">
-          *Las reservas completadas se encuentran en un menú separado
-        </small>
         <button class="btn btn-nueva" onclick="abrirModalNuevaReserva()">
           <i class="fas fa-plus"></i>
           Nueva Reserva
@@ -59,6 +56,19 @@
         <div class="stat-number">0</div>
         <div class="stat-label">Total Reservas</div>
       </div>
+    </div>
+
+    <!-- Tabs de reservas -->
+    <div class="tabs-container fade-in-up">
+      <button class="tab-button active" data-tab="principales" onclick="cambiarTab('principales')">
+        Pendientes y confirmadas
+      </button>
+      <button class="tab-button" data-tab="completadas" onclick="cambiarTab('completadas')">
+        Historial completadas
+      </button>
+      <button class="tab-button" data-tab="canceladas" onclick="cambiarTab('canceladas')">
+        Historial canceladas
+      </button>
     </div>
 
     <!-- Tabla moderna -->

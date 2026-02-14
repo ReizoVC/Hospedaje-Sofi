@@ -1,6 +1,29 @@
 let reservas = [];
 let usuarios = [];
 let habitaciones = [];
+let tabActual = 'principales';
+
+function parseDateOnly(dateStr) {
+  if (!dateStr) return null;
+  const parts = dateStr.split('-').map(Number);
+  if (parts.length !== 3 || parts.some(Number.isNaN)) {
+    return new Date(dateStr);
+  }
+  const [year, month, day] = parts;
+  return new Date(year, month - 1, day);
+}
+
+function formatDateInput(dateObj) {
+  if (!(dateObj instanceof Date)) return '';
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function formatDateDisplay(dateObj) {
+  return dateObj instanceof Date ? dateObj.toLocaleDateString('es-ES') : '';
+}
 
 document.addEventListener('DOMContentLoaded', function() {
   const elements = document.querySelectorAll('.fade-in-up');
@@ -34,13 +57,22 @@ async function cargarReservas() {
     
     const todasLasReservas = await response.json();
     
-    // Filtrar las reservas completadas (no se muestran en este menú)
-    reservas = todasLasReservas.filter(reserva => reserva.estado !== 'completada');
+    reservas = todasLasReservas;
     
     actualizarTablaReservas();
   } catch (error) {
     mostrarError('Error al cargar las reservas');
   }
+}
+
+function cambiarTab(tab) {
+  tabActual = tab;
+  const botones = document.querySelectorAll('.tab-button');
+  botones.forEach(boton => {
+    const activo = boton.dataset.tab === tab;
+    boton.classList.toggle('active', activo);
+  });
+  actualizarTablaReservas();
 }
 
 // Función para cargar estadísticas
@@ -100,23 +132,39 @@ function actualizarTablaReservas() {
   if (!tbody) return;
   
   tbody.innerHTML = '';
+
+  const reservasFiltradas = reservas.filter(reserva => {
+    if (tabActual === 'canceladas') {
+      return reserva.estado === 'cancelada';
+    }
+    if (tabActual === 'completadas') {
+      return reserva.estado === 'completada';
+    }
+    return reserva.estado !== 'cancelada' && reserva.estado !== 'completada';
+  });
   
-  if (reservas.length === 0) {
+  if (reservasFiltradas.length === 0) {
+    let mensajeVacio = 'No hay reservas pendientes ni confirmadas';
+    if (tabActual === 'canceladas') {
+      mensajeVacio = 'No hay reservas canceladas';
+    } else if (tabActual === 'completadas') {
+      mensajeVacio = 'No hay reservas completadas';
+    }
     tbody.innerHTML = `
       <tr>
         <td colspan="7" style="text-align: center; padding: 3rem 1rem; color: var(--secondary-color);">
           <i class="fas fa-calendar-times" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
-          No hay reservas registradas
+          ${mensajeVacio}
         </td>
       </tr>
     `;
     return;
   }
   
-  reservas.forEach(reserva => {
+  reservasFiltradas.forEach(reserva => {
     const tr = document.createElement('tr');
     
-    const fechaInicio = new Date(reserva.fechainicio);
+    const fechaInicio = parseDateOnly(reserva.fechainicio);
     const fechaHoy = new Date();
     fechaHoy.setHours(0, 0, 0, 0);
     const yaComenzo = fechaInicio <= fechaHoy;
@@ -127,32 +175,41 @@ function actualizarTablaReservas() {
     const iniciales = `${reserva.usuario.nombre.charAt(0)}${reserva.usuario.apellidos.charAt(0)}`;
     const colorAvatar = generarColorAvatar(reserva.usuario.nombre);
     
-    const fechaInicioStr = fechaInicio.toLocaleDateString('es-ES');
-    const fechaFinStr = new Date(reserva.fechafin).toLocaleDateString('es-ES');
+    const fechaInicioStr = formatDateDisplay(fechaInicio);
+    const fechaFinStr = formatDateDisplay(parseDateOnly(reserva.fechafin));
     
     const badgeInfo = obtenerBadgeInfo(reserva.estado);
     
-    let botonEditar = '';
-    
-    if (puedeEditarCompleto) {
-      botonEditar = `<button class="btn btn-sm btn-outline-primary" title="Editar reserva pendiente" onclick="editarReserva(${reserva.idreserva})">
-        <i class="fas fa-edit"></i>
-      </button>`;
-    } else if (!esPendiente && !yaComenzo) {
-      botonEditar = `<button class="btn btn-sm btn-outline-secondary" title="Solo cambio de estado (no pendiente)" onclick="editarReserva(${reserva.idreserva})">
-        <i class="fas fa-edit"></i>
-        <i class="fas fa-flag" style="font-size: 0.7em; margin-left: 2px;"></i>
-      </button>`;
-    } else if (yaComenzo && esPendiente) {
-      botonEditar = `<button class="btn btn-sm btn-outline-warning" title="Solo cambio de estado (ya comenzó)" onclick="editarReserva(${reserva.idreserva})">
-        <i class="fas fa-edit"></i>
-        <i class="fas fa-clock" style="font-size: 0.7em; margin-left: 2px;"></i>
-      </button>`;
-    } else {
-      botonEditar = `<button class="btn btn-sm btn-outline-danger" title="Solo cambio de estado (ya comenzó y confirmada)" onclick="editarReserva(${reserva.idreserva})">
-        <i class="fas fa-edit"></i>
-        <i class="fas fa-ban" style="font-size: 0.7em; margin-left: 2px;"></i>
-      </button>`;
+    let accionesHTML = '';
+    if (reserva.estado !== 'cancelada' && reserva.estado !== 'completada') {
+      let botonEditar = '';
+      if (puedeEditarCompleto) {
+        botonEditar = `<button class="btn btn-sm btn-outline-primary" title="Editar reserva pendiente" onclick="editarReserva(${reserva.idreserva})">
+          <i class="fas fa-edit"></i>
+        </button>`;
+      } else if (!esPendiente && !yaComenzo) {
+        botonEditar = `<button class="btn btn-sm btn-outline-secondary" title="Solo cambio de estado (no pendiente)" onclick="editarReserva(${reserva.idreserva})">
+          <i class="fas fa-edit"></i>
+          <i class="fas fa-flag" style="font-size: 0.7em; margin-left: 2px;"></i>
+        </button>`;
+      } else if (yaComenzo && esPendiente) {
+        botonEditar = `<button class="btn btn-sm btn-outline-warning" title="Solo cambio de estado (ya comenzó)" onclick="editarReserva(${reserva.idreserva})">
+          <i class="fas fa-edit"></i>
+          <i class="fas fa-clock" style="font-size: 0.7em; margin-left: 2px;"></i>
+        </button>`;
+      } else {
+        botonEditar = `<button class="btn btn-sm btn-outline-danger" title="Solo cambio de estado (ya comenzó y confirmada)" onclick="editarReserva(${reserva.idreserva})">
+          <i class="fas fa-edit"></i>
+          <i class="fas fa-ban" style="font-size: 0.7em; margin-left: 2px;"></i>
+        </button>`;
+      }
+
+      accionesHTML = `
+        ${botonEditar}
+        <button class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="eliminarReserva(${reserva.idreserva})">
+          <i class="fas fa-trash"></i>
+        </button>
+      `;
     }
     
     tr.innerHTML = `
@@ -167,12 +224,7 @@ function actualizarTablaReservas() {
       <td style="font-weight: 500;">${fechaInicioStr}</td>
       <td style="font-weight: 500;">${fechaFinStr}</td>
       <td><span class="badge ${badgeInfo.clase}"><i class="${badgeInfo.icono} me-1"></i>${badgeInfo.texto}</span></td>
-      <td>
-        ${botonEditar}
-        <button class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="eliminarReserva(${reserva.idreserva})">
-          <i class="fas fa-trash"></i>
-        </button>
-      </td>
+      <td>${accionesHTML}</td>
     `;
     
     tbody.appendChild(tr);
@@ -269,8 +321,8 @@ async function actualizarReserva(event, idReserva) {
   const data = Object.fromEntries(formData.entries());
   
   // Validar fechas
-  const fechaInicio = new Date(data.fechainicio);
-  const fechaFin = new Date(data.fechafin);
+  const fechaInicio = parseDateOnly(data.fechainicio);
+  const fechaFin = parseDateOnly(data.fechafin);
   
   if (fechaInicio >= fechaFin) {
     mostrarError('La fecha de inicio debe ser anterior a la fecha de fin');
@@ -366,7 +418,7 @@ function editarReserva(idReserva) {
     return;
   }
   
-  const fechaInicio = new Date(reserva.fechainicio);
+  const fechaInicio = parseDateOnly(reserva.fechainicio);
   const fechaHoy = new Date();
   fechaHoy.setHours(0, 0, 0, 0);
   
@@ -380,8 +432,8 @@ function editarReserva(idReserva) {
     return;
   }
   
-  const fechaInicioStr = fechaInicio.toISOString().split('T')[0];
-  const fechaFin = new Date(reserva.fechafin).toISOString().split('T')[0];
+  const fechaInicioStr = formatDateInput(fechaInicio);
+  const fechaFin = formatDateInput(parseDateOnly(reserva.fechafin));
   
   const habitacionesDisponibles = habitaciones.filter(h => 
     h.estado === 'disponible' || h.idhabitacion === reserva.habitacion.idhabitacion
@@ -499,8 +551,8 @@ function mostrarModalEstadoSolo(reserva, yaComenzo, esPendiente) {
     `<option value="${estado.valor}" ${estado.valor === reserva.estado ? 'selected' : ''}>${estado.texto}</option>`
   ).join('');
   
-  const fechaInicio = new Date(reserva.fechainicio).toLocaleDateString('es-ES');
-  const fechaFin = new Date(reserva.fechafin).toLocaleDateString('es-ES');
+  const fechaInicio = formatDateDisplay(parseDateOnly(reserva.fechainicio));
+  const fechaFin = formatDateDisplay(parseDateOnly(reserva.fechafin));
   
   // Determinar el motivo por el cual no se puede editar
   let motivoRestriccion = '';
@@ -715,7 +767,7 @@ function abrirModalNuevaReserva() {
     `<option value="${h.idhabitacion}">${h.numero} - ${h.nombre} ($${h.precio_noche}/noche)</option>`
   ).join('');
   
-  const hoy = new Date().toISOString().split('T')[0];
+  const hoy = formatDateInput(new Date());
   
   const modalHTML = `
     <div class="modal-edit-header">

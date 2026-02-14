@@ -485,19 +485,21 @@ def api_reportes_admin_ingresos():
         desde_str = request.args.get('desde')
         hasta_str = request.args.get('hasta')
         estados_str = request.args.get('estados')
+        d_desde = None
+        d_hasta = None
         if desde_str and hasta_str:
             d_desde = _parse_fecha(desde_str)
             d_hasta = _parse_fecha(hasta_str)
-        else:
-            d_desde, d_hasta = _rango_fechas_default()
         estados = ['confirmada', 'completada']
         if estados_str:
             estados = [e.strip() for e in estados_str.split(',') if e.strip()]
-        q = Reserva.query.filter(
-            Reserva.estado.in_(estados),
-            Reserva.fechainicio >= d_desde,
-            Reserva.fechainicio <= d_hasta
-        ).order_by(Reserva.fechainicio.asc())
+        q = Reserva.query.filter(Reserva.estado.in_(estados))
+        if d_desde and d_hasta:
+            q = q.filter(
+                Reserva.fechainicio >= d_desde,
+                Reserva.fechainicio <= d_hasta
+            )
+        q = q.order_by(Reserva.fechainicio.asc())
         items = []
         total = 0.0
         for r in q.all():
@@ -518,13 +520,39 @@ def api_reportes_admin_ingresos():
             except Exception:
                 continue
         return jsonify({
-            'desde': d_desde.isoformat(),
-            'hasta': d_hasta.isoformat(),
+            'desde': d_desde.isoformat() if d_desde else None,
+            'hasta': d_hasta.isoformat() if d_hasta else None,
             'items': items,
             'total': round(total, 2),
         })
     except Exception as e:
         return jsonify({'error': f'Error al generar reporte de ingresos: {str(e)}'}), 500
+
+@admin.route('/api/reportes/admin/ingresos/total-general', methods=['GET'])
+def api_reportes_admin_ingresos_total_general():
+    error = verificar_admin()
+    if error:
+        return error
+    try:
+        estados = ['confirmada', 'completada']
+        hoy = date.today()
+        q = Reserva.query.filter(
+            Reserva.estado.in_(estados),
+            Reserva.fechainicio.isnot(None),
+            Reserva.fechainicio <= hoy
+        )
+        total = 0.0
+        for r in q.all():
+            try:
+                noches = (r.fechafin - r.fechainicio).days if r.fechafin and r.fechainicio else 0
+                precio = float(r.habitacion.precio_noche) if r.habitacion and r.habitacion.precio_noche else 0.0
+                monto = max(noches, 0) * precio
+                total += monto
+            except Exception:
+                continue
+        return jsonify({'total': round(total, 2)})
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener total general de ingresos: {str(e)}'}), 500
 
 @admin.route('/api/reportes/admin/ingresos/periodos', methods=['GET'])
 def api_reportes_admin_ingresos_periodos():

@@ -57,11 +57,14 @@ function renderizarHabitaciones() {
   grid.innerHTML = habitaciones.map(habitacion => {
     const estado = habitacion.estado.toLowerCase();
     const config = ESTADOS_CONFIG[estado] || ESTADOS_CONFIG['disponible'];
+    const esMantenimiento = estado === 'mantenimiento';
+    const claseAccion = esMantenimiento ? 'accionable' : '';
     
     return `
-      <div class="habitacion ${config.clase}" 
+      <div class="habitacion ${config.clase} ${claseAccion}" 
            data-id="${habitacion.idhabitacion}" 
-           data-numero="${habitacion.numero}">
+           data-numero="${habitacion.numero}"
+           data-estado="${estado}">
         <div class="habitacion-icono">
           <i class="${config.icon}"></i>
         </div>
@@ -76,6 +79,45 @@ function renderizarHabitaciones() {
       </div>
     `;
   }).join('');
+
+  const tarjetas = grid.querySelectorAll('.habitacion');
+  tarjetas.forEach(tarjeta => {
+    tarjeta.addEventListener('click', () => manejarCambioEstado(tarjeta));
+  });
+}
+
+async function manejarCambioEstado(tarjeta) {
+  const estadoActual = (tarjeta.dataset.estado || '').toLowerCase();
+  const idHabitacion = tarjeta.dataset.id;
+  const numeroHabitacion = tarjeta.dataset.numero;
+
+  if (estadoActual !== 'mantenimiento') {
+    return;
+  }
+
+  const confirmar = await mostrarConfirmacion(
+    `¿Marcar la habitación ${numeroHabitacion} como disponible?`
+  );
+  if (!confirmar) return;
+
+  try {
+    const response = await fetch(`api/habitaciones/${idHabitacion}/estado`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ estado: 'disponible' })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'No se pudo actualizar el estado');
+    }
+
+    await cargarHabitaciones();
+  } catch (error) {
+    mostrarError(error.message);
+  }
 }
 
 function mostrarError(mensaje) {

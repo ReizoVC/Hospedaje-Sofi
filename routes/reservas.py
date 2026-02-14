@@ -223,8 +223,19 @@ def mis_reservas():
             reserva_dict = reserva.to_dict()
             reserva_dict['habitacion'] = habitacion.to_dict()
             reservas_data.append(reserva_dict)
+
+        reservas_principales = [
+            r for r in reservas_data if r.get('estado') in ('pendiente', 'confirmada')
+        ]
+        reservas_canceladas = [
+            r for r in reservas_data if r.get('estado') == 'cancelada'
+        ]
         
-        return render_template('pages/mis_reservas.html', reservas=reservas_data)
+        return render_template(
+            'pages/mis_reservas.html',
+            reservas=reservas_principales,
+            reservas_canceladas=reservas_canceladas
+        )
         
     except Exception as e:
         print(f"Error al cargar reservas: {str(e)}")

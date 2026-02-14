@@ -70,12 +70,13 @@ def cambiar_estado_habitacion(id):
         habitacion = Habitacion.query.get_or_404(id)
         data = request.get_json()
         nuevo_estado = data.get('estado')
-        estados_validos = ['disponible', 'ocupada', 'mantenimiento']
-        if nuevo_estado not in estados_validos:
+        if nuevo_estado != 'disponible':
             return jsonify({'error': 'Estado no válido'}), 400
-        habitacion.estado = nuevo_estado
+        if habitacion.estado != 'mantenimiento':
+            return jsonify({'error': 'Solo se puede cambiar a disponible desde mantenimiento'}), 400
+        habitacion.estado = 'disponible'
         db.session.commit()
-        return jsonify({'message': f'Estado de habitación {habitacion.numero} actualizado a {nuevo_estado}'})
+        return jsonify({'message': f'Estado de habitación {habitacion.numero} actualizado a disponible'})
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al cambiar estado: {str(e)}'}), 500
@@ -208,7 +209,7 @@ def obtener_reservas():
             Usuario, Reserva.idusuario == Usuario.idusuario
         ).join(
             Habitacion, Reserva.idhabitacion == Habitacion.idhabitacion
-        ).filter(Reserva.estado != 'completada').all()
+        ).all()
         reservas_list = []
         for reserva, usuario, habitacion in reservas:
             reserva_dict = reserva.to_dict()

@@ -34,10 +34,6 @@
                                 Pendiente
                             {% elif reserva.estado == 'confirmada' %}
                                 Confirmada
-                            {% elif reserva.estado == 'cancelada' %}
-                                Cancelada
-                            {% elif reserva.estado == 'completada' %}
-                                Completada
                             {% else %}
                                 {{ reserva.estado|title }}
                             {% endif %}
@@ -68,11 +64,61 @@
         {% else %}
         <div class="sin-reservas">
             <i class="fas fa-calendar-times"></i>
-            <h2>No tienes reservas</h2>
+            <h2>No tienes reservas pendientes ni confirmadas</h2>
             <p>¡Explora nuestras habitaciones y haz tu primera reserva!</p>
             <a href="/habitaciones" class="btn-explorar">Explorar Habitaciones</a>
         </div>
         {% endif %}
+
+        <div class="reservas-seccion">
+            <h2>Reservas Canceladas</h2>
+            {% if reservas_canceladas %}
+            <div class="reservas-lista">
+                {% for reserva in reservas_canceladas %}
+                <div class="reserva-card">
+                    <div class="reserva-info">
+                        <div class="habitacion-info">
+                            <h3>{{ reserva.habitacion.nombre }}</h3>
+                            <p class="codigo-reserva">Código: <strong>{{ reserva.codigoreserva }}</strong></p>
+                        </div>
+                        
+                        <div class="fechas-info">
+                            <div class="fecha-item">
+                                <span class="label">Llegada:</span>
+                                <span class="fecha">{{ reserva.fechainicio }}</span>
+                            </div>
+                            <div class="fecha-item">
+                                <span class="label">Salida:</span>
+                                <span class="fecha">{{ reserva.fechafin }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="estado-info">
+                            <span class="estado estado-cancelada">Cancelada</span>
+                        </div>
+                        
+                        <div class="precio-info">
+                            {% set dias = (reserva.fechafin | datetime - reserva.fechainicio | datetime).days %}
+                            {% set total = dias * reserva.habitacion.precio_noche %}
+                            <span class="precio-total">S/ {{ "%.0f"|format(total) }}</span>
+                            <span class="precio-detalle">{{ dias }} noche{% if dias != 1 %}s{% endif %}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="reserva-acciones">
+                        <a href="/habitacion/{{ reserva.habitacion.idhabitacion }}" class="btn-ver-habitacion">
+                            Ver Habitación
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="sin-reservas sin-reservas-canceladas">
+                <p>No tienes reservas canceladas.</p>
+            </div>
+            {% endif %}
+        </div>
     </div>
 </section>
 
@@ -85,6 +131,15 @@
 .mis-reservas h1 {
     text-align: center;
     margin-bottom: 2rem;
+    color: #333;
+}
+
+.reservas-seccion {
+    margin-top: 2.5rem;
+}
+
+.reservas-seccion h2 {
+    margin-bottom: 1.5rem;
     color: #333;
 }
 
@@ -242,6 +297,10 @@
 .sin-reservas h2 {
     margin: 1rem 0;
     color: #333;
+}
+
+.sin-reservas-canceladas {
+    padding: 1.5rem 0;
 }
 
 @media (max-width: 768px) {

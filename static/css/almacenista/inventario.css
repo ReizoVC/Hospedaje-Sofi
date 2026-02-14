@@ -31,6 +31,37 @@
     margin: 1rem 0
 }
 
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: .5rem;
+    margin: 1rem 0
+}
+
+.tab-btn {
+    padding: .5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, .1);
+    background: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .15s all ease
+}
+
+.tab-btn.active {
+    background: #08aca3;
+    border-color: #08aca3;
+    color: #fff
+}
+
+.tab-panel {
+    display: none
+}
+
+.tab-panel.active {
+    display: block
+}
+
 .stat-card {
     background: #fff;
     border-radius: 12px;

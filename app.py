@@ -9,6 +9,7 @@ from models.reserva import Reserva
 from models.checkinout import CheckInOut
 from models.producto import Producto
 from models.movimientos import Movimientos
+from models.lote import Lote
 from models.egreso import Egreso
 from models.ingreso import Ingreso 
 from models.valoracion import Valoracion

@@ -9,6 +9,7 @@ class Movimientos(db.Model):
 
     idmovimiento = db.Column(db.Integer, primary_key=True)
     idproducto = db.Column(db.Integer, db.ForeignKey('productos.idproducto'), nullable=True)
+    idlote = db.Column(db.Integer, db.ForeignKey('lotes.idlote'), nullable=True)
     idusuario = db.Column(UUID(as_uuid=True), db.ForeignKey('usuarios.idusuario'), nullable=False)
     tipo = db.Column(db.String(20), nullable=False)
     cantidad = db.Column(db.Integer, nullable=False)
@@ -16,6 +17,7 @@ class Movimientos(db.Model):
     fecha = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     producto = db.relationship('Producto', backref='movimientos')
+    lote = db.relationship('Lote', backref='movimientos')
 
     def __repr__(self) -> str:
         return (
@@ -27,6 +29,7 @@ class Movimientos(db.Model):
         return {
             'idmovimiento': self.idmovimiento,
             'idproducto': self.idproducto,
+            'idlote': self.idlote,
             'idusuario': str(self.idusuario) if self.idusuario else None,
             'tipo': self.tipo,
             'cantidad': int(self.cantidad or 0),
@@ -49,12 +52,10 @@ def _mov_before_insert(mapper, connection, target: Movimientos):
         cantidad = int(target.cantidad or 0)
         costo_unit = 0
         try:
-            if getattr(target, 'producto', None) is not None and target.producto.costo is not None:
-                costo_unit = int(target.producto.costo or 0)
-            elif target.idproducto is not None:
+            if target.idlote is not None:
                 res = connection.execute(
-                    text('SELECT costo FROM productos WHERE idproducto = :id'),
-                    {'id': target.idproducto}
+                    text('SELECT costo_unitario FROM lotes WHERE idlote = :id'),
+                    {'id': target.idlote}
                 )
                 row = res.first()
                 if row:
@@ -81,12 +82,10 @@ def _mov_before_update(mapper, connection, target: Movimientos):
         cantidad = int(target.cantidad or 0)
         costo_unit = 0
         try:
-            if getattr(target, 'producto', None) is not None and target.producto.costo is not None:
-                costo_unit = int(target.producto.costo or 0)
-            elif target.idproducto is not None:
+            if target.idlote is not None:
                 res = connection.execute(
-                    text('SELECT costo FROM productos WHERE idproducto = :id'),
-                    {'id': target.idproducto}
+                    text('SELECT costo_unitario FROM lotes WHERE idlote = :id'),
+                    {'id': target.idlote}
                 )
                 row = res.first()
                 if row:

@@ -225,6 +225,10 @@ body {
     border: 1px solid transparent;
 }
 
+.habitacion.accionable {
+    cursor: pointer;
+}
+
 .habitacion:hover {
     transform: translateY(-2px);
     box-shadow: var(--card-shadow-hover);

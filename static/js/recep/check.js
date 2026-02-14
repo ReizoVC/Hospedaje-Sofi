@@ -1,5 +1,15 @@
 let reservasCheck = { checkin: [], checkout: [] };
 
+function parseDateOnly(dateStr) {
+  if (!dateStr) return null;
+  const parts = dateStr.split('-').map(Number);
+  if (parts.length !== 3 || parts.some(Number.isNaN)) {
+    return new Date(dateStr);
+  }
+  const [year, month, day] = parts;
+  return new Date(year, month - 1, day);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const elements = document.querySelectorAll('.fade-in-up');
   elements.forEach((element, index) => {
@@ -81,8 +91,8 @@ function actualizarTablaCheck() {
     const colorAvatar = generarColorAvatar(reserva.usuario.nombre);
     
     // Formatear fechas
-    const fechaInicio = new Date(reserva.fechainicio).toLocaleDateString('es-ES');
-    const fechaFin = new Date(reserva.fechafin).toLocaleDateString('es-ES');
+    const fechaInicio = parseDateOnly(reserva.fechainicio)?.toLocaleDateString('es-ES') || '';
+    const fechaFin = parseDateOnly(reserva.fechafin)?.toLocaleDateString('es-ES') || '';
     
     // Determinar la información del estado y botón según el tipo
     let estadoInfo, botonAccion, fechaCheckin, fechaCheckout;

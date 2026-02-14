@@ -40,8 +40,23 @@
 		});
 		const total = document.getElementById('total-ingresos');
 		if (total) total.textContent = fmt(data.total||0);
+	}
+
+	async function cargarTotalGeneralIngresos(){
 		const totalBtn = document.getElementById('btn-total-ingresos');
-		if (totalBtn) totalBtn.textContent = fmt(data.total||0);
+		if (!totalBtn) return;
+		try{
+			totalBtn.disabled = true;
+			totalBtn.textContent = 'Cargando...';
+			const res = await fetch('api/reportes/admin/ingresos/total-general');
+			if (!res.ok) throw new Error('Error al obtener total');
+			const data = await res.json();
+			totalBtn.textContent = fmt(data.total||0);
+		} catch (e){
+			totalBtn.textContent = 'Error al cargar';
+		} finally {
+			totalBtn.disabled = false;
+		}
 	}
 
 	function llenarSelect(select, items, placeholder){
@@ -51,6 +66,10 @@
 		base.value = '';
 		base.textContent = placeholder;
 		select.appendChild(base);
+		const allOpt = document.createElement('option');
+		allOpt.value = '__all__';
+		allOpt.textContent = 'Todos';
+		select.appendChild(allOpt);
 		(items||[]).forEach(it=>{
 			const opt = document.createElement('option');
 			opt.value = it.value || '';
@@ -65,6 +84,11 @@
 		if (!select) return;
 		const opt = select.selectedOptions && select.selectedOptions[0];
 		if (!select.value || !opt){
+			cargarIngresos();
+			return;
+		}
+		if (select.value === '__all__'){
+			(otros||[]).forEach(o=>{ if (o) o.value = ''; });
 			cargarIngresos();
 			return;
 		}
@@ -115,6 +139,11 @@
 		});
 		const total = document.getElementById('total-egresos');
 		if (total) total.textContent = fmt(data.total||0);
+	}
+
+	const totalBtn = document.getElementById('btn-total-ingresos');
+	if (totalBtn){
+		totalBtn.addEventListener('click', cargarTotalGeneralIngresos);
 	}
 
 	cargarIngresos();
