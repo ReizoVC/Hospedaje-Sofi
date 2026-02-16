@@ -775,12 +775,11 @@ nav a:hover {
     color: #1a1a1a;
     margin: 0 0 16px 0;
     line-height: 1.3;
-    height: 3.9rem; /* Altura fija para 2 líneas (1.5rem * 1.3 * 2) */
+    height: 3.9rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
-    overflow: hidden;
 }
 
 .hab-servicios-pills {

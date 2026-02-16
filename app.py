@@ -1,4 +1,5 @@
 from flask import Flask, session
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from utils.db import db
 
@@ -61,6 +62,22 @@ def inject_user():
             'rol': session['user_rol']
         }   
     return {'user': user}
+
+@app.template_filter('datetime')
+def datetime_filter(value):
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    if hasattr(value, 'year') and hasattr(value, 'month') and hasattr(value, 'day'):
+        return datetime(value.year, value.month, value.day)
+    if isinstance(value, str):
+        for fmt in ('%Y-%m-%d', '%Y-%m-%d %H:%M:%S'):
+            try:
+                return datetime.strptime(value, fmt)
+            except ValueError:
+                continue
+    return value
 
 # Registro de blueprints (auth antes que inicio)
 app.register_blueprint(auth)

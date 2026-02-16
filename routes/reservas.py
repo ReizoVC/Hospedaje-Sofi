@@ -206,41 +206,11 @@ def reserva_paso3(idhabitacion):
 
 @reservas.route('/mis-reservas')
 def mis_reservas():
-    """Mostrar las reservas del usuario actual"""
+    """Compatibilidad: redirigir a la vista de usuario"""
     if 'user_id' not in session:
         return redirect(url_for('auth.login_page'))
-    
-    try:
-        user_uuid = uuid.UUID(session['user_id']) if isinstance(session['user_id'], str) else session['user_id']
-        reservas_usuario = db.session.query(Reserva, Habitacion).join(
-            Habitacion, Reserva.idhabitacion == Habitacion.idhabitacion
-        ).filter(Reserva.idusuario == user_uuid).order_by(
-            Reserva.fecha_creacion.desc()
-        ).all()
-        
-        reservas_data = []
-        for reserva, habitacion in reservas_usuario:
-            reserva_dict = reserva.to_dict()
-            reserva_dict['habitacion'] = habitacion.to_dict()
-            reservas_data.append(reserva_dict)
 
-        reservas_principales = [
-            r for r in reservas_data if r.get('estado') in ('pendiente', 'confirmada')
-        ]
-        reservas_canceladas = [
-            r for r in reservas_data if r.get('estado') == 'cancelada'
-        ]
-        
-        return render_template(
-            'pages/mis_reservas.html',
-            reservas=reservas_principales,
-            reservas_canceladas=reservas_canceladas
-        )
-        
-    except Exception as e:
-        print(f"Error al cargar reservas: {str(e)}")
-        flash('Error al cargar las reservas', 'error')
-        return redirect(url_for('inicio.index'))
+    return redirect(url_for('user.reservations'))
 
 @reservas.route('/verificar-disponibilidad', methods=['POST'])
 def verificar_disponibilidad():
@@ -334,3 +304,29 @@ def cancelar_reserva(codigo_reserva):
         db.session.rollback()
         print(f"Error al cancelar reserva: {str(e)}")
         return jsonify({'success': False, 'message': 'Error interno del servidor'}), 500
+
+
+@reservas.route('/completar-pago/<codigo_reserva>', methods=['POST'])
+def completar_pago(codigo_reserva):
+    """Completar el pago de una reserva parcial"""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Debe iniciar sesión'}), 401
+
+    try:
+        user_uuid = uuid.UUID(session['user_id']) if isinstance(session['user_id'], str) else session['user_id']
+        reserva = Reserva.query.filter_by(codigoreserva=codigo_reserva, idusuario=user_uuid).first()
+
+        if not reserva:
+            return jsonify({'success': False, 'message': 'Reserva no encontrada'}), 404
+
+        if reserva.estado != 'pendiente':
+            return jsonify({'success': False, 'message': 'La reserva no está pendiente de pago'}), 400
+
+        reserva.estado = 'confirmada'
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'Pago completado y reserva confirmada'})
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error al completar pago: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error al completar el pago'}), 500

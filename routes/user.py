@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request, jsonify
+from datetime import timedelta
 from utils.auth import redirect_staff_to_dashboard
 from utils.db import db
 from models.usuario import Usuario
@@ -64,6 +65,10 @@ def reservations():
             .order_by(Reserva.fechainicio.desc())
             .all()
         )
+
+        for reserva in reservas:
+            if reserva.fechainicio:
+                reserva.limite_pago = reserva.fechainicio - timedelta(days=2)
 
         estados_activas = {'pendiente', 'confirmada', 'activa'}
         reservas_activas = [r for r in reservas if r.estado in estados_activas]

@@ -4,65 +4,168 @@
 
 {% block page_title %}Mis Reservas{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user/reservations.css') }}">
+{% endblock %}
+
 {% block content %}
-<section class="reservas-list-section">
-    <h2>Reservas Activas</h2>
-    {% if reservas_activas and reservas_activas|length > 0 %}
-        {% for r in reservas_activas %}
-        <div class="reserva-card upcoming">
-            <div class="status-badge text-success">{{ r.estado|capitalize }}</div>
-            <h3>
-                {% if r.habitacion %}
-                    {{ r.habitacion.nombre }} - {{ r.habitacion.numero }}
-                {% else %}
-                    Habitación #{{ r.idhabitacion }}
-                {% endif %}
-            </h3>
-            <p><strong>Fechas:</strong> {{ r.fechainicio.strftime('%d/%m/%Y') }} - {{ r.fechafin.strftime('%d/%m/%Y') }}</p>
-            <p><strong>Código:</strong> {{ r.codigoreserva }}</p>
-            <div class="card-actions">
-                <a class="btn btn-secondary btn-sm" href="/reservas/{{ r.idreserva }}">
-                    <i class="fas fa-eye"></i>
-                    Ver Detalles
-                </a>
-            </div>
-        </div>
-        {% endfor %}
-    {% else %}
-        <p class="text-muted">Aún no tienes reservas activas.</p>
-    {% endif %}
+<section class="mis-reservas">
+    <div class="container">
+        <h1>Mis Reservas</h1>
 
-    <h2 id="historial">Historial de Reservas</h2>
-    {% if reservas_historial and reservas_historial|length > 0 %}
-        {% for r in reservas_historial %}
-        <div class="reserva-card past-reserva">
-            <div class="status-badge text-muted">{{ r.estado|capitalize }}</div>
-            <h3>
-                {% if r.habitacion %}
-                    {{ r.habitacion.nombre }} - {{ r.habitacion.numero }}
-                {% else %}
-                    Habitación #{{ r.idhabitacion }}
-                {% endif %}
-            </h3>
-            <p><strong>Fechas:</strong> {{ r.fechainicio.strftime('%d/%m/%Y') }} - {{ r.fechafin.strftime('%d/%m/%Y') }}</p>
-            <p><strong>Código:</strong> {{ r.codigoreserva }}</p>
-            <div class="card-actions">
-                <a class="btn btn-secondary btn-sm" href="/reservas/{{ r.idreserva }}">
-                    <i class="fas fa-eye"></i>
-                    Ver Detalles
-                </a>
-            </div>
-        </div>
-        {% endfor %}
-    {% else %}
-        <p class="text-muted">Aún no hay reservas en tu historial.</p>
-    {% endif %}
+        {% if reservas_activas and reservas_activas|length > 0 %}
+        <div class="reservas-lista">
+            {% for r in reservas_activas %}
+            {% set precio_noche = r.habitacion.precio_noche if r.habitacion else 0 %}
+            {% set dias = (r.fechafin | datetime - r.fechainicio | datetime).days %}
+            {% set total = dias * precio_noche %}
+            <div class="reserva-card">
+                <div class="reserva-info">
+                    <div class="habitacion-info">
+                        <h3>
+                            {% if r.habitacion %}
+                                {{ r.habitacion.nombre }}
+                            {% else %}
+                                Habitación #{{ r.idhabitacion }}
+                            {% endif %}
+                        </h3>
+                        <p class="codigo-reserva">Código: <strong>{{ r.codigoreserva }}</strong></p>
+                    </div>
 
-    <div style="text-align: center; margin-top: 2rem;">
-        <a href="/habitaciones" class="btn btn-primary">
-            <i class="fas fa-plus"></i>
-            Nueva Reserva
-        </a>
+                    <div class="fechas-info">
+                        <div class="fecha-item">
+                            <span class="label">Llegada:</span>
+                            <span class="fecha">{{ r.fechainicio.strftime('%d/%m/%Y') }}</span>
+                        </div>
+                        <div class="fecha-item">
+                            <span class="label">Salida:</span>
+                            <span class="fecha">{{ r.fechafin.strftime('%d/%m/%Y') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="estado-info">
+                        <span class="estado estado-{{ r.estado }}">
+                            {% if r.estado == 'pendiente' %}
+                                Pendiente
+                            {% elif r.estado == 'confirmada' %}
+                                Confirmada
+                            {% elif r.estado == 'activa' %}
+                                Activa
+                            {% else %}
+                                {{ r.estado|title }}
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="precio-info">
+                        <span class="precio-total">S/ {{ "%.0f"|format(total) }}</span>
+                        <span class="precio-detalle">{{ dias }} noche{% if dias != 1 %}s{% endif %}</span>
+                    </div>
+                </div>
+
+                <div class="reserva-acciones">
+                    {% if r.estado == 'pendiente' %}
+                    <button class="btn-completar" onclick="completarPago('{{ r.codigoreserva }}')">
+                        Completar Pago
+                    </button>
+                    <button class="btn-cancelar" onclick="cancelarReserva('{{ r.codigoreserva }}')">
+                        Cancelar Reserva
+                    </button>
+                    {% endif %}
+                    <a href="/habitacion/{{ r.habitacion.idhabitacion if r.habitacion else r.idhabitacion }}" class="btn-ver-habitacion">
+                        Ver Habitación
+                    </a>
+                </div>
+
+                {% if r.estado == 'pendiente' %}
+                <div class="reserva-nota pago-alerta">
+                    {% if r.limite_pago %}
+                        Completa el pago hasta el {{ r.limite_pago.strftime('%d/%m/%Y') }} (2 días antes de la entrada).
+                    {% else %}
+                        Completa el pago hasta 2 días antes de la entrada.
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="sin-reservas">
+            <i class="fas fa-calendar-times"></i>
+            <h2>No tienes reservas activas</h2>
+            <p>¡Explora nuestras habitaciones y haz tu primera reserva!</p>
+            <a href="/habitaciones" class="btn-explorar">Explorar Habitaciones</a>
+        </div>
+        {% endif %}
+
+        <div class="reservas-seccion">
+            <h2 id="historial">Historial de Reservas</h2>
+            {% if reservas_historial and reservas_historial|length > 0 %}
+            <div class="reservas-lista">
+                {% for r in reservas_historial %}
+                {% set precio_noche = r.habitacion.precio_noche if r.habitacion else 0 %}
+                {% set dias = (r.fechafin | datetime - r.fechainicio | datetime).days %}
+                {% set total = dias * precio_noche %}
+                <div class="reserva-card">
+                    <div class="reserva-info">
+                        <div class="habitacion-info">
+                            <h3>
+                                {% if r.habitacion %}
+                                    {{ r.habitacion.nombre }}
+                                {% else %}
+                                    Habitación #{{ r.idhabitacion }}
+                                {% endif %}
+                            </h3>
+                            <p class="codigo-reserva">Código: <strong>{{ r.codigoreserva }}</strong></p>
+                        </div>
+
+                        <div class="fechas-info">
+                            <div class="fecha-item">
+                                <span class="label">Llegada:</span>
+                                <span class="fecha">{{ r.fechainicio.strftime('%d/%m/%Y') }}</span>
+                            </div>
+                            <div class="fecha-item">
+                                <span class="label">Salida:</span>
+                                <span class="fecha">{{ r.fechafin.strftime('%d/%m/%Y') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="estado-info">
+                            <span class="estado estado-{{ r.estado }}">
+                                {% if r.estado == 'completada' %}
+                                    Completada
+                                {% elif r.estado == 'cancelada' %}
+                                    Cancelada
+                                {% else %}
+                                    {{ r.estado|title }}
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="precio-info">
+                            <span class="precio-total">S/ {{ "%.0f"|format(total) }}</span>
+                            <span class="precio-detalle">{{ dias }} noche{% if dias != 1 %}s{% endif %}</span>
+                        </div>
+                    </div>
+
+                    <div class="reserva-acciones">
+                        <a href="/habitacion/{{ r.habitacion.idhabitacion if r.habitacion else r.idhabitacion }}" class="btn-ver-habitacion">
+                            Ver Habitación
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="sin-reservas sin-reservas-canceladas">
+                <p>No tienes reservas en tu historial.</p>
+            </div>
+            {% endif %}
+        </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/pages/mis_reservas.js') }}"></script>
 {% endblock %}

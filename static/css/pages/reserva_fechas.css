@@ -16,6 +16,10 @@
     padding: 3rem 0 4rem;
 }
 
+.reserva-fechas.has-header-offset {
+    padding-top: 7rem;
+}
+
 .reserva-wrap {
     max-width: 1100px;
     margin: 0 auto;

@@ -80,7 +80,7 @@
       if (data.success){
         const planTexto = plan === 'parcial' ? 'Pago inicial del 60%' : 'Pago completo';
         alert(`Pago realizado (${planTexto}).\n\nReserva confirmada.\nCodigo de reserva: ${data.codigo_reserva}`);
-        window.location.href = '/reservas/mis-reservas';
+        window.location.href = '/user/reservations';
         return;
       }
 
