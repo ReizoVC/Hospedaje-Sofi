@@ -366,6 +366,11 @@ function initInventario(){
       const costo = parseInt($('#prod-costo').value||'0',10);
       const fv = $('#prod-sin-fv').checked ? null : ($('#prod-fv').value || null);
       
+      if(costo < 10){
+        alert('El costo unitario no puede ser menor a 10');
+        return;
+      }
+      
       const body = {
         nombre,
         umbralminimo: umbral,
@@ -396,7 +401,12 @@ function initInventario(){
       cantidad: parseInt($('#mov-cantidad').value||'0',10)
     };
     if(tipo === 'entrada' || tipo === 'ajuste'){
-      body.costo_unitario = parseInt($('#mov-costo').value||'0',10);
+      const costo = parseInt($('#mov-costo').value||'0',10);
+      if(costo < 10){
+        alert('El costo unitario no puede ser menor a 10');
+        return;
+      }
+      body.costo_unitario = costo;
       body.fecha_vencimiento = fv;
     }
       const res = await fetch('api/movimientos', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
@@ -409,10 +419,17 @@ function initInventario(){
 
   $('#btn-guardar-lote').addEventListener('click', async ()=>{
     const idlote = parseInt($('#lote-id').value, 10);
+    const costo = parseInt($('#lote-costo').value || '0', 10);
+    
+    if(costo < 10){
+      alert('El costo unitario no puede ser menor a 10');
+      return;
+    }
+    
     const fv = $('#lote-sin-fv').checked ? null : ($('#lote-fv').value || null);
     const body = {
       cantidad_actual: parseInt($('#lote-cantidad-actual').value || '0', 10),
-      costo_unitario: parseInt($('#lote-costo').value || '0', 10),
+      costo_unitario: costo,
       fecha_vencimiento: fv
     };
     

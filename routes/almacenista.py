@@ -149,6 +149,8 @@ def crear_producto():
         cantidad = int(data.get('cantidad') or 0)
         umbral = int(data.get('umbralminimo') or 0)
         costo = int(data.get('costo') or 0)
+        if costo < 10:
+            return jsonify({'error': 'El costo unitario no puede ser menor a 10'}), 400
         fv = data.get('fecha_vencimiento')
         fv_date = datetime.strptime(fv, '%Y-%m-%d').date() if fv else None
         p = Producto(nombre=nombre, umbralminimo=umbral)
@@ -337,6 +339,8 @@ def crear_movimiento():
                 costo_unitario = int(costo_unitario)
             except Exception:
                 return jsonify({'error': 'Costo unitario inválido'}), 400
+            if costo_unitario < 10:
+                return jsonify({'error': 'El costo unitario no puede ser menor a 10'}), 400
 
             fv = data.get('fecha_vencimiento')
             fv_date = None
@@ -517,6 +521,10 @@ def eliminar_lote(idlote):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al eliminar lote: {str(e)}'}), 500
+
+
+@almacenista.route('/api/lotes/<int:idlote>', methods=['PUT'])
+def editar_lote(idlote):
     """Edita los datos de un lote específico (cantidad actual, fecha vencimiento, costo)"""
     error = verificar_almacenista()
     if error:
@@ -532,7 +540,10 @@ def eliminar_lote(idlote):
                 return jsonify({'error': 'La cantidad no puede ser negativa'}), 400
             lote.cantidad_actual = nueva_cantidad
         
-        # Editar costo unitario
+        # Ednuevo_costo = int(data['costo_unitario'] or 0)
+            if nuevo_costo < 10:
+                return jsonify({'error': 'El costo unitario no puede ser menor a 10'}), 400
+            lote.costo_unitario = nuevo_costo
         if 'costo_unitario' in data:
             lote.costo_unitario = int(data['costo_unitario'] or 0)
         
