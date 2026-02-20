@@ -119,6 +119,15 @@ async function cargarLotesParaEdicion(idproducto){
       const estado = l.vencido ? 'vencido' : (l.dias_para_vencer !== null && l.dias_para_vencer <= 15 ? 'por-vencer' : 'vigente');
       const estadoColor = l.vencido ? '#ef4444' : (l.dias_para_vencer !== null && l.dias_para_vencer <= 15 ? '#f59e0b' : '#10b981');
       const fv = l.fecha_vencimiento ? new Date(l.fecha_vencimiento).toLocaleDateString() : 'Sin vencer';
+      const etiquetaVacio = l.cantidad_actual === 0 ? `<span style="
+                display: inline-block;
+                margin-left: 0.5rem;
+                padding: 0.25rem 0.5rem;
+                background: #6b7280;
+                color: white;
+                border-radius: 0.25rem;
+                font-size: 0.75rem;
+              ">Vacío</span>` : '';
       return `
         <div style="
           padding: 0.75rem;
@@ -143,7 +152,7 @@ async function cargarLotesParaEdicion(idproducto){
                 color: white;
                 border-radius: 0.25rem;
                 font-size: 0.75rem;
-              ">${estado}</span>
+              ">${estado}</span>${etiquetaVacio}
             </div>
             <div style="text-align: right; font-size: 0.875rem; color: #666;">
               <p style="margin: 0;">Cant: ${l.cantidad_actual}/${l.cantidad_inicial}</p>
