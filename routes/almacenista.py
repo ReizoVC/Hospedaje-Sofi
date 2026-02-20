@@ -540,12 +540,12 @@ def editar_lote(idlote):
                 return jsonify({'error': 'La cantidad no puede ser negativa'}), 400
             lote.cantidad_actual = nueva_cantidad
         
-        # Ednuevo_costo = int(data['costo_unitario'] or 0)
+        # Editar costo unitario
+        if 'costo_unitario' in data:
+            nuevo_costo = int(data['costo_unitario'] or 0)
             if nuevo_costo < 10:
                 return jsonify({'error': 'El costo unitario no puede ser menor a 10'}), 400
             lote.costo_unitario = nuevo_costo
-        if 'costo_unitario' in data:
-            lote.costo_unitario = int(data['costo_unitario'] or 0)
         
         # Editar fecha de vencimiento
         if 'fecha_vencimiento' in data:
