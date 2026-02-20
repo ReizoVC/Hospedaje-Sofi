@@ -83,29 +83,207 @@ function abrirEditar(id){
   $('#modalProductoTitulo').textContent='Editar producto';
   $('#prod-id').value = id;
   $('#prod-nombre').value = row.children[1].textContent;
-  $('#prod-cantidad').value = 0; // no editable aquí
-  $('#prod-costo').value = (row.children[2].textContent.replace('S/','').trim()||'0');
   $('#prod-umbral').value = row.children[5].textContent;
-  $('#prod-fv').value = row.children[6].textContent;
-  $('#prod-costo').disabled = true;
-  $('#prod-fv').disabled = true;
-  $('#prod-sin-fv').checked = true;
-  if(!$('#prod-fv').value){
-    $('#prod-sin-fv').checked = true;
-    $('#prod-fv').disabled = true;
-  } else {
-    $('#prod-sin-fv').checked = false;
-    $('#prod-fv').disabled = false;
-  }
+  
+  // Ocultar campos de nuevo producto
+  document.getElementById('prod-cantidad-row').style.display = 'none';
+  document.getElementById('prod-costo-row').style.display = 'none';
+  document.getElementById('prod-fv-row').style.display = 'none';
+  document.getElementById('prod-sin-fv-row').style.display = 'none';
+  
+  // Mostrar campos de edición y lotes
+  document.getElementById('lotes-header').style.display = 'block';
+  document.getElementById('lotes-list').style.display = 'block';
+  
+  cargarLotesParaEdicion(id);
   openModal('modalProducto');
 }
 
+async function cargarLotesParaEdicion(idproducto){
+  try {
+    const res = await fetch(`api/lotes/producto/${idproducto}`);
+    const lotes = await res.json();
+    
+    if(!Array.isArray(lotes)){
+      document.getElementById('lotes-list').innerHTML = '<p style="text-align: center; color: #999; padding: 1rem;">Error al cargar lotes</p>';
+      return;
+    }
+    
+    if(lotes.length === 0){
+      document.getElementById('lotes-list').innerHTML = '<p style="text-align: center; color: #999; padding: 1rem;">Sin lotes registrados</p>';
+      return;
+    }
+    
+    const html = lotes.map(l => {
+      const estado = l.vencido ? 'vencido' : (l.dias_para_vencer !== null && l.dias_para_vencer <= 15 ? 'por-vencer' : 'vigente');
+      const estadoColor = l.vencido ? '#ef4444' : (l.dias_para_vencer !== null && l.dias_para_vencer <= 15 ? '#f59e0b' : '#10b981');
+      const fv = l.fecha_vencimiento ? new Date(l.fecha_vencimiento).toLocaleDateString() : 'Sin vencer';
+      return `
+        <div style="
+          padding: 0.75rem;
+          border: 1px solid #ddd;
+          border-radius: 0.375rem;
+          margin-bottom: 0.5rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          background: white;
+        " 
+        onmouseover="this.style.background='#f9fafb'; this.style.borderColor='#999';"
+        onmouseout="this.style.background='white'; this.style.borderColor='#ddd';"
+        onclick="abrirEditarLote(${l.idlote}, ${l.cantidad_actual}, ${l.cantidad_inicial}, '${l.fecha_vencimiento || ''}', ${l.costo_unitario}, '${l.fecha_ingreso || ''}')">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong>Lote #${l.idlote}</strong>
+              <span style="
+                display: inline-block;
+                margin-left: 0.5rem;
+                padding: 0.25rem 0.5rem;
+                background: ${estadoColor};
+                color: white;
+                border-radius: 0.25rem;
+                font-size: 0.75rem;
+              ">${estado}</span>
+            </div>
+            <div style="text-align: right; font-size: 0.875rem; color: #666;">
+              <p style="margin: 0;">Cant: ${l.cantidad_actual}/${l.cantidad_inicial}</p>
+              <p style="margin: 0;">Vencimiento: ${fv}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    document.getElementById('lotes-list').innerHTML = html;
+  } catch(e) {
+    document.getElementById('lotes-list').innerHTML = '<p style="text-align: center; color: #f00; padding: 1rem;">Error al cargar lotes</p>';
+  }
+}
+
+function abrirEditarLote(idlote, cantidad_actual, cantidad_inicial, fecha_vencimiento, costo_unitario, fecha_ingreso){
+  $('#lote-id').value = idlote;
+  $('#lote-id-display').textContent = idlote;
+  $('#lote-cantidad-actual').value = cantidad_actual;
+  $('#lote-costo').value = costo_unitario;
+  $('#lote-fecha-ingreso').textContent = fecha_ingreso ? new Date(fecha_ingreso).toLocaleString() : '-';
+  
+  // Actualizar estado del lote
+  const hoy = new Date();
+  if(fecha_vencimiento){
+    const fv = new Date(fecha_vencimiento);
+    const diasFalta = Math.floor((fv - hoy) / (1000 * 60 * 60 * 24));
+    let estado = 'Vigente';
+    let color = '#10b981';
+    if(diasFalta < 0){
+      estado = 'Vencido';
+      color = '#ef4444';
+    } else if(diasFalta <= 15){
+      estado = `Por vencer (${diasFalta}d)`;
+      color = '#f59e0b';
+    }
+    $('#lote-estado').textContent = estado;
+    $('#lote-estado').style.background = color;
+    $('#lote-estado').style.color = 'white';
+    $('#lote-fv').value = fecha_vencimiento;
+    $('#lote-sin-fv').checked = false;
+    $('#lote-fv').disabled = false;
+  } else {
+    $('#lote-estado').textContent = 'Sin vencimiento';
+    $('#lote-estado').style.background = '#6b7280';
+    $('#lote-estado').style.color = 'white';
+    $('#lote-fv').value = '';
+    $('#lote-sin-fv').checked = true;
+    $('#lote-fv').disabled = true;
+  }
+  
+  closeModal('modalProducto');
+  openModal('modalEditarLote');
+}
+
 async function eliminarProducto(id){
-  if(!confirm('¿Eliminar producto? Esta acción no se puede deshacer.')) return;
-  const res = await fetch(`api/productos/${id}`, {method:'DELETE'});
+  // Cargar lotes del producto
+  const res = await fetch(`api/lotes/producto/${id}`);
+  const lotes = await res.json();
+  
+  if(!Array.isArray(lotes) || lotes.length === 0){
+    alert('El producto no tiene lotes para eliminar');
+    return;
+  }
+  
+  // Guardar el ID del producto para usar después
+  window._productoEnEliminacion = id;
+  cargarLotesParaEliminar(lotes);
+  openModal('modalEliminarLote');
+}
+
+function cargarLotesParaEliminar(lotes){
+  const container = document.getElementById('lotes-eliminar-list');
+  
+  if(!Array.isArray(lotes) || lotes.length === 0){
+    container.innerHTML = '<p style="text-align: center; color: #999; padding: 1rem;">Sin lotes registrados</p>';
+    return;
+  }
+  
+  const html = lotes.map(l => {
+    const estado = l.vencido ? 'vencido' : (l.dias_para_vencer !== null && l.dias_para_vencer <= 15 ? 'por-vencer' : 'vigente');
+    const estadoColor = l.vencido ? '#ef4444' : (l.dias_para_vencer !== null && l.dias_para_vencer <= 15 ? '#f59e0b' : '#10b981');
+    const fv = l.fecha_vencimiento ? new Date(l.fecha_vencimiento).toLocaleDateString() : 'Sin vencer';
+    return `
+      <div style="
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        background: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      ">
+        <div>
+          <strong>Lote #${l.idlote}</strong>
+          <span style="
+            display: inline-block;
+            margin-left: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            background: ${estadoColor};
+            color: white;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+          ">${estado}</span>
+          <div style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">
+            <p style="margin: 0;">Cant: ${l.cantidad_actual}/${l.cantidad_inicial}</p>
+            <p style="margin: 0;">Costo: S/ ${l.costo_unitario} | Vencimiento: ${fv}</p>
+          </div>
+        </div>
+        <button 
+          type="button"
+          class="btn btn-danger btn-icon"
+          title="Eliminar lote"
+          onclick="confirmarEliminarLote(${l.idlote})"
+          style="margin-left: 1rem; flex-shrink: 0;">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    `;
+  }).join('');
+  
+  container.innerHTML = html;
+}
+
+async function confirmarEliminarLote(idlote){
+  if(!confirm('¿Eliminar este lote? Esta acción no se puede deshacer. Si tiene movimientos registrados, no se puede eliminar.')) return;
+  
+  const res = await fetch(`api/lotes/${idlote}`, {method: 'DELETE'});
   const data = await res.json();
-  if(!res.ok){ alert(data.error||'No se pudo eliminar'); return; }
+  
+  if(!res.ok){
+    alert(data.error || 'Error al eliminar lote');
+    return;
+  }
+  
+  alert(data.message || 'Lote eliminado correctamente');
+  closeModal('modalEliminarLote');
   await cargar();
+  await cargarStats();
 }
 
 function abrirMovimiento(idproducto){
@@ -140,36 +318,73 @@ function initInventario(){
     $('#modalProductoTitulo').textContent='Nuevo producto';
     $('#prod-id').value='';
     $('#prod-nombre').value='';
-    $('#prod-cantidad').value=0;
     $('#prod-umbral').value=0;
+    $('#prod-cantidad').value=0;
     $('#prod-costo').value=0;
     $('#prod-fv').value='';
     $('#prod-sin-fv').checked=false;
-    $('#prod-fv').disabled=false;
-    $('#prod-costo').disabled=false;
+    
+    // Mostrar campos de nuevo producto
+    document.getElementById('prod-cantidad-row').style.display = 'block';
+    document.getElementById('prod-costo-row').style.display = 'block';
+    document.getElementById('prod-fv-row').style.display = 'block';
+    document.getElementById('prod-sin-fv-row').style.display = 'block';
+    
+    // Ocultar campos de edición y lotes
+    document.getElementById('lotes-header').style.display = 'none';
+    document.getElementById('lotes-list').style.display = 'none';
+    
     openModal('modalProducto');
   });
 
   $('#btn-guardar-producto').addEventListener('click', async ()=>{
     const id = $('#prod-id').value;
-    const body = {
-      nombre: $('#prod-nombre').value.trim(),
-      umbralminimo: parseInt($('#prod-umbral').value||'0',10)
-    };
-    if(!id){
-      body.cantidad = parseInt($('#prod-cantidad').value||'0',10);
-      body.costo = parseInt($('#prod-costo').value||'0',10);
-      body.fecha_vencimiento = document.getElementById('prod-sin-fv').checked ? null : ($('#prod-fv').value || null);
+    const nombre = $('#prod-nombre').value.trim();
+    const umbral = parseInt($('#prod-umbral').value||'0',10);
+    
+    if(!nombre){
+      alert('El nombre del producto es requerido');
+      return;
     }
-
-    const url = id? `api/productos/${id}`: 'api/productos';
-    const method = id? 'PUT': 'POST';
-    const res = await fetch(url, {method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
-    const data = await res.json();
-    if(!res.ok){ alert(data.error||'Error'); return; }
-    closeModal('modalProducto');
-    await cargar();
-    await cargarStats();
+    
+    if(id){
+      // Modo edición: solo actualiza nombre e umbral
+      const body = { nombre, umbralminimo: umbral };
+      const res = await fetch(`api/productos/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if(!res.ok){ alert(data.error||'Error'); return; }
+      closeModal('modalProducto');
+      await cargar();
+      await cargarStats();
+    } else {
+      // Modo nuevo: crea producto con lote inicial
+      const cantidad = parseInt($('#prod-cantidad').value||'0',10);
+      const costo = parseInt($('#prod-costo').value||'0',10);
+      const fv = $('#prod-sin-fv').checked ? null : ($('#prod-fv').value || null);
+      
+      const body = {
+        nombre,
+        umbralminimo: umbral,
+        cantidad,
+        costo,
+        fecha_vencimiento: fv
+      };
+      
+      const res = await fetch('api/productos', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if(!res.ok){ alert(data.error||'Error'); return; }
+      closeModal('modalProducto');
+      await cargar();
+      await cargarStats();
+    }
   });
 
   $('#btn-registrar-mov').addEventListener('click', async ()=>{
@@ -192,6 +407,30 @@ function initInventario(){
     await cargarStats();
   });
 
+  $('#btn-guardar-lote').addEventListener('click', async ()=>{
+    const idlote = parseInt($('#lote-id').value, 10);
+    const fv = $('#lote-sin-fv').checked ? null : ($('#lote-fv').value || null);
+    const body = {
+      cantidad_actual: parseInt($('#lote-cantidad-actual').value || '0', 10),
+      costo_unitario: parseInt($('#lote-costo').value || '0', 10),
+      fecha_vencimiento: fv
+    };
+    
+    const res = await fetch(`api/lotes/${idlote}`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if(!res.ok){ 
+      alert(data.error || 'Error al guardar lote');
+      return;
+    }
+    closeModal('modalEditarLote');
+    await cargar();
+    await cargarStats();
+  });
+
   window.addEventListener('click', (e)=>{
     if(e.target.classList.contains('modal')) e.target.style.display='none';
   });
@@ -200,6 +439,16 @@ function initInventario(){
     if(e.target && e.target.id === 'prod-sin-fv'){
       const cb = e.target;
       const input = document.getElementById('prod-fv');
+      if(cb.checked){
+        input.value = '';
+        input.disabled = true;
+      } else {
+        input.disabled = false;
+      }
+    }
+    if(e.target && e.target.id === 'lote-sin-fv'){
+      const cb = e.target;
+      const input = document.getElementById('lote-fv');
       if(cb.checked){
         input.value = '';
         input.disabled = true;

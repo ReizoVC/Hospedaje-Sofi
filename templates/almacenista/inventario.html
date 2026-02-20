@@ -90,7 +90,7 @@
   </div>
 </section>
 
-<!-- Modal Nuevo Producto -->
+<!-- Modal Nuevo/Editar Producto -->
 <div id="modalProducto" class="modal" style="display:none;">
   <div class="modal-content">
     <div class="modal-header">
@@ -101,35 +101,108 @@
       <form id="formProducto">
         <input type="hidden" id="prod-id" />
         <div class="form-row">
-          <label>Nombre</label>
+          <label>Nombre del producto</label>
           <input id="prod-nombre" type="text" required />
         </div>
-        <div class="form-row">
+        
+        <!-- Campos solo para nuevo producto -->
+        <div class="form-row" id="prod-cantidad-row" style="display: none;">
           <label>Cantidad inicial</label>
           <input id="prod-cantidad" type="number" min="0" value="0" />
         </div>
-        <div class="form-row">
+        <div class="form-row" id="prod-costo-row" style="display: none;">
           <label>Costo unitario</label>
           <input id="prod-costo" type="number" step="1" min="0" value="0" />
         </div>
-        <div class="form-row">
-          <label>Umbral mínimo</label>
-          <input id="prod-umbral" type="number" min="0" value="0" />
-        </div>
-        <div class="form-row">
+        <div class="form-row" id="prod-fv-row" style="display: none;">
           <label>Fecha de vencimiento</label>
           <input id="prod-fv" type="date" />
         </div>
-        <div class="form-row">
+        <div class="form-row" id="prod-sin-fv-row" style="display: none;">
           <label style="display:flex;align-items:center;gap:.5rem;font-weight:500;color:#374151">
             <input id="prod-sin-fv" type="checkbox" /> Sin fecha de vencimiento
           </label>
         </div>
+        
+        <!-- Campo para edición -->
+        <div class="form-row">
+          <label>Umbral mínimo</label>
+          <input id="prod-umbral" type="number" min="0" value="0" />
+        </div>
       </form>
+      
+      <h4 style="margin-top: 1.5rem; margin-bottom: 0.75rem; display: none;" id="lotes-header">Seleccionar lote para editar:</h4>
+      <div id="lotes-list" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 0.375rem; padding: 0.5rem; display: none;">
+        <p style="text-align: center; color: #999; padding: 1rem;">Cargando lotes...</p>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-sec" data-close="modalProducto">Cancelar</button>
       <button id="btn-guardar-producto" class="btn-primary">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Eliminar Lote -->
+<div id="modalEliminarLote" class="modal" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Eliminar Lote del Producto</h3>
+      <span class="close" data-close="modalEliminarLote">&times;</span>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom: 1rem; color: #666;">Selecciona el lote que deseas eliminar:</p>
+      <div id="lotes-eliminar-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 0.375rem; padding: 0.5rem;">
+        <p style="text-align: center; color: #999; padding: 1rem;">Cargando lotes...</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" data-close="modalEliminarLote">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Lote -->
+<div id="modalEditarLote" class="modal" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Editar Lote #<span id="lote-id-display">0</span></h3>
+      <span class="close" data-close="modalEditarLote">&times;</span>
+    </div>
+    <div class="modal-body">
+      <form id="formEditarLote">
+        <input type="hidden" id="lote-id" />
+        <div class="form-row">
+          <label>Cantidad actual</label>
+          <input id="lote-cantidad-actual" type="number" min="0" required />
+        </div>
+        <div class="form-row">
+          <label>Costo unitario</label>
+          <input id="lote-costo" type="number" step="1" min="0" required />
+        </div>
+        <div class="form-row">
+          <label>Fecha de vencimiento</label>
+          <input id="lote-fv" type="date" />
+        </div>
+        <div class="form-row">
+          <label style="display:flex;align-items:center;gap:.5rem;font-weight:500;color:#374151">
+            <input id="lote-sin-fv" type="checkbox" /> Sin fecha de vencimiento
+          </label>
+        </div>
+        <div class="form-row" style="background: #f3f4f6; border-radius: 0.375rem; padding: 0.75rem; margin-top: 1rem;">
+          <label style="margin-bottom: 0; color: #666;">Información del lote:</label>
+          <p style="font-size: 0.875rem; color: #666; margin: 0.25rem 0;">
+            <strong>Ingreso:</strong> <span id="lote-fecha-ingreso">-</span>
+          </p>
+          <p style="font-size: 0.875rem; color: #666; margin: 0.25rem 0;">
+            <strong>Estado:</strong> <span id="lote-estado" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">-</span>
+          </p>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" data-close="modalEditarLote">Cancelar</button>
+      <button id="btn-guardar-lote" class="btn-primary">Guardar lote</button>
     </div>
   </div>
 </div>

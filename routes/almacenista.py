@@ -280,6 +280,39 @@ def listar_lotes_vencidos():
         return jsonify({'error': f'Error al listar lotes vencidos: {str(e)}'}), 500
 
 
+@almacenista.route('/api/lotes/producto/<int:idproducto>', methods=['GET'])
+def listar_lotes_por_producto(idproducto):
+    """Obtiene todos los lotes de un producto específico"""
+    error = verificar_almacenista()
+    if error:
+        return error
+    try:
+        Producto.query.get_or_404(idproducto)
+        lotes = (
+            Lote.query
+            .filter(Lote.idproducto == idproducto)
+            .order_by(Lote.fecha_ingreso.desc())
+            .all()
+        )
+        items = []
+        hoy = date.today()
+        for lote in lotes:
+            vencido = lote.fecha_vencimiento is not None and lote.fecha_vencimiento < hoy
+            items.append({
+                'idlote': lote.idlote,
+                'cantidad_actual': int(lote.cantidad_actual or 0),
+                'cantidad_inicial': int(lote.cantidad_inicial or 0),
+                'fecha_vencimiento': lote.fecha_vencimiento.isoformat() if lote.fecha_vencimiento else None,
+                'costo_unitario': int(lote.costo_unitario or 0),
+                'fecha_ingreso': lote.fecha_ingreso.isoformat() if lote.fecha_ingreso else None,
+                'vencido': vencido,
+                'dias_para_vencer': (lote.fecha_vencimiento - hoy).days if lote.fecha_vencimiento else None,
+            })
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': f'Error al listar lotes: {str(e)}'}), 500
+
+
 @almacenista.route('/api/movimientos', methods=['POST'])
 def crear_movimiento():
     error = verificar_almacenista()
@@ -351,9 +384,17 @@ def crear_movimiento():
                 'movimiento': mov.to_dict(),
             }), 201
 
+        # Filtrar solo lotes vigentes (no vencidos)
+        hoy = date.today()
+        lotes_vigentes = or_(Lote.fecha_vencimiento.is_(None), Lote.fecha_vencimiento >= hoy)
+        
         lotes = (
             Lote.query
-            .filter(Lote.idproducto == producto.idproducto, Lote.cantidad_actual > 0)
+            .filter(
+                Lote.idproducto == producto.idproducto,
+                Lote.cantidad_actual > 0,
+                lotes_vigentes  # Solo lotes no vencidos
+            )
             .order_by(
                 expression.nulls_last(Lote.fecha_vencimiento.asc()),
                 Lote.fecha_ingreso.asc(),
@@ -386,7 +427,7 @@ def crear_movimiento():
 
         if restante > 0:
             db.session.rollback()
-            return jsonify({'error': 'Stock insuficiente'}), 400
+            return jsonify({'error': 'Stock insuficiente - no hay suficiente stock en lotes vigentes'}), 400
 
         db.session.commit()
         return jsonify({
@@ -400,3 +441,125 @@ def crear_movimiento():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al crear movimiento: {str(e)}'}), 500
+
+
+@almacenista.route('/api/lotes/<int:idlote>/descartar-vencido', methods=['POST'])
+def descartar_lote_vencido(idlote):
+    """Descarta un lote vencido y registra el movimiento como salida/descarte"""
+    error = verificar_almacenista()
+    if error:
+        return error
+    try:
+        lote = Lote.query.get_or_404(idlote)
+        hoy = date.today()
+        
+        # Verificar que esté vencido
+        if lote.fecha_vencimiento is None or lote.fecha_vencimiento >= hoy:
+            return jsonify({'error': 'El lote no está vencido'}), 400
+        
+        # Verificar que tenga cantidad
+        if lote.cantidad_actual <= 0:
+            return jsonify({'error': 'El lote ya está vacío'}), 400
+        
+        cantidad_descartada = int(lote.cantidad_actual or 0)
+        producto = Producto.query.get_or_404(lote.idproducto)
+        sid = session.get('user_id')
+        user_uuid = uuid.UUID(sid) if isinstance(sid, str) else sid
+        
+        # Crear movimiento de salida/descarte
+        mov = Movimientos(
+            idproducto=lote.idproducto,
+            idlote=lote.idlote,
+            idusuario=user_uuid,
+            tipo='salida',
+            cantidad=cantidad_descartada,
+            costototal=int(cantidad_descartada) * int(lote.costo_unitario or 0),
+            fecha=datetime.utcnow(),
+        )
+        db.session.add(mov)
+        
+        # Marcar lote como agotado
+        lote.cantidad_actual = 0
+        
+        db.session.commit()
+        return jsonify({
+            'message': f'Lote vencido descartado (cantidad: {cantidad_descartada} unidades)',
+            'producto': _producto_to_dict(producto),
+            'movimiento': mov.to_dict(),
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error al descartar lote: {str(e)}'}), 500
+
+
+@almacenista.route('/api/lotes/<int:idlote>', methods=['DELETE'])
+def eliminar_lote(idlote):
+    """Elimina un lote específico"""
+    error = verificar_almacenista()
+    if error:
+        return error
+    try:
+        lote = Lote.query.get_or_404(idlote)
+        idproducto = lote.idproducto
+        
+        # Verificar que el lote no tenga movimientos asociados
+        if lote.movimientos and len(lote.movimientos) > 0:
+            return jsonify({'error': 'No se puede eliminar un lote con movimientos registrados'}), 400
+        
+        db.session.delete(lote)
+        db.session.commit()
+        
+        producto = Producto.query.get_or_404(idproducto)
+        return jsonify({
+            'message': f'Lote #{idlote} eliminado correctamente',
+            'producto': _producto_to_dict(producto),
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error al eliminar lote: {str(e)}'}), 500
+    """Edita los datos de un lote específico (cantidad actual, fecha vencimiento, costo)"""
+    error = verificar_almacenista()
+    if error:
+        return error
+    try:
+        lote = Lote.query.get_or_404(idlote)
+        data = request.get_json() or {}
+        
+        # Editar cantidad actual
+        if 'cantidad_actual' in data:
+            nueva_cantidad = int(data['cantidad_actual'] or 0)
+            if nueva_cantidad < 0:
+                return jsonify({'error': 'La cantidad no puede ser negativa'}), 400
+            lote.cantidad_actual = nueva_cantidad
+        
+        # Editar costo unitario
+        if 'costo_unitario' in data:
+            lote.costo_unitario = int(data['costo_unitario'] or 0)
+        
+        # Editar fecha de vencimiento
+        if 'fecha_vencimiento' in data:
+            if data['fecha_vencimiento'] is None:
+                lote.fecha_vencimiento = None
+            else:
+                try:
+                    lote.fecha_vencimiento = datetime.strptime(data['fecha_vencimiento'], '%Y-%m-%d').date()
+                except Exception:
+                    return jsonify({'error': 'Fecha de vencimiento inválida'}), 400
+        
+        db.session.commit()
+        producto = Producto.query.get_or_404(lote.idproducto)
+        return jsonify({
+            'message': 'Lote actualizado correctamente',
+            'producto': _producto_to_dict(producto),
+            'lote': {
+                'idlote': lote.idlote,
+                'cantidad_actual': int(lote.cantidad_actual or 0),
+                'cantidad_inicial': int(lote.cantidad_inicial or 0),
+                'fecha_vencimiento': lote.fecha_vencimiento.isoformat() if lote.fecha_vencimiento else None,
+                'costo_unitario': int(lote.costo_unitario or 0),
+                'fecha_ingreso': lote.fecha_ingreso.isoformat() if lote.fecha_ingreso else None,
+            }
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error al editar lote: {str(e)}'}), 500
