@@ -206,8 +206,6 @@ def actualizar_producto(idproducto):
             if nombre != p.nombre and Producto.query.filter(Producto.nombre.ilike(nombre)).first():
                 return jsonify({'error': 'Ya existe un producto con ese nombre'}), 400
             p.nombre = nombre
-        if 'umbralminimo' in data:
-            p.umbralminimo = int(data['umbralminimo'] or 0)
         if 'fecha_vencimiento' in data or 'costo' in data:
             pass
         db.session.commit()

@@ -84,6 +84,7 @@ function abrirEditar(id){
   $('#prod-id').value = id;
   $('#prod-nombre').value = row.children[1].textContent;
   $('#prod-umbral').value = row.children[5].textContent;
+  $('#prod-umbral').disabled = true;
   
   // Ocultar campos de nuevo producto
   document.getElementById('prod-cantidad-row').style.display = 'none';
@@ -319,6 +320,7 @@ function initInventario(){
     $('#prod-id').value='';
     $('#prod-nombre').value='';
     $('#prod-umbral').value=0;
+    $('#prod-umbral').disabled=false;
     $('#prod-cantidad').value=0;
     $('#prod-costo').value=0;
     $('#prod-fv').value='';
@@ -348,8 +350,7 @@ function initInventario(){
     }
     
     if(id){
-      // Modo edición: solo actualiza nombre e umbral
-      const body = { nombre, umbralminimo: umbral };
+      const body = { nombre };
       const res = await fetch(`api/productos/${id}`, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
